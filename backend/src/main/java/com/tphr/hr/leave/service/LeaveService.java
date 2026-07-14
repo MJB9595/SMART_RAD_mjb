@@ -5,7 +5,7 @@ import com.tphr.hr.leave.dto.LeavePolicyDto;
 import com.tphr.hr.leave.dto.LeaveTypeDto;
 import com.tphr.hr.leave.entity.LeavePolicy;
 import com.tphr.hr.leave.repository.LeavePolicyRepository;
-import com.tphr.hr.leave.repository.LeaveTypeRepository;
+import com.tphr.hr.leave.LeaveTypeRepository;
 import com.tphr.hr.position.Position;
 import com.tphr.hr.position.PositionRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Service
+@Service("leavePolicyConfigService")
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class LeaveService {
