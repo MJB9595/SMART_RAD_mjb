@@ -21,17 +21,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 	}
 
 	return (
-		<div className="flex flex-1 flex-col">
-			<TopNav
-				user={user}
-				onLogout={() => {
-					logout();
-					router.replace("/login");
-				}}
-			/>
-			<div className="flex flex-1">
-				<Sidebar />
-				<main className="flex-1 bg-white p-6 text-slate-900">{children}</main>
+		<div className="app">
+			<Sidebar />
+			<div className="main">
+				<TopNav
+					user={user}
+					onLogout={() => {
+						logout();
+						router.replace("/login");
+					}}
+				/>
+				<div className="content">
+					{children}
+				</div>
 			</div>
 		</div>
 	);

@@ -1,150 +1,201 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { approveAppointment, listAppointments, rejectAppointment } from "@/lib/api/appointments";
-import { ApiError } from "@/lib/api/client";
-import { Button, Field, Select } from "@/components/ui";
-import { StatusBadge } from "@/components/StatusBadge";
 import type { Appointment, AppointmentType } from "@/lib/types/appointment";
 
 const TYPE_LABELS: Record<AppointmentType, string> = {
 	HIRE: "임용",
 	PROMOTION: "승진",
 	TRANSFER: "전보",
-	CONCURRENT: "겸직",
+	CONCURRENT: "겸임",
 };
 
 export default function AppointmentsPage() {
 	const [appointments, setAppointments] = useState<Appointment[]>([]);
-	const [type, setType] = useState("");
-	const [status, setStatus] = useState("");
-	const [error, setError] = useState<string | null>(null);
+	const [totalElements, setTotalElements] = useState(0);
 	const [loading, setLoading] = useState(true);
+	const [selectedAppt, setSelectedAppt] = useState<Appointment | null>(null);
 
-	const load = useCallback(() => {
+	function load() {
 		setLoading(true);
-		setError(null);
 		listAppointments()
-			.then((page) => setAppointments(page.content))
-			.catch((err) => setError(err instanceof ApiError ? err.message : "발령 이력을 불러오지 못했습니다."))
+			.then((page) => {
+				setAppointments(page.content);
+				setTotalElements(page.totalElements);
+				if (page.content.length > 0) {
+					setSelectedAppt(page.content[0]);
+				}
+			})
+			.catch(console.error)
 			.finally(() => setLoading(false));
-	}, []);
+	}
 
 	useEffect(() => {
 		load();
-	}, [load]);
+	}, []);
 
 	async function decide(id: number, action: "approve" | "reject") {
 		try {
 			if (action === "approve") await approveAppointment(id);
 			else await rejectAppointment(id);
 			load();
-		} catch (err) {
-			alert(err instanceof ApiError ? err.message : "처리에 실패했습니다.");
+		} catch (err: any) {
+			alert("처리에 실패했습니다.");
 		}
 	}
 
-	const filtered = useMemo(
-		() =>
-			appointments.filter(
-				(a) => (!type || a.appointmentType === type) && (!status || a.approvalStatus === status),
-			),
-		[appointments, type, status],
-	);
+	const getTypePill = (type: AppointmentType) => {
+		if (type === "HIRE") return <span className="pill green">임용</span>;
+		if (type === "PROMOTION") return <span className="pill green">승진</span>;
+		if (type === "TRANSFER") return <span className="pill blue">전보</span>;
+		return <span className="pill gray">{TYPE_LABELS[type] || type}</span>;
+	};
+
+	const getStatusPill = (status: string) => {
+		if (status === "APPROVED") return <span className="pill green">승인완료</span>;
+		if (status === "PENDING") return <span className="pill amber">승인대기</span>;
+		if (status === "REJECTED") return <span className="pill red">반려</span>;
+		return <span className="pill gray">{status}</span>;
+	};
+
+	const formatChanges = (appt: Appointment) => {
+		if (appt.appointmentType === "PROMOTION") {
+			return `${appt.fromPositionName ?? "-"} → ${appt.toPositionName ?? "-"}`;
+		}
+		if (appt.appointmentType === "TRANSFER") {
+			return `${appt.fromDepartmentName ?? "-"} → ${appt.toDepartmentName ?? "-"}`;
+		}
+		return `${appt.toDepartmentName ?? "-"} / ${appt.toPositionName ?? "-"}`;
+	};
 
 	return (
-		<div>
-			<nav className="mb-2 text-sm text-slate-500">
-				인사발령 관리 <span className="mx-1">›</span>{" "}
-				<span className="font-medium text-slate-900">발령 등록/승인</span>
-			</nav>
-
-			<div className="mb-6 flex items-start justify-between">
+		<>
+			<div className="title-row">
 				<div>
-					<h1 className="text-2xl font-bold text-slate-900">발령 등록/승인</h1>
-					<p className="mt-1 text-sm text-slate-500">임용·승진·전보·겸직 발령을 등록하고 승인합니다.</p>
+					<div className="page-title">발령 등록·승인</div>
+					<div className="page-sub">전보·승진·겸임 등 인사발령 건을 등록하고 승인합니다</div>
 				</div>
-				<Button variant="primary">발령 등록</Button>
+				<button className="btn-primary">+ 발령 등록</button>
 			</div>
 
-			<div className="mb-6 rounded-lg border border-slate-200 p-6">
-				<p className="mb-4 text-sm font-semibold text-slate-700">검색조건</p>
-				<div className="flex flex-wrap items-end gap-4">
-					<Field label="발령구분">
-						<Select value={type} onChange={(e) => setType(e.target.value)}>
-							<option value="">전체</option>
-							<option value="HIRE">임용</option>
-							<option value="PROMOTION">승진</option>
-							<option value="TRANSFER">전보</option>
-							<option value="CONCURRENT">겸직</option>
-						</Select>
-					</Field>
-					<Field label="처리상태">
-						<Select value={status} onChange={(e) => setStatus(e.target.value)}>
-							<option value="">전체</option>
-							<option value="PENDING">대기</option>
-							<option value="APPROVED">승인</option>
-							<option value="REJECTED">반려</option>
-						</Select>
-					</Field>
+			<div className="stat-grid">
+				<div className="stat-card">
+					<div className="stat-top"><span className="stat-label">이번달 발령</span></div>
+					<div className="stat-value">{totalElements}<span>건</span></div>
+				</div>
+				<div className="stat-card">
+					<div className="stat-top"><span className="stat-label">승인 대기</span><span className="badge new">대기</span></div>
+					<div className="stat-value">{appointments.filter(a => a.approvalStatus === "PENDING").length}<span>건</span></div>
+				</div>
+				<div className="stat-card">
+					<div className="stat-top"><span className="stat-label">승인 완료</span></div>
+					<div className="stat-value">{appointments.filter(a => a.approvalStatus === "APPROVED").length}<span>건</span></div>
+				</div>
+				<div className="stat-card">
+					<div className="stat-top"><span className="stat-label">반려</span></div>
+					<div className="stat-value">{appointments.filter(a => a.approvalStatus === "REJECTED").length}<span>건</span></div>
 				</div>
 			</div>
 
-			{loading && <p className="text-sm text-slate-500">불러오는 중...</p>}
-			{error && <p className="text-sm text-red-600">{error}</p>}
-
-			{!loading && !error && (
-				<>
-					<table className="w-full border-collapse text-sm">
+			<div className="split">
+				<div className="card">
+					<div className="card-head">
+						<div className="card-title">발령 목록</div>
+						<div className="head-actions">
+							<button className="btn-ghost">필터</button>
+							<button className="btn-ghost">내보내기</button>
+						</div>
+					</div>
+					<table>
 						<thead>
-							<tr className="border-b border-slate-200 bg-slate-50 text-left text-slate-500">
-								<th className="p-3 font-medium">발령번호</th>
-								<th className="p-3 font-medium">대상자</th>
-								<th className="p-3 font-medium">발령구분</th>
-								<th className="p-3 font-medium">이전 소속/직급</th>
-								<th className="p-3 font-medium">이후 소속/직급</th>
-								<th className="p-3 font-medium">발령일</th>
-								<th className="p-3 font-medium">상태</th>
-								<th className="p-3 font-medium">처리</th>
+							<tr>
+								<th>발령번호</th>
+								<th>대상자 / 발령내용</th>
+								<th>구분</th>
+								<th>발령일</th>
+								<th>상태</th>
 							</tr>
 						</thead>
 						<tbody>
-							{filtered.map((a) => (
-								<tr key={a.id} className="border-b border-slate-100 hover:bg-slate-50">
-									<td className="p-3">{a.documentNumber}</td>
-									<td className="p-3">{a.employeeName}</td>
-									<td className="p-3">{TYPE_LABELS[a.appointmentType]}</td>
-									<td className="p-3">{a.fromDepartmentName ?? "-"} / {a.fromPositionName ?? "-"}</td>
-									<td className="p-3">{a.toDepartmentName ?? "-"} / {a.toPositionName ?? "-"}</td>
-									<td className="p-3">{a.appointmentDate}</td>
-									<td className="p-3"><StatusBadge status={a.approvalStatus} /></td>
-									<td className="p-3">
-										{a.approvalStatus === "PENDING" ? (
-											<div className="flex gap-1">
-												<button
-													onClick={() => decide(a.id, "approve")}
-													className="rounded border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs text-blue-600"
-												>
-													승인
-												</button>
-												<button
-													onClick={() => decide(a.id, "reject")}
-													className="rounded border border-red-200 bg-red-50 px-2 py-0.5 text-xs text-red-600"
-												>
-													반려
-												</button>
+							{appointments.map((appt) => (
+								<tr key={appt.id} onClick={() => setSelectedAppt(appt)} style={{cursor: 'pointer'}}>
+									<td className="mono">{appt.documentNumber}</td>
+									<td>
+										<div className="cell-person">
+											<div className="avatar-sm">{appt.employeeName.slice(0, 1)}</div>
+											<div>
+												<div className="p-name">{appt.employeeName}</div>
+												<div className="p-sub">{formatChanges(appt)}</div>
 											</div>
-										) : (
-											<span className="text-xs text-slate-400">{a.approverName ?? "-"}</span>
-										)}
+										</div>
 									</td>
+									<td>{getTypePill(appt.appointmentType)}</td>
+									<td className="mono">{appt.appointmentDate}</td>
+									<td>{getStatusPill(appt.approvalStatus)}</td>
 								</tr>
 							))}
 						</tbody>
 					</table>
-					<div className="mt-4 text-sm text-slate-500">총 {filtered.length}건</div>
-				</>
-			)}
-		</div>
+					<div className="table-foot">
+						<span className="foot-info">전체 {totalElements}건 중 1–{appointments.length}건 표시</span>
+						<div className="pager">
+							<span className="cur">1</span>
+						</div>
+					</div>
+				</div>
+
+				{selectedAppt && (
+					<div className="card">
+						<div className="panel">
+							<div className="panel-eyebrow">발령 상세 미리보기</div>
+							<div className="panel-avatar">{selectedAppt.employeeName.slice(0, 1)}</div>
+							<div className="panel-name">{selectedAppt.employeeName}</div>
+							<div className="panel-role">{TYPE_LABELS[selectedAppt.appointmentType]} · {selectedAppt.approvalStatus === 'PENDING' ? '승인 대기' : (selectedAppt.approvalStatus === 'APPROVED' ? '승인 완료' : '반려됨')}</div>
+							
+							<div className="field-row">
+								<span className="field-label">발령번호</span>
+								<span className="field-value mono">{selectedAppt.documentNumber}</span>
+							</div>
+							<div className="field-row">
+								<span className="field-label">발령 전</span>
+								<span className="field-value">{selectedAppt.fromDepartmentName || "-"} / {selectedAppt.fromPositionName || "-"}</span>
+							</div>
+							<div className="field-row">
+								<span className="field-label">발령 후</span>
+								<span className="field-value">{selectedAppt.toDepartmentName || "-"} / {selectedAppt.toPositionName || "-"}</span>
+							</div>
+							<div className="field-row">
+								<span className="field-label">발령일</span>
+								<span className="field-value mono">{selectedAppt.appointmentDate}</span>
+							</div>
+							
+							<div className="mini-stats">
+								<div className="mini-stat"><div className="mini-stat-label">등록자</div><div className="mini-stat-value text-sm font-bold" style={{fontSize: '11px'}}>{selectedAppt.registeredByName || "시스템"}</div></div>
+								<div className="mini-stat"><div className="mini-stat-label">첨부</div><div className="mini-stat-value text-sm font-bold" style={{fontSize: '11px'}}>0건</div></div>
+								<div className="mini-stat"><div className="mini-stat-label">경과일</div><div className="mini-stat-value text-sm font-bold" style={{fontSize: '11px'}}>-</div></div>
+							</div>
+							
+							{selectedAppt.approvalStatus === "PENDING" ? (
+								<div className="flex gap-2 mt-4" style={{display: 'flex', gap: '8px', marginTop: '16px'}}>
+									<button className="btn-primary" style={{flex: 1, justifyContent: 'center'}} onClick={() => decide(selectedAppt.id, "approve")}>
+										승인 처리
+									</button>
+									<button className="btn-outline" style={{flex: 1, border: '1px solid #DC2626', color: '#DC2626'}} onClick={() => decide(selectedAppt.id, "reject")}>
+										반려
+									</button>
+								</div>
+							) : (
+								<div style={{marginTop: '16px'}}>
+									<button className="btn-outline" style={{width: '100%', border: '1px solid #E5E8EE', color: '#9AA3B2', cursor: 'not-allowed'}} disabled>
+										결재 완료됨 ({selectedAppt.approverName || "시스템"})
+									</button>
+								</div>
+							)}
+						</div>
+					</div>
+				)}
+			</div>
+		</>
 	);
 }

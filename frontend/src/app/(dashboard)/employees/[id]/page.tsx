@@ -10,7 +10,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import type { Career, Certification, Education, Employee } from "@/lib/types/employee";
 
 const CATEGORY_LABEL: Record<string, string> = { FACULTY: "교원", STAFF: "직원" };
-const TABS = ["학력", "경력", "자격증"] as const;
+const TABS = ["학력", "경력", "자격증", "가족", "병역", "어학"] as const;
 type Tab = (typeof TABS)[number];
 
 function InfoRow({ label, value }: { label: string; value: string | null | undefined }) {
@@ -119,6 +119,24 @@ export default function EmployeeDetailPage() {
 				<Table
 					headers={["자격증명", "발급기관", "자격번호", "취득일", "만료일"]}
 					rows={certifications.map((c) => [c.name, c.issuer, c.certNumber, c.acquiredDate, c.expiryDate])}
+				/>
+			)}
+			{tab === "가족" && (
+				<Table
+					headers={["가족성명", "관계", "생년월일", "동거여부", "부양여부"]}
+					rows={[]}
+				/>
+			)}
+			{tab === "병역" && (
+				<Table
+					headers={["군별", "계급", "병역구분", "입대일", "전역일", "면제사유"]}
+					rows={[]}
+				/>
+			)}
+			{tab === "어학" && (
+				<Table
+					headers={["언어", "시험명", "점수", "취득일", "발급기관"]}
+					rows={[]}
 				/>
 			)}
 		</div>

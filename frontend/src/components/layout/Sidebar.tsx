@@ -2,39 +2,54 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { findActiveTab, isNavItemActive } from "@/lib/nav";
+import { topNavTabs, findActiveTab, isNavItemActive } from "@/lib/nav";
 
 export function Sidebar() {
 	const pathname = usePathname();
 	const activeTab = findActiveTab(pathname);
-	const allHrefs = activeTab.sections.flatMap((s) => s.items.map((i) => i.href));
 
 	return (
-		<aside className="w-60 shrink-0 overflow-y-auto bg-[#0f1730] px-4 py-6 text-sm">
-			{activeTab.sections.map((section) => (
-				<div key={section.label} className="mb-6">
-					<p className="mb-2 px-3 text-sm font-semibold text-white">{section.label}</p>
-					<ul className="space-y-1">
-						{section.items.map((item) => {
-							const active = isNavItemActive(pathname, item.href, allHrefs);
-							return (
-								<li key={item.href}>
-									<Link
-										href={item.href}
-										className={`block rounded px-3 py-2 ${
-											active
-												? "bg-blue-500/20 font-medium text-white"
-												: "text-slate-400 hover:text-white"
-										}`}
-									>
-										{item.label}
-									</Link>
-								</li>
-							);
-						})}
-					</ul>
+		<aside className="sidebar">
+			<div className="logo-row">
+				<div className="logo-badge">
+					<svg viewBox="0 0 24 24" fill="none">
+						<rect x="3" y="3" width="8" height="8" rx="2" fill="#fff" fillOpacity="0.95" />
+						<rect x="13" y="3" width="8" height="8" rx="2" fill="#fff" fillOpacity="0.6" />
+						<rect x="3" y="13" width="8" height="8" rx="2" fill="#fff" fillOpacity="0.6" />
+						<rect x="13" y="13" width="8" height="8" rx="2" fill="#fff" fillOpacity="0.95" />
+					</svg>
 				</div>
-			))}
+				<div className="logo-text-wrap">
+					<div className="logo-title">TSM</div>
+					<div className="logo-sub">교직원 인사관리 시스템</div>
+				</div>
+			</div>
+			
+			<div className="nav-label">HR MODULES</div>
+			
+			{topNavTabs.map((tab) => {
+				const isTabActive = tab.key === activeTab.key;
+				return (
+					<div key={tab.key}>
+						<Link href={tab.basePath} className={`nav-item ${isTabActive ? "active" : ""}`}>
+							{tab.label}
+						</Link>
+						
+						{isTabActive && (
+							<div className="nav-sub">
+								{tab.sections.flatMap(section => section.items).map(item => {
+									const isActive = isNavItemActive(pathname, item.href, tab.sections.flatMap(s => s.items).map(i => i.href));
+									return (
+										<Link key={item.href} href={item.href} className={isActive ? "on" : ""}>
+											<span className="dot"></span>{item.label}
+										</Link>
+									);
+								})}
+							</div>
+						)}
+					</div>
+				);
+			})}
 		</aside>
 	);
 }

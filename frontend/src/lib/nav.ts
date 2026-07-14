@@ -22,11 +22,9 @@ export const topNavTabs: TopNavTab[] = [
 		basePath: "/employees",
 		sections: [
 			{
-				label: "인사기록",
+				label: "인사기록 관리",
 				items: [
-					{ label: "인사정보관리", href: "/employees" },
-					{ label: "학력·경력 관리", href: "/records/education-career" },
-					{ label: "자격증 관리", href: "/records/certifications" },
+					{ label: "교직원 정보관리", href: "/employees" },
 				],
 			},
 		],
@@ -37,7 +35,7 @@ export const topNavTabs: TopNavTab[] = [
 		basePath: "/appointments",
 		sections: [
 			{
-				label: "인사발령",
+				label: "인사발령 관리",
 				items: [
 					{ label: "발령 등록/승인", href: "/appointments" },
 					{ label: "발령 이력 조회", href: "/appointments/history" },
@@ -47,32 +45,58 @@ export const topNavTabs: TopNavTab[] = [
 	},
 	{
 		key: "attendance",
-		label: "근태·휴가 관리",
+		label: "근태 관리",
 		basePath: "/attendance",
 		sections: [
 			{
-				label: "근태관리",
-				items: [{ label: "출퇴근 현황", href: "/attendance" }],
+				label: "근태 관리",
+				items: [
+					{ label: "일일 근태 등록", href: "/attendance" },
+					{ label: "월 근태 현황", href: "/attendance/monthly" },
+				],
 			},
+		],
+	},
+	{
+		key: "leaves",
+		label: "휴가 관리",
+		basePath: "/leaves",
+		sections: [
 			{
-				label: "휴가관리",
+				label: "휴가 관리",
 				items: [
 					{ label: "휴가 신청/승인", href: "/leaves" },
 					{ label: "잔여일수 현황", href: "/leave-balance" },
+					{ label: "휴가유형·정책 관리", href: "/leaves/policy" },
 				],
 			},
 		],
 	},
 	{
 		key: "salary",
-		label: "급여 연계 관리",
-		basePath: "/salary",
+		label: "급여 관리",
+		basePath: "/payroll",
 		sections: [
 			{
-				label: "급여관리",
+				label: "급여 관리",
 				items: [
-					{ label: "기초 급여 조회", href: "/salary" },
-					{ label: "정산용 엑셀 다운로드", href: "/salary/settlement" },
+					{ label: "급여 명세서 조회", href: "/payroll" },
+					{ label: "수당 관리", href: "/payroll/allowance" },
+					{ label: "정산 엑셀 다운로드", href: "/payroll/settlement" },
+				],
+			},
+		],
+	},
+	{
+		key: "welfare",
+		label: "복지·증명 관리",
+		basePath: "/welfare/event-support",
+		sections: [
+			{
+				label: "복지·증명 관리",
+				items: [
+					{ label: "경조비 신청/승인", href: "/welfare/event-support" },
+					{ label: "증명서 발급", href: "/welfare/certificate" },
 				],
 			},
 		],
@@ -80,11 +104,14 @@ export const topNavTabs: TopNavTab[] = [
 	{
 		key: "dashboard",
 		label: "통계 대시보드",
-		basePath: "/dashboard",
+		basePath: "/dashboard/headcount",
 		sections: [
 			{
-				label: "통계",
-				items: [{ label: "현황 대시보드", href: "/dashboard" }],
+				label: "통계 대시보드",
+				items: [
+					{ label: "부서별 정원 현황", href: "/dashboard/headcount" },
+					{ label: "당일 근태 현황", href: "/dashboard/attendance" },
+				],
 			},
 		],
 	},
@@ -94,9 +121,9 @@ export const topNavTabs: TopNavTab[] = [
 		basePath: "/system/roles",
 		sections: [
 			{
-				label: "시스템관리",
+				label: "시스템 관리",
 				items: [
-					{ label: "권한 관리", href: "/system/roles" },
+					{ label: "권한 관리 (RBAC)", href: "/system/roles" },
 					{ label: "공통 코드 관리", href: "/system/codes" },
 					{ label: "감사로그 조회", href: "/system/audit" },
 				],

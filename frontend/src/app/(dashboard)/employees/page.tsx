@@ -1,147 +1,155 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { searchEmployees } from "@/lib/api/employees";
-import { listDepartments } from "@/lib/api/departments";
-import { ApiError } from "@/lib/api/client";
-import { Button, Field, Input, Select } from "@/components/ui";
-import { StatusBadge } from "@/components/StatusBadge";
 import type { Employee } from "@/lib/types/employee";
-import type { Department } from "@/lib/types/department";
-
-const CATEGORY_LABEL: Record<string, string> = { FACULTY: "교원", STAFF: "직원" };
 
 export default function EmployeesPage() {
 	const router = useRouter();
 	const [employees, setEmployees] = useState<Employee[]>([]);
-	const [departments, setDepartments] = useState<Department[]>([]);
-	const [keyword, setKeyword] = useState("");
-	const [departmentId, setDepartmentId] = useState("");
-	const [staffCategory, setStaffCategory] = useState("");
-	const [employmentStatus, setEmploymentStatus] = useState("");
-	const [error, setError] = useState<string | null>(null);
+	const [totalElements, setTotalElements] = useState(0);
 	const [loading, setLoading] = useState(true);
+	const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
 
-	function load(params: Record<string, string> = {}) {
+	function load() {
 		setLoading(true);
-		setError(null);
-		searchEmployees(params)
-			.then((page) => setEmployees(page.content))
-			.catch((err) => setError(err instanceof ApiError ? err.message : "인사정보를 불러오지 못했습니다."))
+		searchEmployees({})
+			.then((page) => {
+				setEmployees(page.content);
+				setTotalElements(page.totalElements);
+				if (page.content.length > 0) {
+					setSelectedEmployee(page.content[0]);
+				}
+			})
+			.catch(console.error)
 			.finally(() => setLoading(false));
 	}
 
 	useEffect(() => {
 		load();
-		listDepartments().then(setDepartments).catch(() => setDepartments([]));
 	}, []);
 
-	function handleSearch(e: FormEvent) {
-		e.preventDefault();
-		load({ keyword, departmentId, staffCategory, employmentStatus });
-	}
-
-	function handleReset() {
-		setKeyword("");
-		setDepartmentId("");
-		setStaffCategory("");
-		setEmploymentStatus("");
-		load();
-	}
+	const getStatusPill = (status: string) => {
+		if (status === "EMPLOYED") return <span className="pill green">재직</span>;
+		if (status === "ON_LEAVE") return <span className="pill amber">휴직</span>;
+		if (status === "RESIGNED") return <span className="pill gray">퇴직</span>;
+		return <span className="pill gray">{status}</span>;
+	};
 
 	return (
-		<div>
-			<nav className="mb-2 text-sm text-slate-500">
-				인사기록 관리 <span className="mx-1">›</span>{" "}
-				<span className="font-medium text-slate-900">인사정보관리</span>
-			</nav>
-
-			<div className="mb-6 flex items-start justify-between">
+		<>
+			<div className="title-row">
 				<div>
-					<h1 className="text-2xl font-bold text-slate-900">인사정보관리</h1>
-					<p className="mt-1 text-sm text-slate-500">교직원의 인사기록카드를 조회하고 관리합니다.</p>
+					<div className="page-title">인사기록카드</div>
+					<div className="page-sub">학력·경력·자격·포상·징계 이력을 통합 조회하고 관리합니다</div>
 				</div>
-				<div className="flex gap-2">
-					<Button variant="outline">엑셀 다운로드</Button>
-					<Button variant="primary">교직원 등록</Button>
+				<button className="btn-primary" onClick={() => router.push('/employees/new')}>+ 인사기록카드 등록</button>
+			</div>
+
+			<div className="stat-grid">
+				<div className="stat-card">
+					<div className="stat-top"><span className="stat-label">전체 교직원</span></div>
+					<div className="stat-value">{totalElements}<span>명</span></div>
+				</div>
+				<div className="stat-card">
+					<div className="stat-top"><span className="stat-label">재직 중</span></div>
+					<div className="stat-value">{employees.filter(e => e.employmentStatus === 'EMPLOYED').length}<span>명</span></div>
+				</div>
+				<div className="stat-card">
+					<div className="stat-top"><span className="stat-label">휴직 중</span></div>
+					<div className="stat-value">{employees.filter(e => e.employmentStatus === 'ON_LEAVE').length}<span>명</span></div>
+				</div>
+				<div className="stat-card">
+					<div className="stat-top"><span className="stat-label">이번달 갱신 필요 자격</span><span className="badge new">신규</span></div>
+					<div className="stat-value">0<span>건</span></div>
 				</div>
 			</div>
 
-			<form onSubmit={handleSearch} className="mb-6 rounded-lg border border-slate-200 p-6">
-				<p className="mb-4 text-sm font-semibold text-slate-700">검색조건</p>
-				<div className="flex flex-wrap items-end gap-4">
-					<Field label="이름/사번">
-						<Input placeholder="이름 또는 사번" value={keyword} onChange={(e) => setKeyword(e.target.value)} />
-					</Field>
-					<Field label="구분">
-						<Select value={staffCategory} onChange={(e) => setStaffCategory(e.target.value)}>
-							<option value="">전체</option>
-							<option value="FACULTY">교원</option>
-							<option value="STAFF">직원</option>
-						</Select>
-					</Field>
-					<Field label="소속">
-						<Select value={departmentId} onChange={(e) => setDepartmentId(e.target.value)}>
-							<option value="">전체</option>
-							{departments.map((d) => (
-								<option key={d.id} value={d.id}>
-									{d.name}
-								</option>
-							))}
-						</Select>
-					</Field>
-					<Field label="재직상태">
-						<Select value={employmentStatus} onChange={(e) => setEmploymentStatus(e.target.value)}>
-							<option value="">전체</option>
-							<option value="EMPLOYED">재직</option>
-							<option value="ON_LEAVE">휴직</option>
-							<option value="RESIGNED">퇴직</option>
-						</Select>
-					</Field>
-					<Button type="submit" variant="primary">조회</Button>
-					<Button type="button" variant="outline" onClick={handleReset}>초기화</Button>
-				</div>
-			</form>
-
-			{loading && <p className="text-sm text-slate-500">불러오는 중...</p>}
-			{error && <p className="text-sm text-red-600">{error}</p>}
-
-			{!loading && !error && (
-				<>
-					<table className="w-full border-collapse text-sm">
+			<div className="split">
+				<div className="card">
+					<div className="card-head">
+						<div className="card-title">인사기록카드 목록</div>
+						<div className="head-actions">
+							<button className="btn-ghost">필터</button>
+							<button className="btn-ghost">내보내기</button>
+						</div>
+					</div>
+					<table>
 						<thead>
-							<tr className="border-b border-slate-200 bg-slate-50 text-left text-slate-500">
-								<th className="p-3 font-medium">사번</th>
-								<th className="p-3 font-medium">성명</th>
-								<th className="p-3 font-medium">구분</th>
-								<th className="p-3 font-medium">소속</th>
-								<th className="p-3 font-medium">직급</th>
-								<th className="p-3 font-medium">재직상태</th>
-								<th className="p-3 font-medium">임용일</th>
+							<tr>
+								<th>사번</th>
+								<th>이름</th>
+								<th>소속</th>
+								<th>직급</th>
+								<th>재직상태</th>
+								<th>등록일</th>
 							</tr>
 						</thead>
 						<tbody>
-							{employees.map((employee) => (
-								<tr
-									key={employee.id}
-									onClick={() => router.push(`/employees/${employee.id}`)}
-									className="cursor-pointer border-b border-slate-100 hover:bg-blue-50"
-								>
-									<td className="p-3 font-medium text-blue-600">{employee.employeeNumber}</td>
-									<td className="p-3">{employee.name}</td>
-									<td className="p-3">{CATEGORY_LABEL[employee.staffCategory]}</td>
-									<td className="p-3">{employee.departmentName}</td>
-									<td className="p-3">{employee.positionName}</td>
-									<td className="p-3"><StatusBadge status={employee.employmentStatus} /></td>
-									<td className="p-3">{employee.hireDate}</td>
+							{employees.map((emp) => (
+								<tr key={emp.id} onClick={() => setSelectedEmployee(emp)} style={{cursor:'pointer'}}>
+									<td>
+										<div className="cell-person">
+											<div className="avatar-sm">{emp.name.slice(0, 1)}</div>
+											<div>
+												<div className="p-name">{emp.name}</div>
+												<div className="p-sub">{emp.departmentName}</div>
+											</div>
+										</div>
+									</td>
+									<td className="mono">{emp.employeeNumber}</td>
+									<td>{emp.departmentName}</td>
+									<td>{emp.positionName}</td>
+									<td>{getStatusPill(emp.employmentStatus)}</td>
+									<td className="mono">{emp.hireDate}</td>
 								</tr>
 							))}
 						</tbody>
 					</table>
-					<div className="mt-4 text-sm text-slate-500">총 {employees.length}건</div>
-				</>
-			)}
-		</div>
+					<div className="table-foot">
+						<span className="foot-info">전체 {totalElements}건 중 1–{employees.length}건 표시</span>
+						<div className="pager">
+							<span className="cur">1</span>
+						</div>
+					</div>
+				</div>
+
+				{selectedEmployee && (
+					<div className="card">
+						<div className="panel">
+							<div className="panel-eyebrow">인사기록카드 미리보기</div>
+							<div className="panel-avatar">{selectedEmployee.name.slice(0, 1)}</div>
+							<div className="panel-name">{selectedEmployee.name}</div>
+							<div className="panel-role">{selectedEmployee.departmentName} · {selectedEmployee.positionName}</div>
+							<div className="field-row">
+								<span className="field-label">사번</span>
+								<span className="field-value mono">{selectedEmployee.employeeNumber}</span>
+							</div>
+							<div className="field-row">
+								<span className="field-label">임용일</span>
+								<span className="field-value mono">{selectedEmployee.hireDate}</span>
+							</div>
+							<div className="field-row">
+								<span className="field-label">최종학력</span>
+								<span className="field-value">-</span>
+							</div>
+							<div className="field-row">
+								<span className="field-label">자격증</span>
+								<span className="field-value">-</span>
+							</div>
+							<div className="mini-stats">
+								<div className="mini-stat"><div className="mini-stat-label">근속연수</div><div className="mini-stat-value">-</div></div>
+								<div className="mini-stat"><div className="mini-stat-label">포상</div><div className="mini-stat-value">-</div></div>
+								<div className="mini-stat"><div className="mini-stat-label">징계</div><div className="mini-stat-value">-</div></div>
+							</div>
+							<button className="btn-outline" onClick={() => router.push(`/employees/${selectedEmployee.id}`)}>
+								전체 기록 상세보기
+							</button>
+						</div>
+					</div>
+				)}
+			</div>
+		</>
 	);
 }
