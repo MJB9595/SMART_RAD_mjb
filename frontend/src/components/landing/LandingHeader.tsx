@@ -32,7 +32,7 @@ export function LandingHeader() {
 			{/* fixed 헤더로 인한 레이아웃 시프트 방지용 자리 차지 div */}
 			<div className="h-16 w-full shrink-0" />
 			<header 
-				className={`fixed top-0 left-0 right-0 z-50 flex h-16 items-center justify-between border-b bg-white/95 backdrop-blur-sm px-8 md:px-16 lg:px-24 transition-transform duration-300 ${
+				className={`fixed top-0 left-0 right-0 z-50 flex h-16 items-center justify-between border-b border-slate-200 bg-white/95 backdrop-blur-sm px-8 md:px-16 lg:px-24 transition-transform duration-300 ${
 					isVisible ? "translate-y-0" : "-translate-y-full"
 				}`}
 			>
