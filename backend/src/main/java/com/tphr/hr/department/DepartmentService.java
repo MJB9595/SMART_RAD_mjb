@@ -23,7 +23,7 @@ public class DepartmentService {
 	}
 
 	public DepartmentResponse getDepartment(Long id) {
-		return DepartmentResponse.from(findActiveDepartment(id));
+		return DepartmentResponse.from(findActive(id));
 	}
 
 	public List<DepartmentTreeResponse> getDepartmentTree() {
@@ -43,43 +43,36 @@ public class DepartmentService {
 	@Transactional
 	public DepartmentResponse createDepartment(DepartmentRequest request) {
 		Department parent = resolveParent(request.parentDepartmentId());
-		Department department = new Department(request.name(), parent);
+		Department department = new Department(request.name(), request.orgType(), parent, request.headcount());
 		return DepartmentResponse.from(departmentRepository.save(department));
 	}
 
 	@Transactional
 	public DepartmentResponse updateDepartment(Long id, DepartmentRequest request) {
-		Department department = findActiveDepartment(id);
+		Department department = findActive(id);
 		Department parent = resolveParent(request.parentDepartmentId());
 		if (parent != null && parent.getId().equals(id)) {
-			throw ApiException.badRequest("상위 부서로 자기 자신을 지정할 수 없습니다.");
+			throw ApiException.badRequest("상위 조직으로 자기 자신을 지정할 수 없습니다.");
 		}
-		department.update(request.name(), parent);
+		department.update(request.name(), request.orgType(), parent, request.headcount());
 		return DepartmentResponse.from(department);
 	}
 
 	@Transactional
 	public void deleteDepartment(Long id) {
-		Department department = findActiveDepartment(id);
+		Department department = findActive(id);
 		if (!departmentRepository.findByParentDepartment_IdAndDeletedFalse(id).isEmpty()) {
-			throw ApiException.conflict("하위 부서가 존재하여 삭제할 수 없습니다.");
+			throw ApiException.conflict("하위 조직이 존재하여 삭제할 수 없습니다.");
 		}
 		department.delete();
 	}
 
 	private Department resolveParent(Long parentDepartmentId) {
-		if (parentDepartmentId == null) {
-			return null;
-		}
-		return findActiveDepartment(parentDepartmentId);
+		return parentDepartmentId == null ? null : findActive(parentDepartmentId);
 	}
 
-	private Department findActiveDepartment(Long id) {
-		Department department = departmentRepository.findById(id)
-				.orElseThrow(() -> ApiException.notFound("부서를 찾을 수 없습니다. id=" + id));
-		if (department.isDeleted()) {
-			throw ApiException.notFound("부서를 찾을 수 없습니다. id=" + id);
-		}
-		return department;
+	private Department findActive(Long id) {
+		return departmentRepository.findByIdAndDeletedFalse(id)
+				.orElseThrow(() -> ApiException.notFound("조직을 찾을 수 없습니다. id=" + id));
 	}
 }

@@ -3,6 +3,8 @@ package com.tphr.hr.department;
 import com.tphr.hr.common.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -27,17 +29,28 @@ public class Department extends BaseEntity {
 	@Column(nullable = false, length = 100)
 	private String name;
 
+	@Enumerated(EnumType.STRING)
+	@Column(name = "org_type", nullable = false, length = 20)
+	private OrgType orgType;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "parent_department_id")
 	private Department parentDepartment;
 
-	public Department(String name, Department parentDepartment) {
+	@Column(nullable = false)
+	private int headcount;
+
+	public Department(String name, OrgType orgType, Department parentDepartment, int headcount) {
 		this.name = name;
+		this.orgType = orgType;
 		this.parentDepartment = parentDepartment;
+		this.headcount = headcount;
 	}
 
-	public void update(String name, Department parentDepartment) {
+	public void update(String name, OrgType orgType, Department parentDepartment, int headcount) {
 		this.name = name;
+		this.orgType = orgType;
 		this.parentDepartment = parentDepartment;
+		this.headcount = headcount;
 	}
 }

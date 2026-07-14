@@ -22,33 +22,29 @@ public class PositionService {
 	}
 
 	public PositionResponse getPosition(Long id) {
-		return PositionResponse.from(findActivePosition(id));
+		return PositionResponse.from(findActive(id));
 	}
 
 	@Transactional
 	public PositionResponse createPosition(PositionRequest request) {
-		Position position = new Position(request.name(), request.sortOrder());
+		Position position = new Position(request.name(), request.category(), request.sortOrder());
 		return PositionResponse.from(positionRepository.save(position));
 	}
 
 	@Transactional
 	public PositionResponse updatePosition(Long id, PositionRequest request) {
-		Position position = findActivePosition(id);
-		position.update(request.name(), request.sortOrder());
+		Position position = findActive(id);
+		position.update(request.name(), request.category(), request.sortOrder());
 		return PositionResponse.from(position);
 	}
 
 	@Transactional
 	public void deletePosition(Long id) {
-		findActivePosition(id).delete();
+		findActive(id).delete();
 	}
 
-	private Position findActivePosition(Long id) {
-		Position position = positionRepository.findById(id)
+	private Position findActive(Long id) {
+		return positionRepository.findByIdAndDeletedFalse(id)
 				.orElseThrow(() -> ApiException.notFound("직급을 찾을 수 없습니다. id=" + id));
-		if (position.isDeleted()) {
-			throw ApiException.notFound("직급을 찾을 수 없습니다. id=" + id);
-		}
-		return position;
 	}
 }

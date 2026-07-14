@@ -1,35 +1,20 @@
 package com.tphr.hr.common.entity;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
-import java.time.LocalDateTime;
 import lombok.Getter;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+/** 기준정보 테이블용 — 감사/버전 + active 플래그. */
 @Getter
 @MappedSuperclass
-@EntityListeners(AuditingEntityListener.class)
-public abstract class BaseEntity {
-
-	@CreatedDate
-	@Column(nullable = false, updatable = false)
-	private LocalDateTime createdAt;
-
-	@LastModifiedDate
-	@Column(nullable = false)
-	private LocalDateTime updatedAt;
-
-	@Column(nullable = false)
-	private boolean deleted = false;
+public abstract class BaseEntity extends AuditedEntity {
 
 	@Column(nullable = false)
 	private boolean active = true;
 
+	@Override
 	public void delete() {
-		this.deleted = true;
+		super.delete();
 		this.active = false;
 	}
 

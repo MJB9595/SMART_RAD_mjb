@@ -1,0 +1,277 @@
+// ─────────────────────────────────────────────────────────────
+// 교직원 인사관리 시스템 ERD (메뉴 구조 기반 재설계)
+// dbdiagram.io 에 그대로 붙여넣으면 시각화됩니다.
+//   메뉴 매핑:
+//   ① 인사기록 관리  : employee, education, career, certification
+//   ② 인사발령 관리  : appointment
+//   ③ 근태/휴가 관리 : attendance, leave_request, leave_balance
+//   ④ 급여 연계 관리 : salary_basic
+//   ⑤ 통계 대시보드  : department.headcount + 위 테이블 집계 (신규 테이블 없음)
+//   ⑥ 시스템 관리    : role, permission, role_permission, employee_role,
+//                       common_code, audit_log
+// 공통 감사 컬럼(created_at/updated_at/created_by/updated_by/version/deleted)은
+// 모든 업무 테이블에 존재 (지면상 대표 테이블에만 표기).
+// ─────────────────────────────────────────────────────────────
+
+// ===== 기준정보 =====
+Table department {
+  id                   bigint       [pk, increment]
+  name                 varchar(100) [not null, note: '조직명']
+  org_type             varchar(20)  [not null, note: 'ACADEMIC(학사) / ADMINISTRATIVE(행정)']
+  parent_department_id bigint       [ref: > department.id, note: '상위조직(자기참조 트리)']
+  headcount            int          [not null, default: 0, note: '정원 (부서별 정원현황 통계용)']
+  active               boolean      [not null, default: true]
+  created_at           datetime     [not null]
+  updated_at           datetime     [not null]
+  created_by           bigint
+  updated_by           bigint
+  version              bigint       [not null, default: 0]
+  deleted              boolean      [not null, default: false]
+}
+
+Table position {
+  id         bigint      [pk, increment]
+  name       varchar(50) [not null]
+  category   varchar(20) [not null, note: 'FACULTY(교원)/STAFF(직원)/COMMON']
+  sort_order int         [not null, default: 0]
+  active     boolean     [not null, default: true]
+}
+
+Table employment_type {
+  id     bigint      [pk, increment]
+  name   varchar(50) [not null, note: '전임/계약직/조교 등']
+  active boolean     [not null, default: true]
+}
+
+// ===== ① 인사기록 관리 =====
+Table employee {
+  id                bigint       [pk, increment]
+  employee_number   varchar(20)  [not null, unique, note: '사번']
+  name              varchar(50)  [not null]
+  email             varchar(100) [not null, unique, note: '로그인 ID']
+  password          varchar(255) [not null, note: 'BCrypt']
+  phone             varchar(20)
+  staff_category    varchar(20)  [not null, note: 'FACULTY/STAFF']
+  role              varchar(20)  [not null, note: 'JWT 대표권한(ADMIN/EMPLOYEE), 상세는 employee_role']
+  department_id     bigint       [not null, ref: > department.id]
+  position_id       bigint       [not null, ref: > position.id]
+  employment_type_id bigint      [not null, ref: > employment_type.id]
+  employment_status varchar(20)  [not null, note: 'EMPLOYED/ON_LEAVE/RESIGNED']
+  hire_date         date         [not null, note: '임용일']
+  resign_date       date
+  // 인사기록카드 확장 인적사항
+  birth_date        date
+  gender            varchar(10)
+  address           varchar(255)
+  emergency_contact varchar(50)
+  created_at        datetime     [not null]
+  updated_at        datetime     [not null]
+  created_by        bigint
+  updated_by        bigint
+  version           bigint       [not null, default: 0]
+  deleted           boolean      [not null, default: false]
+
+  indexes {
+    name [name: 'idx_employee_name']
+    staff_category [name: 'idx_employee_staff_category']
+  }
+}
+
+Table education {
+  id             bigint       [pk, increment]
+  employee_id    bigint       [not null, ref: > employee.id]
+  school_name    varchar(100) [not null, note: '학교명']
+  major          varchar(100) [note: '전공']
+  degree         varchar(20)  [note: '학사/석사/박사']
+  admission_date date
+  graduation_date date
+  status         varchar(20)  [note: '졸업/재학/수료/중퇴']
+  deleted        boolean      [not null, default: false]
+}
+
+Table career {
+  id              bigint       [pk, increment]
+  employee_id     bigint       [not null, ref: > employee.id]
+  company_name    varchar(100) [not null, note: '기관/회사명']
+  department      varchar(100)
+  position        varchar(50)
+  job_description varchar(500)
+  start_date      date         [not null]
+  end_date        date
+  deleted         boolean      [not null, default: false]
+}
+
+Table certification {
+  id             bigint       [pk, increment]
+  employee_id    bigint       [not null, ref: > employee.id]
+  name           varchar(100) [not null, note: '자격증명']
+  issuer         varchar(100) [note: '발급기관']
+  cert_number    varchar(100)
+  acquired_date  date
+  expiry_date    date         [note: '갱신 알림 대상']
+  deleted        boolean      [not null, default: false]
+}
+
+// ===== ② 인사발령 관리 (등록/승인 + 이력) =====
+Table appointment {
+  id                 bigint       [pk, increment]
+  document_number    varchar(30)  [not null, unique, note: 'APT-2026-001 자동채번']
+  employee_id        bigint       [not null, ref: > employee.id]
+  appointment_type   varchar(30)  [not null, note: '임용/승진/전보/겸직/파견/직위해제/퇴임']
+  from_department_id bigint       [ref: > department.id, note: '발령 전 소속']
+  to_department_id   bigint       [ref: > department.id, note: '발령 후 소속']
+  from_position_id   bigint       [ref: > position.id]
+  to_position_id     bigint       [ref: > position.id]
+  appointment_date   date         [not null]
+  reason             varchar(500)
+  approval_status    varchar(20)  [not null, note: 'PENDING/APPROVED/REJECTED']
+  approver_id        bigint       [ref: > employee.id]
+  approved_at        datetime
+  registered_by      bigint       [not null, ref: > employee.id, note: '등록자']
+  created_at         datetime     [not null]
+  version            bigint       [not null, default: 0]
+  deleted            boolean      [not null, default: false]
+
+  indexes {
+    appointment_date [name: 'idx_appointment_date']
+  }
+}
+
+// ===== ③ 근태 / 휴가 관리 =====
+Table attendance {
+  id             bigint      [pk, increment]
+  employee_id    bigint      [not null, ref: > employee.id]
+  work_date      date        [not null]
+  check_in_time  time
+  check_out_time time
+  status         varchar(20) [not null, note: 'PRESENT/LATE/ABSENT/LEAVE/HALF/BIZTRIP 등']
+  remark         varchar(300)
+  version        bigint      [not null, default: 0]
+  deleted        boolean     [not null, default: false]
+
+  indexes {
+    (employee_id, work_date) [unique, name: 'uq_attendance_employee_date']
+    work_date [name: 'idx_attendance_work_date']
+  }
+}
+
+Table leave_request {
+  id              bigint      [pk, increment]
+  document_number varchar(30) [not null, unique, note: 'LVE-2026-001']
+  employee_id     bigint      [not null, ref: > employee.id]
+  leave_type      varchar(20) [not null, note: '연차/병가/공가/특별/육아 등']
+  start_date      date        [not null]
+  end_date        date        [not null]
+  days            decimal(4,1) [not null, note: '반차 고려 0.5 단위']
+  reason          varchar(500)
+  approval_status varchar(20) [not null, note: 'PENDING/APPROVED/REJECTED']
+  approver_id     bigint      [ref: > employee.id]
+  approved_at     datetime
+  created_at      datetime    [not null]
+  version         bigint      [not null, default: 0]
+  deleted         boolean     [not null, default: false]
+}
+
+Table leave_balance {
+  id            bigint       [pk, increment]
+  employee_id   bigint       [not null, ref: > employee.id]
+  year          int          [not null, note: '기준연도']
+  total_granted decimal(4,1) [not null, note: '연간 부여일수']
+  used_days     decimal(4,1) [not null, default: 0, note: '사용일수']
+  remaining     decimal(4,1) [not null, note: '잔여일수 (대시보드)']
+  version       bigint       [not null, default: 0]
+
+  indexes {
+    (employee_id, year) [unique, name: 'uq_leave_balance_employee_year']
+  }
+}
+
+// ===== ④ 급여 연계 관리 (기초 급여 조회 / 엑셀 정산) =====
+Table salary_basic {
+  id             bigint       [pk, increment]
+  employee_id    bigint       [not null, ref: > employee.id]
+  base_pay       decimal(12,0) [not null, note: '기본급']
+  meal_allowance decimal(12,0) [not null, default: 0, note: '식대']
+  transport_allowance decimal(12,0) [not null, default: 0, note: '교통비']
+  position_allowance  decimal(12,0) [not null, default: 0, note: '직급수당']
+  bank_name      varchar(50)
+  account_number varchar(50)
+  account_holder varchar(50)
+  effective_date date         [not null, note: '적용 시작일']
+  created_at     datetime     [not null]
+  version        bigint       [not null, default: 0]
+  deleted        boolean      [not null, default: false]
+
+  indexes {
+    (employee_id, effective_date) [name: 'idx_salary_employee_effective']
+  }
+}
+
+// ===== ⑥ 시스템 관리 : RBAC =====
+Table role {
+  id          bigint      [pk, increment]
+  code        varchar(50) [not null, unique, note: 'ROLE_ADMIN / ROLE_HR / ROLE_EMPLOYEE']
+  name        varchar(50) [not null]
+  description varchar(200)
+  active      boolean     [not null, default: true]
+}
+
+Table permission {
+  id       bigint      [pk, increment]
+  code     varchar(80) [not null, unique, note: 'EMPLOYEE_READ / APPOINTMENT_APPROVE 등']
+  name     varchar(80) [not null]
+  resource varchar(50) [note: '대상 리소스']
+  action   varchar(30) [note: 'READ/WRITE/APPROVE/DELETE']
+}
+
+Table role_permission {
+  role_id       bigint [not null, ref: > role.id]
+  permission_id bigint [not null, ref: > permission.id]
+
+  indexes {
+    (role_id, permission_id) [pk]
+  }
+}
+
+Table employee_role {
+  employee_id bigint [not null, ref: > employee.id]
+  role_id     bigint [not null, ref: > role.id]
+
+  indexes {
+    (employee_id, role_id) [pk]
+  }
+}
+
+// ===== ⑥ 시스템 관리 : 공통 코드 =====
+Table common_code {
+  id          bigint      [pk, increment]
+  group_code  varchar(50) [not null, note: '코드그룹 (예: LEAVE_TYPE)']
+  code        varchar(50) [not null, note: '코드값']
+  name        varchar(100) [not null, note: '표시명']
+  sort_order  int         [not null, default: 0]
+  parent_code varchar(50) [note: '계층형 코드용']
+  active      boolean     [not null, default: true]
+
+  indexes {
+    (group_code, code) [unique, name: 'uq_common_code']
+  }
+}
+
+// ===== ⑥ 시스템 관리 : 감사로그 =====
+Table audit_log {
+  id          bigint       [pk, increment]
+  actor_id    bigint       [ref: > employee.id, note: '행위자']
+  action      varchar(50)  [not null, note: 'CREATE/UPDATE/DELETE/LOGIN/APPROVE']
+  entity_type varchar(50)  [note: '대상 엔티티명']
+  entity_id   bigint       [note: '대상 PK']
+  before_data text         [note: '변경 전 (JSON)']
+  after_data  text         [note: '변경 후 (JSON)']
+  ip_address  varchar(45)
+  created_at  datetime     [not null]
+
+  indexes {
+    actor_id [name: 'idx_audit_actor']
+    (entity_type, entity_id) [name: 'idx_audit_entity']
+    created_at [name: 'idx_audit_created']
+  }
+}

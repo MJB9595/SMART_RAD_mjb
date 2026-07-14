@@ -1,5 +1,6 @@
 package com.tphr.hr.employee.dto;
 
+import com.tphr.hr.common.StaffCategory;
 import com.tphr.hr.employee.Employee;
 import com.tphr.hr.employee.EmployeeRole;
 import com.tphr.hr.employee.EmploymentStatus;
@@ -11,6 +12,7 @@ public record EmployeeResponse(
 		String name,
 		String email,
 		String phone,
+		StaffCategory staffCategory,
 		Long departmentId,
 		String departmentName,
 		Long positionId,
@@ -20,7 +22,12 @@ public record EmployeeResponse(
 		EmployeeRole role,
 		EmploymentStatus employmentStatus,
 		LocalDate hireDate,
-		LocalDate resignDate
+		LocalDate resignDate,
+		LocalDate birthDate,
+		String gender,
+		String address,
+		String emergencyContact,
+		Long version
 ) {
 
 	public static EmployeeResponse from(Employee employee) {
@@ -30,6 +37,7 @@ public record EmployeeResponse(
 				employee.getName(),
 				employee.getEmail(),
 				employee.getPhone(),
+				employee.getStaffCategory(),
 				employee.getDepartment().getId(),
 				employee.getDepartment().getName(),
 				employee.getPosition().getId(),
@@ -39,7 +47,12 @@ public record EmployeeResponse(
 				employee.getRole(),
 				employee.getEmploymentStatus(),
 				employee.getHireDate(),
-				employee.getResignDate()
+				employee.getResignDate(),
+				employee.getBirthDate(),
+				employee.getGender(),
+				employee.getAddress(),
+				employee.getEmergencyContact(),
+				employee.getVersion()
 		);
 	}
 }

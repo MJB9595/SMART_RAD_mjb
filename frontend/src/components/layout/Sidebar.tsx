@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { findActiveTab } from "@/lib/nav";
+import { findActiveTab, isNavItemActive } from "@/lib/nav";
 
 export function Sidebar() {
 	const pathname = usePathname();
 	const activeTab = findActiveTab(pathname);
+	const allHrefs = activeTab.sections.flatMap((s) => s.items.map((i) => i.href));
 
 	return (
 		<aside className="w-60 shrink-0 overflow-y-auto bg-[#0f1730] px-4 py-6 text-sm">
@@ -15,7 +16,7 @@ export function Sidebar() {
 					<p className="mb-2 px-3 text-sm font-semibold text-white">{section.label}</p>
 					<ul className="space-y-1">
 						{section.items.map((item) => {
-							const active = pathname.startsWith(item.href);
+							const active = isNavItemActive(pathname, item.href, allHrefs);
 							return (
 								<li key={item.href}>
 									<Link

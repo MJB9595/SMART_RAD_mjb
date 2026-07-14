@@ -1,5 +1,6 @@
 package com.tphr.hr.employee;
 
+import com.tphr.hr.common.StaffCategory;
 import com.tphr.hr.common.exception.ApiException;
 import com.tphr.hr.department.Department;
 import com.tphr.hr.department.DepartmentRepository;
@@ -11,6 +12,7 @@ import com.tphr.hr.employee.dto.PasswordChangeRequest;
 import com.tphr.hr.employmenttype.EmploymentType;
 import com.tphr.hr.employmenttype.EmploymentTypeRepository;
 import com.tphr.hr.position.Position;
+import com.tphr.hr.position.PositionCategory;
 import com.tphr.hr.position.PositionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -31,20 +33,21 @@ public class EmployeeService {
 	private final PasswordEncoder passwordEncoder;
 
 	public Page<EmployeeResponse> searchEmployees(String keyword, Long departmentId, Long positionId,
-			EmploymentStatus employmentStatus, Pageable pageable) {
+			StaffCategory staffCategory, EmploymentStatus employmentStatus, Pageable pageable) {
 		return employeeRepository
-				.findAll(EmployeeSpecifications.search(keyword, departmentId, positionId, employmentStatus), pageable)
+				.findAll(EmployeeSpecifications.search(keyword, departmentId, positionId, staffCategory,
+						employmentStatus), pageable)
 				.map(EmployeeResponse::from);
 	}
 
 	public EmployeeResponse getEmployee(Long id) {
-		return EmployeeResponse.from(findActiveEmployee(id));
+		return EmployeeResponse.from(findActive(id));
 	}
 
 	@Transactional
 	public EmployeeResponse createEmployee(EmployeeCreateRequest request) {
 		if (employeeRepository.existsByEmployeeNumber(request.employeeNumber())) {
-			throw ApiException.conflict("이미 존재하는 사원번호입니다.");
+			throw ApiException.conflict("이미 존재하는 사번입니다.");
 		}
 		if (employeeRepository.existsByEmail(request.email())) {
 			throw ApiException.conflict("이미 존재하는 이메일입니다.");
@@ -53,72 +56,89 @@ public class EmployeeService {
 		Department department = findDepartment(request.departmentId());
 		Position position = findPosition(request.positionId());
 		EmploymentType employmentType = findEmploymentType(request.employmentTypeId());
+		validatePositionCategory(request.staffCategory(), position);
 
-		Employee employee = new Employee(
-				request.employeeNumber(),
-				request.name(),
-				request.email(),
-				passwordEncoder.encode(request.password()),
-				request.phone(),
-				department,
-				position,
-				employmentType,
-				request.role(),
-				request.hireDate()
-		);
+		Employee employee = Employee.builder()
+				.employeeNumber(request.employeeNumber())
+				.name(request.name())
+				.email(request.email())
+				.password(passwordEncoder.encode(request.password()))
+				.phone(request.phone())
+				.staffCategory(request.staffCategory())
+				.department(department)
+				.position(position)
+				.employmentType(employmentType)
+				.role(request.role())
+				.hireDate(request.hireDate())
+				.birthDate(request.birthDate())
+				.gender(request.gender())
+				.address(request.address())
+				.emergencyContact(request.emergencyContact())
+				.build();
 		return EmployeeResponse.from(employeeRepository.save(employee));
 	}
 
 	@Transactional
 	public EmployeeResponse updateEmployee(Long id, EmployeeUpdateRequest request) {
-		Employee employee = findActiveEmployee(id);
+		Employee employee = findActive(id);
 		Department department = findDepartment(request.departmentId());
 		Position position = findPosition(request.positionId());
 		EmploymentType employmentType = findEmploymentType(request.employmentTypeId());
+		validatePositionCategory(employee.getStaffCategory(), position);
 
-		employee.updateInfo(request.name(), request.phone(), department, position, employmentType);
+		employee.updateInfo(request.name(), request.phone(), department, position, employmentType,
+				request.address(), request.emergencyContact());
 		return EmployeeResponse.from(employee);
 	}
 
 	@Transactional
 	public EmployeeResponse changeEmploymentStatus(Long id, EmployeeStatusRequest request) {
-		Employee employee = findActiveEmployee(id);
+		Employee employee = findActive(id);
 		employee.changeEmploymentStatus(request.employmentStatus(), request.resignDate());
 		return EmployeeResponse.from(employee);
 	}
 
 	@Transactional
 	public void changePassword(Long id, PasswordChangeRequest request) {
-		Employee employee = findActiveEmployee(id);
+		Employee employee = findActive(id);
 		employee.changePassword(passwordEncoder.encode(request.newPassword()));
 	}
 
 	@Transactional
 	public void deleteEmployee(Long id) {
-		findActiveEmployee(id).delete();
+		findActive(id).delete();
 	}
 
-	private Employee findActiveEmployee(Long id) {
-		Employee employee = employeeRepository.findById(id)
-				.orElseThrow(() -> ApiException.notFound("사원을 찾을 수 없습니다. id=" + id));
-		if (employee.isDeleted()) {
-			throw ApiException.notFound("사원을 찾을 수 없습니다. id=" + id);
+	/** 교원↔교원직급, 직원↔직원직급만 허용 (COMMON은 공용). */
+	private void validatePositionCategory(StaffCategory staffCategory, Position position) {
+		if (position.getCategory() == PositionCategory.COMMON) {
+			return;
 		}
-		return employee;
+		boolean match = (staffCategory == StaffCategory.FACULTY && position.getCategory() == PositionCategory.FACULTY)
+				|| (staffCategory == StaffCategory.STAFF && position.getCategory() == PositionCategory.STAFF);
+		if (!match) {
+			throw ApiException.badRequest(
+					"교직원 구분(" + staffCategory + ")과 직급 구분(" + position.getCategory() + ")이 일치하지 않습니다.");
+		}
+	}
+
+	private Employee findActive(Long id) {
+		return employeeRepository.findByIdAndDeletedFalse(id)
+				.orElseThrow(() -> ApiException.notFound("교직원을 찾을 수 없습니다. id=" + id));
 	}
 
 	private Department findDepartment(Long id) {
-		return departmentRepository.findById(id)
-				.orElseThrow(() -> ApiException.notFound("부서를 찾을 수 없습니다. id=" + id));
+		return departmentRepository.findByIdAndDeletedFalse(id)
+				.orElseThrow(() -> ApiException.notFound("조직을 찾을 수 없습니다. id=" + id));
 	}
 
 	private Position findPosition(Long id) {
-		return positionRepository.findById(id)
+		return positionRepository.findByIdAndDeletedFalse(id)
 				.orElseThrow(() -> ApiException.notFound("직급을 찾을 수 없습니다. id=" + id));
 	}
 
 	private EmploymentType findEmploymentType(Long id) {
-		return employmentTypeRepository.findById(id)
-				.orElseThrow(() -> ApiException.notFound("사원타입을 찾을 수 없습니다. id=" + id));
+		return employmentTypeRepository.findByIdAndDeletedFalse(id)
+				.orElseThrow(() -> ApiException.notFound("임용구분을 찾을 수 없습니다. id=" + id));
 	}
 }

@@ -1,5 +1,6 @@
 package com.tphr.hr.employee;
 
+import com.tphr.hr.common.StaffCategory;
 import com.tphr.hr.employee.dto.EmployeeCreateRequest;
 import com.tphr.hr.employee.dto.EmployeeResponse;
 import com.tphr.hr.employee.dto.EmployeeStatusRequest;
@@ -9,6 +10,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -35,9 +38,11 @@ public class EmployeeController {
 			@RequestParam(required = false) String keyword,
 			@RequestParam(required = false) Long departmentId,
 			@RequestParam(required = false) Long positionId,
+			@RequestParam(required = false) StaffCategory staffCategory,
 			@RequestParam(required = false) EmploymentStatus employmentStatus,
-			Pageable pageable) {
-		return employeeService.searchEmployees(keyword, departmentId, positionId, employmentStatus, pageable);
+			@PageableDefault(size = 20, sort = "employeeNumber", direction = Sort.Direction.ASC) Pageable pageable) {
+		return employeeService.searchEmployees(keyword, departmentId, positionId, staffCategory, employmentStatus,
+				pageable);
 	}
 
 	@GetMapping("/{id}")

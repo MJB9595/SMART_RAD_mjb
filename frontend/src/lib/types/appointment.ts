@@ -1,4 +1,5 @@
-export type AppointmentType = "PROMOTION" | "TRANSFER" | "CONCURRENT";
+export type AppointmentType = "HIRE" | "PROMOTION" | "TRANSFER" | "CONCURRENT";
+export type ApprovalStatus = "PENDING" | "APPROVED" | "REJECTED";
 
 export interface Appointment {
 	id: number;
@@ -17,5 +18,8 @@ export interface Appointment {
 	toPositionName: string | null;
 	appointmentDate: string;
 	reason: string | null;
+	approvalStatus: ApprovalStatus;
+	approverName: string | null;
+	approvedAt: string | null;
 	registeredByName: string;
 }

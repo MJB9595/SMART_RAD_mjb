@@ -1,5 +1,6 @@
 package com.tphr.hr.employee;
 
+import com.tphr.hr.common.StaffCategory;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
 
@@ -9,7 +10,7 @@ public final class EmployeeSpecifications {
 	}
 
 	public static Specification<Employee> search(String keyword, Long departmentId, Long positionId,
-			EmploymentStatus employmentStatus) {
+			StaffCategory staffCategory, EmploymentStatus employmentStatus) {
 		return (root, query, cb) -> {
 			var predicates = cb.conjunction();
 
@@ -27,6 +28,9 @@ public final class EmployeeSpecifications {
 			}
 			if (positionId != null) {
 				predicates = cb.and(predicates, cb.equal(root.get("position").get("id"), positionId));
+			}
+			if (staffCategory != null) {
+				predicates = cb.and(predicates, cb.equal(root.get("staffCategory"), staffCategory));
 			}
 			if (employmentStatus != null) {
 				predicates = cb.and(predicates, cb.equal(root.get("employmentStatus"), employmentStatus));
