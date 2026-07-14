@@ -19,6 +19,7 @@ public class CommonCode extends BaseEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "common_code_id")
 	private Long id;
 
 	@Column(name = "group_code", nullable = false, length = 50)

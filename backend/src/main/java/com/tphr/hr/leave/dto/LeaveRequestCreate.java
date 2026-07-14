@@ -1,6 +1,5 @@
 package com.tphr.hr.leave.dto;
 
-import com.tphr.hr.leave.LeaveType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
@@ -12,7 +11,7 @@ public record LeaveRequestCreate(
 		Long employeeId,
 
 		@NotNull(message = "휴가유형은 필수입니다.")
-		LeaveType leaveType,
+		Long leaveTypeId,
 
 		@NotNull(message = "시작일은 필수입니다.")
 		LocalDate startDate,

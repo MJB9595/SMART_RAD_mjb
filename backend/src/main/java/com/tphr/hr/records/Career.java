@@ -19,12 +19,13 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-@Table(name = "career")
+@Table(name = "employee_career")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Career extends DeletableEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "employee_career_id")
 	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)

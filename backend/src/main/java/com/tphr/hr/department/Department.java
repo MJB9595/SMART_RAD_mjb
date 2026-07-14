@@ -24,9 +24,10 @@ public class Department extends BaseEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "department_id")
 	private Long id;
 
-	@Column(nullable = false, length = 100)
+	@Column(name = "department_name", nullable = false, length = 100)
 	private String name;
 
 	@Enumerated(EnumType.STRING)

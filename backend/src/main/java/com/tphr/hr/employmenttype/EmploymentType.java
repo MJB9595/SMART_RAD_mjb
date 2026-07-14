@@ -19,9 +19,10 @@ public class EmploymentType extends BaseEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "employment_type_id")
 	private Long id;
 
-	@Column(nullable = false, length = 50)
+	@Column(name = "employment_type_name", nullable = false, length = 50)
 	private String name;
 
 	public EmploymentType(String name) {

@@ -30,18 +30,19 @@ public class LeaveRequest extends DeletableEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "leave_request_id")
 	private Long id;
 
 	@Column(name = "document_number", nullable = false, unique = true, length = 30)
 	private String documentNumber;
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "leave_type_id")
+	private LeaveType leaveType;
+
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "employee_id")
 	private Employee employee;
-
-	@Enumerated(EnumType.STRING)
-	@Column(name = "leave_type", nullable = false, length = 20)
-	private LeaveType leaveType;
 
 	@Column(name = "start_date", nullable = false)
 	private LocalDate startDate;
@@ -49,14 +50,14 @@ public class LeaveRequest extends DeletableEntity {
 	@Column(name = "end_date", nullable = false)
 	private LocalDate endDate;
 
-	@Column(nullable = false, precision = 4, scale = 1)
+	@Column(name = "leave_days", nullable = false, precision = 4, scale = 1)
 	private BigDecimal days;
 
-	@Column(length = 500)
+	@Column(columnDefinition = "TEXT")
 	private String reason;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "approval_status", nullable = false, length = 20)
+	@Column(name = "status", nullable = false, length = 30)
 	private ApprovalStatus approvalStatus;
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -67,11 +68,11 @@ public class LeaveRequest extends DeletableEntity {
 	private LocalDateTime approvedAt;
 
 	@Builder
-	public LeaveRequest(String documentNumber, Employee employee, LeaveType leaveType, LocalDate startDate,
+	public LeaveRequest(String documentNumber, LeaveType leaveType, Employee employee, LocalDate startDate,
 			LocalDate endDate, BigDecimal days, String reason) {
 		this.documentNumber = documentNumber;
-		this.employee = employee;
 		this.leaveType = leaveType;
+		this.employee = employee;
 		this.startDate = startDate;
 		this.endDate = endDate;
 		this.days = days;

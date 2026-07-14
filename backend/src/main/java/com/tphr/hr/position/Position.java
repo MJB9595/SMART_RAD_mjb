@@ -21,16 +21,18 @@ public class Position extends BaseEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "position_id")
 	private Long id;
 
-	@Column(nullable = false, length = 50)
+	@Column(name = "position_name", nullable = false, length = 50)
 	private String name;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false, length = 20)
 	private PositionCategory category;
 
-	@Column(name = "sort_order", nullable = false)
+	/** DB 컬럼은 level (직급 레벨), 정렬 기준으로 사용. */
+	@Column(name = "level", nullable = false)
 	private int sortOrder;
 
 	public Position(String name, PositionCategory category, int sortOrder) {

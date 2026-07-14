@@ -3,6 +3,7 @@ package com.tphr.hr.leave;
 import com.tphr.hr.leave.dto.LeaveBalanceResponse;
 import com.tphr.hr.leave.dto.LeaveRequestCreate;
 import com.tphr.hr.leave.dto.LeaveRequestResponse;
+import com.tphr.hr.leave.dto.LeaveTypeResponse;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
@@ -29,6 +30,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class LeaveController {
 
 	private final LeaveService leaveService;
+
+	@GetMapping("/types")
+	public List<LeaveTypeResponse> getLeaveTypes() {
+		return leaveService.getLeaveTypes().stream().map(LeaveTypeResponse::from).toList();
+	}
 
 	@GetMapping
 	public Page<LeaveRequestResponse> getLeaveRequests(

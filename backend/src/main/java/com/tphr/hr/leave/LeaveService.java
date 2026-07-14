@@ -25,11 +25,15 @@ public class LeaveService {
 
 	private final LeaveRequestRepository leaveRequestRepository;
 	private final LeaveBalanceRepository leaveBalanceRepository;
+	private final LeaveTypeRepository leaveTypeRepository;
 	private final EmployeeRepository employeeRepository;
 	private final DocumentNumberGenerator documentNumberGenerator;
 	private final AuditLogService auditLogService;
 
-	// ===== 휴가 신청 =====
+	public List<LeaveType> getLeaveTypes() {
+		return leaveTypeRepository.findByDeletedFalseOrderByIdAsc();
+	}
+
 	public Page<LeaveRequestResponse> getLeaveRequests(Pageable pageable) {
 		return leaveRequestRepository.findByDeletedFalseOrderByCreatedAtDesc(pageable)
 				.map(LeaveRequestResponse::from);
@@ -38,11 +42,14 @@ public class LeaveService {
 	@Transactional
 	public LeaveRequestResponse createLeaveRequest(LeaveRequestCreate request) {
 		Employee employee = findEmployee(request.employeeId());
+		LeaveType leaveType = leaveTypeRepository.findByIdAndDeletedFalse(request.leaveTypeId())
+				.orElseThrow(() -> ApiException.notFound("휴가유형을 찾을 수 없습니다. id=" + request.leaveTypeId()));
 		String documentNumber = documentNumberGenerator.generate(DOCUMENT_PREFIX);
+
 		LeaveRequest leaveRequest = LeaveRequest.builder()
 				.documentNumber(documentNumber)
+				.leaveType(leaveType)
 				.employee(employee)
-				.leaveType(request.leaveType())
 				.startDate(request.startDate())
 				.endDate(request.endDate())
 				.days(request.days())
@@ -57,10 +64,11 @@ public class LeaveService {
 		LeaveRequest leaveRequest = findActive(id);
 		Employee approver = findEmployee(SecurityUtils.getCurrentEmployeeId());
 
-		if (leaveRequest.getLeaveType() == LeaveType.ANNUAL) {
+		if (leaveRequest.getLeaveType().isAnnual()) {
 			int year = leaveRequest.getStartDate().getYear();
 			LeaveBalance balance = leaveBalanceRepository
-					.findByEmployee_IdAndYearAndDeletedFalse(leaveRequest.getEmployee().getId(), year)
+					.findByEmployee_IdAndLeaveType_IdAndYearAndDeletedFalse(
+							leaveRequest.getEmployee().getId(), leaveRequest.getLeaveType().getId(), year)
 					.orElseThrow(() -> ApiException.conflict(year + "년도 연차 잔여 정보가 없습니다."));
 			balance.consume(leaveRequest.getDays());
 		}
@@ -78,7 +86,6 @@ public class LeaveService {
 		return LeaveRequestResponse.from(leaveRequest);
 	}
 
-	// ===== 잔여일수 대시보드 =====
 	public List<LeaveBalanceResponse> getLeaveBalances(int year) {
 		return leaveBalanceRepository.findByYearAndDeletedFalseOrderByEmployee_EmployeeNumberAsc(year).stream()
 				.map(LeaveBalanceResponse::from)
