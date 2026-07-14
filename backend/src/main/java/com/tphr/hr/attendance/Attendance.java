@@ -30,6 +30,7 @@ public class Attendance extends DeletableEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "attendance_id")
 	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -46,7 +47,7 @@ public class Attendance extends DeletableEntity {
 	private LocalTime checkOutTime;
 
 	@Enumerated(EnumType.STRING)
-	@Column(nullable = false, length = 20)
+	@Column(name = "attendance_status_code", nullable = false, length = 30)
 	private AttendanceStatus status;
 
 	public Attendance(Employee employee, LocalDate workDate, LocalTime checkInTime, LocalTime checkOutTime,

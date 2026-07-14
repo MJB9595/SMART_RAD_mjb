@@ -1,6 +1,6 @@
-package com.tphr.hr.salary;
+package com.tphr.hr.payroll;
 
-import com.tphr.hr.salary.dto.SalaryBasicResponse;
+import com.tphr.hr.payroll.dto.PayrollResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,17 +9,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/salaries")
+@RequestMapping("/payrolls")
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class SalaryController {
+public class PayrollController {
 
-	private final SalaryBasicRepository salaryBasicRepository;
+	private final PayrollRepository payrollRepository;
 
 	@GetMapping
-	public List<SalaryBasicResponse> getSalaries() {
-		return salaryBasicRepository.findByDeletedFalseOrderByEmployee_EmployeeNumberAsc().stream()
-				.map(SalaryBasicResponse::from)
+	public List<PayrollResponse> getPayrolls() {
+		return payrollRepository.findByDeletedFalseOrderByPayrollYearMonthDescEmployee_EmployeeNumberAsc().stream()
+				.map(PayrollResponse::from)
 				.toList();
 	}
 }

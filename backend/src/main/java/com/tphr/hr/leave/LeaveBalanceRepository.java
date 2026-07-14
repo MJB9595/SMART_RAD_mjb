@@ -7,8 +7,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface LeaveBalanceRepository extends JpaRepository<LeaveBalance, Long> {
 
-	Optional<LeaveBalance> findByEmployee_IdAndYearAndDeletedFalse(Long employeeId, int year);
+	Optional<LeaveBalance> findByEmployee_IdAndLeaveType_IdAndYearAndDeletedFalse(Long employeeId, Long leaveTypeId,
+			int year);
 
-	@EntityGraph(attributePaths = {"employee"})
+	@EntityGraph(attributePaths = {"employee", "employee.department", "leaveType"})
 	List<LeaveBalance> findByYearAndDeletedFalseOrderByEmployee_EmployeeNumberAsc(int year);
 }

@@ -30,9 +30,10 @@ public class Employee extends DeletableEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "employee_id")
 	private Long id;
 
-	@Column(name = "employee_number", nullable = false, unique = true, length = 20)
+	@Column(name = "employee_no", nullable = false, unique = true, length = 30)
 	private String employeeNumber;
 
 	@Column(nullable = false, length = 50)
@@ -69,13 +70,13 @@ public class Employee extends DeletableEntity {
 	private EmployeeRole role;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "employment_status", nullable = false, length = 20)
+	@Column(name = "employee_status_code", nullable = false, length = 30)
 	private EmploymentStatus employmentStatus;
 
 	@Column(name = "hire_date", nullable = false)
 	private LocalDate hireDate;
 
-	@Column(name = "resign_date")
+	@Column(name = "resignation_date")
 	private LocalDate resignDate;
 
 	// 인사기록카드 확장 인적사항

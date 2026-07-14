@@ -9,6 +9,8 @@ public record LeaveBalanceResponse(
 		String employeeNumber,
 		String employeeName,
 		String departmentName,
+		Long leaveTypeId,
+		String leaveTypeName,
 		int year,
 		BigDecimal totalGranted,
 		BigDecimal usedDays,
@@ -18,7 +20,7 @@ public record LeaveBalanceResponse(
 	public static LeaveBalanceResponse from(LeaveBalance b) {
 		return new LeaveBalanceResponse(
 				b.getId(), b.getEmployee().getId(), b.getEmployee().getEmployeeNumber(), b.getEmployee().getName(),
-				b.getEmployee().getDepartment().getName(), b.getYear(), b.getTotalGranted(), b.getUsedDays(),
-				b.getRemaining());
+				b.getEmployee().getDepartment().getName(), b.getLeaveType().getId(), b.getLeaveType().getName(),
+				b.getYear(), b.getTotalGranted(), b.getUsedDays(), b.getRemaining());
 	}
 }

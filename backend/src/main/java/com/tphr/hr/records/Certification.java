@@ -19,12 +19,13 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-@Table(name = "certification")
+@Table(name = "employee_certificate")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Certification extends DeletableEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "employee_certificate_id")
 	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)

@@ -19,13 +19,18 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-@Table(name = "leave_balance")
+@Table(name = "employee_leave_balance")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class LeaveBalance extends DeletableEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "employee_leave_balance_id")
 	private Long id;
+
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "leave_type_id")
+	private LeaveType leaveType;
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "employee_id")
@@ -34,13 +39,13 @@ public class LeaveBalance extends DeletableEntity {
 	@Column(nullable = false)
 	private int year;
 
-	@Column(name = "total_granted", nullable = false, precision = 4, scale = 1)
+	@Column(name = "total_days", nullable = false, precision = 5, scale = 1)
 	private BigDecimal totalGranted;
 
-	@Column(name = "used_days", nullable = false, precision = 4, scale = 1)
+	@Column(name = "used_days", nullable = false, precision = 5, scale = 1)
 	private BigDecimal usedDays;
 
-	@Column(nullable = false, precision = 4, scale = 1)
+	@Column(name = "remain_days", nullable = false, precision = 5, scale = 1)
 	private BigDecimal remaining;
 
 	/** 연차 승인 시 사용일수 차감. 잔여 부족 시 예외. */

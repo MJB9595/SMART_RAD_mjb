@@ -3,7 +3,6 @@ package com.tphr.hr.leave.dto;
 import com.tphr.hr.common.ApprovalStatus;
 import com.tphr.hr.employee.Employee;
 import com.tphr.hr.leave.LeaveRequest;
-import com.tphr.hr.leave.LeaveType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -13,7 +12,8 @@ public record LeaveRequestResponse(
 		String documentNumber,
 		Long employeeId,
 		String employeeName,
-		LeaveType leaveType,
+		Long leaveTypeId,
+		String leaveTypeName,
 		LocalDate startDate,
 		LocalDate endDate,
 		BigDecimal days,
@@ -27,7 +27,8 @@ public record LeaveRequestResponse(
 		Employee approver = r.getApprover();
 		return new LeaveRequestResponse(
 				r.getId(), r.getDocumentNumber(), r.getEmployee().getId(), r.getEmployee().getName(),
-				r.getLeaveType(), r.getStartDate(), r.getEndDate(), r.getDays(), r.getReason(),
+				r.getLeaveType().getId(), r.getLeaveType().getName(),
+				r.getStartDate(), r.getEndDate(), r.getDays(), r.getReason(),
 				r.getApprovalStatus(), approver != null ? approver.getName() : null, r.getApprovedAt());
 	}
 }

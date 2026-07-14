@@ -10,6 +10,6 @@ public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, Long
 
 	Optional<LeaveRequest> findByIdAndDeletedFalse(Long id);
 
-	@EntityGraph(attributePaths = {"employee", "approver"})
+	@EntityGraph(attributePaths = {"employee", "approver", "leaveType"})
 	Page<LeaveRequest> findByDeletedFalseOrderByCreatedAtDesc(Pageable pageable);
 }
