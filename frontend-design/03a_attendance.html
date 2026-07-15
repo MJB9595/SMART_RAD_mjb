@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=1920">
+<title>일일 근태 등록 · TSM</title>
+<style>
+/* ============================================================
+   TSM 교직원 인사관리 시스템 — 목업 공유 스타일 (1920×1080)
+   실제 앱 globals.css 디자인 시스템을 그대로 추출
+   ============================================================ */
+* { margin:0; padding:0; box-sizing:border-box; }
+.mono { font-family:'IBM Plex Mono','SF Mono',monospace; }
+
+html, body { background:#DDE3EA; }
+body {
+  display:flex; justify-content:center;
+  font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  -webkit-font-smoothing:antialiased;
+  color:#111827;
+}
+
+/* 1920x1080 고정 프레임 */
+.frame { width:1920px; height:1080px; overflow:hidden; }
+.app { display:flex; height:1080px; background:#F7F8FA; color:#111827; }
+
+/* ===== Sidebar ===== */
+.sidebar {
+  width:262px; flex-shrink:0; background:#FFFFFF;
+  border-right:1px solid #EEF0F3; padding:24px 16px; display:flex; flex-direction:column;
+  overflow-y:auto;
+}
+.logo-row { display:flex; align-items:center; gap:10px; padding:4px 8px 24px; }
+.logo-badge {
+  width:40px; height:40px; border-radius:11px; background:#1F3A8F;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.logo-badge svg { width:20px; height:20px; }
+.logo-text-wrap { display:flex; flex-direction:column; }
+.logo-title { font-size:16px; font-weight:800; color:#111827; letter-spacing:0.2px; }
+.logo-sub { font-size:11px; color:#8A94A6; margin-top:1px; }
+
+.nav-label {
+  font-size:10.5px; font-weight:700; color:#A6AFBD; letter-spacing:0.8px;
+  padding:6px 8px 8px; margin-top:6px;
+}
+.nav-item {
+  display:block; font-size:13.5px; font-weight:600; color:#4B5565;
+  padding:9px 10px; border-radius:8px; text-decoration:none; margin-bottom:2px;
+}
+.nav-item:hover { background:#F3F5F8; }
+.nav-item.active { background:#EAF0FF; color:#1F3A8F; }
+.nav-sub { display:flex; flex-direction:column; margin:2px 0 10px 8px; }
+.nav-sub a {
+  display:flex; align-items:center; gap:8px; font-size:13px; color:#6B7280;
+  text-decoration:none; padding:7px 10px; border-radius:7px; font-weight:500;
+}
+.nav-sub a:hover { background:#F3F5F8; }
+.nav-sub a.on { color:#1F3A8F; font-weight:700; background:#F3F6FF; }
+.nav-sub a .dot { width:5px; height:5px; border-radius:50%; background:#C7CDD6; flex-shrink:0; }
+.nav-sub a.on .dot { background:#1F3A8F; }
+
+/* ===== Header / main ===== */
+.main { flex:1; display:flex; flex-direction:column; min-width:0; }
+.topbar {
+  height:64px; background:#FFFFFF; border-bottom:1px solid #EEF0F3;
+  display:flex; align-items:center; justify-content:space-between; padding:0 28px; flex-shrink:0;
+}
+.search-box {
+  flex:1; max-width:420px; background:#F3F5F8; border-radius:9px; height:38px;
+  display:flex; align-items:center; padding:0 14px; font-size:13px; color:#9AA3B2; gap:8px;
+}
+.search-box input { background:transparent; border:none; outline:none; width:100%; font-size:13px; color:#6B7280; font-family:inherit; }
+.user-box { display:flex; align-items:center; gap:10px; }
+.user-avatar {
+  width:34px; height:34px; border-radius:50%; background:#1F3A8F; color:#fff;
+  display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;
+}
+.user-name { font-size:13.5px; font-weight:700; color:#111827; }
+.user-role { font-size:11.5px; color:#8A94A6; }
+.notif-dot { width:7px; height:7px; border-radius:50%; background:#1F3A8F; }
+.logout { margin-left:16px; font-size:12px; font-weight:600; color:#6B7280; background:none; border:none; cursor:pointer; }
+
+/* ===== Content ===== */
+.content { padding:28px 32px 48px; overflow-y:auto; }
+.breadcrumb { font-size:12.5px; color:#9AA3B2; margin-bottom:10px; }
+.breadcrumb b { color:#4B5565; font-weight:700; }
+.title-row { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:26px; }
+.page-title { font-size:26px; font-weight:800; color:#111827; margin-bottom:6px; }
+.page-sub { font-size:13.5px; color:#8A94A6; }
+
+.btn-primary {
+  background:#1F3A8F; color:#fff; font-size:13.5px; font-weight:700; border:none;
+  padding:11px 18px; border-radius:9px; display:inline-flex; align-items:center; gap:6px; white-space:nowrap; cursor:pointer;
+}
+.btn-outline {
+  background:#fff; color:#1F3A8F; font-size:13.5px; font-weight:700; border:1px solid #1F3A8F;
+  padding:11px 18px; border-radius:9px; width:100%; text-align:center; cursor:pointer;
+}
+.btn-ghost {
+  background:#fff; border:1px solid #E5E8EE; color:#4B5565; font-size:12.5px; font-weight:600;
+  padding:8px 12px; border-radius:8px; display:inline-flex; align-items:center; gap:6px; cursor:pointer;
+}
+.btn-row { display:flex; gap:8px; }
+
+/* ===== Stat cards ===== */
+.stat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
+.stat-grid.c3 { grid-template-columns:repeat(3,1fr); }
+.stat-grid.c2 { grid-template-columns:repeat(2,1fr); }
+.stat-card { background:#fff; border:1px solid #EEF0F3; border-radius:14px; padding:20px; }
+.stat-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.stat-label { font-size:12.5px; color:#8A94A6; font-weight:600; }
+.badge { font-size:11px; font-weight:700; padding:3px 8px; border-radius:20px; }
+.badge.up { color:#16A34A; background:#DCFCE7; }
+.badge.down { color:#DC2626; background:#FEE2E2; }
+.badge.new { color:#D97706; background:#FEF3C7; }
+.badge.info { color:#1F3A8F; background:#EAF0FF; }
+.stat-value { font-size:26px; font-weight:800; color:#111827; }
+.stat-value span { font-size:13px; font-weight:600; color:#9AA3B2; margin-left:2px; }
+
+/* ===== Cards / tables ===== */
+.split { display:grid; grid-template-columns:1fr 320px; gap:20px; align-items:start; }
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; align-items:start; }
+.grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; align-items:start; }
+.card { background:#fff; border:1px solid #EEF0F3; border-radius:14px; }
+.card + .card { margin-top:20px; }
+.card-head {
+  display:flex; align-items:center; justify-content:space-between; padding:18px 22px;
+  border-bottom:1px solid #F1F3F6;
+}
+.card-title { font-size:15px; font-weight:700; color:#111827; }
+.card-sub { font-size:12px; color:#9AA3B2; margin-top:2px; font-weight:500; }
+.head-actions { display:flex; gap:8px; align-items:center; }
+
+table { width:100%; border-collapse:collapse; }
+th {
+  text-align:left; font-size:12px; color:#9AA3B2; font-weight:700; padding:12px 22px;
+  border-bottom:1px solid #F1F3F6; white-space:nowrap;
+}
+td { padding:14px 22px; border-bottom:1px solid #F6F7F9; font-size:13.5px; color:#374151; vertical-align:middle; }
+tbody tr:last-child td { border-bottom:none; }
+tbody tr.selected { background:#F7F9FF; }
+.cell-person { display:flex; align-items:center; gap:10px; }
+.avatar-sm {
+  width:32px; height:32px; border-radius:50%; background:#EAF0FF; color:#1F3A8F;
+  display:flex; align-items:center; justify-content:center; font-size:12.5px; font-weight:700; flex-shrink:0;
+}
+.p-name { font-weight:700; color:#111827; font-size:13.5px; }
+.p-sub { font-size:11.5px; color:#9AA3B2; margin-top:1px; }
+.pill { display:inline-block; font-size:11.5px; font-weight:700; padding:4px 10px; border-radius:20px; }
+.pill.green { color:#16A34A; background:#DCFCE7; }
+.pill.amber { color:#D97706; background:#FEF3C7; }
+.pill.gray  { color:#6B7280; background:#F3F4F6; }
+.pill.red   { color:#DC2626; background:#FEE2E2; }
+.pill.blue  { color:#1F3A8F; background:#EAF0FF; }
+.right { text-align:right; }
+.center { text-align:center; }
+
+.table-foot { display:flex; align-items:center; justify-content:space-between; padding:16px 22px; }
+.foot-info { font-size:12.5px; color:#9AA3B2; }
+.pager { display:flex; gap:4px; }
+.pager span {
+  min-width:28px; height:28px; padding:0 6px; border-radius:7px; display:flex; align-items:center; justify-content:center;
+  font-size:12.5px; color:#6B7280; font-weight:600; cursor:pointer;
+}
+.pager span.cur { background:#1F3A8F; color:#fff; }
+
+/* ===== Side panel ===== */
+.panel { padding:22px; }
+.panel-eyebrow { font-size:11.5px; font-weight:700; color:#1F3A8F; letter-spacing:0.4px; margin-bottom:16px; }
+.panel-avatar {
+  width:56px; height:56px; border-radius:14px; background:#1F3A8F; color:#fff;
+  display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:800; margin-bottom:14px;
+}
+.panel-name { font-size:16px; font-weight:800; color:#111827; }
+.panel-role { font-size:12.5px; color:#9AA3B2; margin-bottom:16px; margin-top:2px; }
+.panel-role .cat { margin-left:6px; color:#1F3A8F; font-weight:700; }
+.field-row {
+  display:flex; align-items:center; justify-content:space-between; padding:10px 0;
+  border-bottom:1px solid #F3F4F6; font-size:13px;
+}
+.field-row:last-of-type { border-bottom:none; }
+.field-label { color:#9AA3B2; }
+.field-value { color:#111827; font-weight:700; }
+.mini-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:16px 0; }
+.mini-stat { background:#F7F8FA; border-radius:10px; padding:10px 6px; text-align:center; }
+.mini-stat-label { font-size:10.5px; color:#9AA3B2; font-weight:600; margin-bottom:4px; }
+.mini-stat-value { font-size:15px; font-weight:800; color:#111827; }
+
+/* ===== Bar chart (dashboard) ===== */
+.bars { display:flex; align-items:flex-end; gap:16px; height:200px; padding:10px 6px 0; }
+.bar-col { flex:1; display:flex; flex-direction:column; align-items:center; gap:8px; justify-content:flex-end; height:100%; }
+.bar-wrap { width:100%; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; flex:1; }
+.bar { width:60%; max-width:54px; border-radius:6px 6px 0 0; background:#E5E8EE; }
+.bar.hi { background:#1F3A8F; }
+.bar-val { font-size:12px; font-weight:800; color:#111827; margin-bottom:6px; }
+.bar-label { font-size:11.5px; color:#6B7280; font-weight:600; text-align:center; }
+
+/* ===== Filters ===== */
+.filter-bar { display:flex; flex-wrap:wrap; gap:10px; align-items:center; padding:16px 22px; border-bottom:1px solid #F1F3F6; }
+.filter-input, .filter-select {
+  height:38px; border:1px solid #E5E8EE; border-radius:8px; padding:0 12px;
+  font-size:13px; color:#374151; background:#fff; font-family:inherit;
+}
+.filter-input { flex:1; min-width:180px; color:#9AA3B2; }
+.filter-select { min-width:130px; cursor:pointer; appearance:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239AA3B2' stroke-width='2'><path d='M6 9l6 6 6-6'/></svg>");
+  background-repeat:no-repeat; background-position:right 12px center; padding-right:30px;
+}
+.filter-reset { background:none; border:none; color:#8A94A6; font-size:12.5px; font-weight:600; cursor:pointer; padding:0 6px; }
+
+/* ===== Small buttons / tabs ===== */
+.btn-sm {
+  background:#fff; border:1px solid #E5E8EE; color:#4B5565; font-size:12px; font-weight:600;
+  padding:5px 10px; border-radius:7px; cursor:pointer;
+}
+.btn-sm.danger { color:#DC2626; border-color:#F3C6C6; }
+.btn-sm.primary { color:#fff; background:#1F3A8F; border-color:#1F3A8F; }
+.btn-sm.approve { color:#16A34A; border-color:#B7E4C7; }
+.row-actions { display:flex; gap:6px; }
+
+.rec-toolbar { display:flex; align-items:center; justify-content:space-between; padding:16px 0 12px; }
+.rec-toolbar .rec-title { font-size:14px; font-weight:700; color:#111827; }
+.tabs { display:flex; gap:2px; border-bottom:1px solid #EEF0F3; margin-bottom:4px; flex-wrap:wrap; }
+.tab-btn {
+  border:none; background:none; font-family:inherit; cursor:pointer;
+  padding:11px 16px; font-size:13.5px; font-weight:600; color:#8A94A6;
+  border-bottom:2px solid transparent; margin-bottom:-1px;
+}
+.tab-btn.on { color:#1F3A8F; border-bottom-color:#1F3A8F; font-weight:700; }
+.tab-btn .cnt {
+  display:inline-block; margin-left:6px; font-size:11px; font-weight:700; color:#8A94A6;
+  background:#F3F5F8; border-radius:10px; padding:1px 7px;
+}
+.tab-btn.on .cnt { color:#1F3A8F; background:#EAF0FF; }
+.empty-row td { text-align:center; color:#9AA3B2; padding:32px 22px; font-size:13px; }
+
+/* ===== Basic info card ===== */
+.info-card {
+  background:#fff; border:1px solid #EEF0F3; border-radius:14px; padding:24px 26px;
+  display:grid; grid-template-columns:1fr 1fr; gap:2px 40px; margin-bottom:22px;
+}
+.info-item { display:flex; padding:9px 0; border-bottom:1px solid #F6F7F9; font-size:13.5px; }
+.info-item .lbl { width:96px; flex-shrink:0; color:#9AA3B2; }
+.info-item .val { color:#111827; font-weight:600; }
+
+/* ===== Key/value list (명세서·상세) ===== */
+.kv { padding:8px 22px 18px; }
+.kv-row { display:flex; align-items:center; justify-content:space-between; padding:11px 0; border-bottom:1px solid #F3F4F6; font-size:13.5px; }
+.kv-row:last-child { border-bottom:none; }
+.kv-row .k { color:#6B7280; }
+.kv-row .v { color:#111827; font-weight:700; }
+.kv-row.total { border-top:2px solid #EEF0F3; border-bottom:none; margin-top:4px; padding-top:14px; }
+.kv-row.total .k { color:#111827; font-weight:800; }
+.kv-row.total .v { color:#1F3A8F; font-size:16px; font-weight:800; }
+.amount.pos { color:#16A34A; }
+.amount.neg { color:#DC2626; }
+
+/* ===== Progress (잔여일수) ===== */
+.progress { height:8px; background:#EEF1F5; border-radius:6px; overflow:hidden; width:140px; }
+.progress > span { display:block; height:100%; background:#1F3A8F; border-radius:6px; }
+
+/* ===== Modal (mockup 표시용) ===== */
+.modal-overlay {
+  position:absolute; inset:0; background:rgba(17,24,39,0.42);
+  display:flex; align-items:center; justify-content:center; z-index:100; padding:20px;
+}
+.modal { background:#fff; border-radius:16px; width:100%; max-width:560px; box-shadow:0 20px 50px rgba(17,24,39,0.25); }
+.modal-head { display:flex; align-items:center; justify-content:space-between; padding:20px 24px; border-bottom:1px solid #F1F3F6; }
+.modal-title { font-size:16px; font-weight:800; color:#111827; }
+.modal-x { background:none; border:none; font-size:20px; color:#9AA3B2; cursor:pointer; line-height:1; }
+.modal-body { padding:22px 24px; }
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px 18px; }
+.form-field { display:flex; flex-direction:column; gap:6px; }
+.form-field.full { grid-column:1 / -1; }
+.form-field label { font-size:12.5px; font-weight:600; color:#4B5565; }
+.form-field label .req { color:#DC2626; margin-left:2px; }
+.form-field input, .form-field select {
+  height:40px; border:1px solid #E5E8EE; border-radius:8px; padding:0 12px;
+  font-size:13.5px; color:#111827; background:#fff; font-family:inherit;
+}
+.form-check { display:flex; align-items:center; gap:8px; font-size:13px; color:#4B5565; }
+.form-check input { width:16px; height:16px; }
+.modal-foot { display:flex; justify-content:flex-end; gap:10px; padding:18px 24px; border-top:1px solid #F1F3F6; }
+
+</style>
+</head><body>
+<div class="frame"><div class="app">
+  <aside class="sidebar"><div class="logo-row"><div class="logo-badge"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" fill="#fff" fill-opacity="0.95"/><rect x="13" y="3" width="8" height="8" rx="2" fill="#fff" fill-opacity="0.6"/><rect x="3" y="13" width="8" height="8" rx="2" fill="#fff" fill-opacity="0.6"/><rect x="13" y="13" width="8" height="8" rx="2" fill="#fff" fill-opacity="0.95"/></svg></div><div class="logo-text-wrap"><div class="logo-title">TSM</div><div class="logo-sub">교직원 인사관리 시스템</div></div></div><div class="nav-label">HR MODULES</div><div><a href="#" class="nav-item">인사기록 관리</a></div><div><a href="#" class="nav-item">인사발령 관리</a></div><div><a href="#" class="nav-item active">근태 관리</a><div class="nav-sub"><a href="#" class="on"><span class="dot"></span>일일 근태 등록</a><a href="#" class=""><span class="dot"></span>월 근태 현황</a></div></div><div><a href="#" class="nav-item">휴가 관리</a></div><div><a href="#" class="nav-item">급여 관리</a></div><div><a href="#" class="nav-item">복지·증명 관리</a></div><div><a href="#" class="nav-item">통계 대시보드</a></div><div><a href="#" class="nav-item">시스템 관리</a></div></aside>
+  <div class="main">
+    <header class="topbar"><div class="search-box"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9AA3B2" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input type="text" placeholder="이름, 사번, 부서로 검색"></div><div class="user-box"><span class="notif-dot"></span><div class="user-avatar">관</div><div><div class="user-name">관리자</div><div class="user-role">ADMIN</div></div><button class="logout">로그아웃</button></div></header>
+    <div class="content">
+      <div class="breadcrumb">근태 관리 <b>›</b> 일일 근태 등록</div>
+      <div class="title-row">
+        <div>
+          <div class="page-title">일일 근태 등록</div>
+          <div class="page-sub">교직원 출퇴근 현황을 확인하고 근태를 등록·정정합니다</div>
+        </div>
+        <button class="btn-primary">+ 근태 등록</button>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-top"><span class="stat-label">오늘 출근</span></div><div class="stat-value">5<span>명</span></div></div>
+        <div class="stat-card"><div class="stat-top"><span class="stat-label">지각·조퇴</span></div><div class="stat-value">1<span>건</span></div></div>
+        <div class="stat-card"><div class="stat-top"><span class="stat-label">휴가 사용중</span></div><div class="stat-value">1<span>명</span></div></div>
+        <div class="stat-card"><div class="stat-top"><span class="stat-label">결근</span><span class="badge down">주의</span></div><div class="stat-value">0<span>명</span></div></div>
+      </div>
+
+      <div class="split">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">출퇴근 현황 (2026-07-15)</div>
+            <div class="head-actions"><button class="btn-ghost">📅 2026-07-15</button><button class="btn-ghost">내보내기</button></div>
+          </div>
+          <table>
+            <thead><tr><th>대상자</th><th>상태</th><th>출근시간</th><th>퇴근시간</th></tr></thead>
+            <tbody>
+              <tr class="selected"><td><div class="cell-person"><div class="avatar-sm">김</div><div><div class="p-name">김정교</div><div class="p-sub mono">FAC001</div></div></div></td><td><span class="pill green">출근</span></td><td class="mono">08:52</td><td class="mono">18:10</td></tr>
+              <tr><td><div class="cell-person"><div class="avatar-sm">이</div><div><div class="p-name">이부교</div><div class="p-sub mono">FAC002</div></div></div></td><td><span class="pill green">출근</span></td><td class="mono">08:47</td><td class="mono">18:30</td></tr>
+              <tr><td><div class="cell-person"><div class="avatar-sm">박</div><div><div class="p-name">박강사</div><div class="p-sub mono">FAC003</div></div></div></td><td><span class="pill amber">지각</span></td><td class="mono">09:20</td><td class="mono">18:05</td></tr>
+              <tr><td><div class="cell-person"><div class="avatar-sm">정</div><div><div class="p-name">정직원</div><div class="p-sub mono">STA001</div></div></div></td><td><span class="pill green">출근</span></td><td class="mono">08:30</td><td class="mono">18:00</td></tr>
+              <tr><td><div class="cell-person"><div class="avatar-sm">한</div><div><div class="p-name">한주임</div><div class="p-sub mono">STA002</div></div></div></td><td><span class="pill blue">휴가</span></td><td class="mono">-</td><td class="mono">-</td></tr>
+            </tbody>
+          </table>
+          <div class="table-foot"><span class="foot-info">전체 5건</span><div class="pager"><span class="cur">1</span></div></div>
+        </div>
+
+        <div class="card">
+          <div class="panel">
+            <div class="panel-eyebrow">잔여일수 대시보드</div>
+            <div class="panel-avatar">김</div>
+            <div class="panel-name">김정교</div>
+            <div class="panel-role">FAC001 · 컴퓨터공학과</div>
+            <div class="field-row"><span class="field-label">연차 발생</span><span class="field-value mono">15일</span></div>
+            <div class="field-row"><span class="field-label">사용</span><span class="field-value mono">3일</span></div>
+            <div class="field-row"><span class="field-label">잔여</span><span class="field-value mono">12일</span></div>
+            <div class="mini-stats">
+              <div class="mini-stat"><div class="mini-stat-label">이월</div><div class="mini-stat-value">0일</div></div>
+              <div class="mini-stat"><div class="mini-stat-label">보상휴가</div><div class="mini-stat-value">0일</div></div>
+              <div class="mini-stat"><div class="mini-stat-label">병가</div><div class="mini-stat-value">0일</div></div>
+            </div>
+            <button class="btn-outline">휴가 이력 보기</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div></div>
+</body></html>

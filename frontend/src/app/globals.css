@@ -195,6 +195,107 @@ tr:last-child td { border-bottom:none; }
 
 
 
+/* ===== 인사기록 페이지: 필터 / 폼 / 모달 / 탭 ===== */
+.filter-bar {
+  display:flex; flex-wrap:wrap; gap:10px; align-items:center;
+  padding:16px 22px; border-bottom:1px solid #F1F3F6;
+}
+.filter-input, .filter-select {
+  height:38px; border:1px solid #E5E8EE; border-radius:8px; padding:0 12px;
+  font-size:13px; color:#374151; background:#fff; font-family:inherit;
+}
+.filter-input { flex:1; min-width:180px; }
+.filter-input::placeholder { color:#9AA3B2; }
+.filter-select { min-width:120px; cursor:pointer; }
+.filter-input:focus, .filter-select:focus { outline:none; border-color:#1F3A8F; }
+.filter-reset {
+  background:none; border:none; color:#8A94A6; font-size:12.5px; font-weight:600;
+  cursor:pointer; padding:0 6px;
+}
+
+/* small buttons in tables/tab headers */
+.btn-sm {
+  background:#fff; border:1px solid #E5E8EE; color:#4B5565; font-size:12px; font-weight:600;
+  padding:5px 10px; border-radius:7px; cursor:pointer;
+}
+.btn-sm:hover { background:#F3F5F8; }
+.btn-sm.danger { color:#DC2626; border-color:#F3C6C6; }
+.btn-sm.danger:hover { background:#FEF2F2; }
+.btn-sm.primary { color:#fff; background:#1F3A8F; border-color:#1F3A8F; }
+.btn-sm.primary:hover { background:#182D6E; }
+.row-actions { display:flex; gap:6px; }
+
+/* record tab section */
+.rec-toolbar {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 0 12px;
+}
+.rec-toolbar .rec-title { font-size:14px; font-weight:700; color:#111827; }
+.tabs {
+  display:flex; gap:2px; border-bottom:1px solid #EEF0F3; margin-bottom:4px; flex-wrap:wrap;
+}
+.tab-btn {
+  border:none; background:none; font-family:inherit; cursor:pointer;
+  padding:11px 16px; font-size:13.5px; font-weight:600; color:#8A94A6;
+  border-bottom:2px solid transparent; margin-bottom:-1px;
+}
+.tab-btn:hover { color:#4B5565; }
+.tab-btn.on { color:#1F3A8F; border-bottom-color:#1F3A8F; font-weight:700; }
+.tab-btn .cnt {
+  display:inline-block; margin-left:6px; font-size:11px; font-weight:700; color:#8A94A6;
+  background:#F3F5F8; border-radius:10px; padding:1px 7px;
+}
+.tab-btn.on .cnt { color:#1F3A8F; background:#EAF0FF; }
+
+.empty-row td { text-align:center; color:#9AA3B2; padding:32px 22px; font-size:13px; }
+
+/* basic info card */
+.info-card {
+  background:#fff; border:1px solid #EEF0F3; border-radius:14px; padding:24px 26px;
+  display:grid; grid-template-columns:1fr 1fr; gap:2px 40px; margin-bottom:22px;
+}
+.info-item { display:flex; padding:9px 0; border-bottom:1px solid #F6F7F9; font-size:13.5px; }
+.info-item .lbl { width:96px; flex-shrink:0; color:#9AA3B2; }
+.info-item .val { color:#111827; font-weight:600; }
+
+/* modal */
+.modal-overlay {
+  position:fixed; inset:0; background:rgba(17,24,39,0.42); backdrop-filter:blur(2px);
+  display:flex; align-items:center; justify-content:center; z-index:100; padding:20px;
+}
+.modal {
+  background:#fff; border-radius:16px; width:100%; max-width:560px; max-height:90vh;
+  overflow-y:auto; box-shadow:0 20px 50px rgba(17,24,39,0.25);
+}
+.modal-head {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:20px 24px; border-bottom:1px solid #F1F3F6;
+}
+.modal-title { font-size:16px; font-weight:800; color:#111827; }
+.modal-x { background:none; border:none; font-size:20px; color:#9AA3B2; cursor:pointer; line-height:1; }
+.modal-body { padding:22px 24px; }
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px 18px; }
+.form-field { display:flex; flex-direction:column; gap:6px; }
+.form-field.full { grid-column:1 / -1; }
+.form-field label { font-size:12.5px; font-weight:600; color:#4B5565; }
+.form-field label .req { color:#DC2626; margin-left:2px; }
+.form-field input, .form-field select {
+  height:40px; border:1px solid #E5E8EE; border-radius:8px; padding:0 12px;
+  font-size:13.5px; color:#111827; background:#fff; font-family:inherit;
+}
+.form-field input:focus, .form-field select:focus { outline:none; border-color:#1F3A8F; }
+.form-check { display:flex; align-items:center; gap:8px; font-size:13px; color:#4B5565; }
+.form-check input { width:16px; height:16px; }
+.modal-foot {
+  display:flex; justify-content:flex-end; gap:10px; padding:18px 24px;
+  border-top:1px solid #F1F3F6;
+}
+.modal-err {
+  background:#FEF2F2; color:#DC2626; font-size:12.5px; border-radius:8px;
+  padding:10px 12px; margin-bottom:16px;
+}
+.link-back { background:none; border:none; color:#1F3A8F; font-weight:700; font-size:13px; cursor:pointer; }
+
 @layer components {
   /* Common Badges */
   .badge-primary {
