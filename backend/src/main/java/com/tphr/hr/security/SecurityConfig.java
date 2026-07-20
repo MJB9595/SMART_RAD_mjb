@@ -12,7 +12,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.http.HttpStatus;
 
 @Configuration
 @EnableWebSecurity
@@ -41,9 +43,11 @@ public class SecurityConfig {
 				})
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(auth -> auth
-						.requestMatchers("/auth/**").permitAll()
+						.requestMatchers("/auth/login").permitAll()
 						.anyRequest().authenticated()
 				)
+				// 미인증 요청은 403 대신 401을 반환해 프론트가 세션 만료를 정확히 감지하도록 함
+				.exceptionHandling(ex -> ex.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
 				.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService),
 						UsernamePasswordAuthenticationFilter.class);
 
