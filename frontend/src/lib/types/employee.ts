@@ -66,3 +66,50 @@ export interface Certification {
 	acquiredDate: string | null;
 	expiryDate: string | null;
 }
+
+export interface Family {
+	id: number;
+	employeeId: number;
+	familyName: string;
+	familyRelation: string;
+	birthDate: string | null;
+	job: string | null;
+	livingTogether: boolean | null;
+	dependent: boolean | null;
+	disabled: boolean | null;
+}
+
+export interface Military {
+	id: number;
+	employeeId: number;
+	militaryType: string | null;
+	militaryRank: string | null;
+	dischargeType: string | null;
+	enlistmentDate: string | null;
+	dischargeDate: string | null;
+	exemptionReason: string | null;
+}
+
+export interface Language {
+	id: number;
+	employeeId: number;
+	languageName: string;
+	readingLevel: string | null;
+	writingLevel: string | null;
+	speakingLevel: string | null;
+	testName: string | null;
+	testScore: string | null;
+	issuedDate: string | null;
+	issuer: string | null;
+}
+
+export interface EmployeeRecordSummary {
+	employeeId: number;
+	latestEducation: string | null;
+	topCertification: string | null;
+	educationCount: number;
+	careerCount: number;
+	certificationCount: number;
+	yearsOfService: number | null;
+	expiringCertificationCount: number;
+}

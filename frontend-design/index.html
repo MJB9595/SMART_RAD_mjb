@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TSM 교직원 인사관리 시스템 · 화면 목업 (1920×1080)</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif; background:#F0F2F6; color:#111827; padding:48px 32px; }
+  .wrap { max-width:1040px; margin:0 auto; }
+  .head { display:flex; align-items:center; gap:14px; margin-bottom:8px; }
+  .logo { width:48px; height:48px; border-radius:13px; background:#1F3A8F; display:flex; align-items:center; justify-content:center; }
+  .logo svg { width:26px; height:26px; }
+  h1 { font-size:24px; font-weight:800; }
+  .sub { color:#8A94A6; font-size:14px; margin-bottom:36px; margin-left:62px; }
+  .mod { margin-bottom:30px; }
+  .mod-title { font-size:13px; font-weight:800; color:#1F3A8F; letter-spacing:0.3px; margin-bottom:12px; padding-bottom:8px; border-bottom:2px solid #E5E9F2; }
+  .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  a.card { display:block; background:#fff; border:1px solid #E7EAF0; border-radius:12px; padding:16px 18px; text-decoration:none; transition:all .12s; }
+  a.card:hover { border-color:#1F3A8F; box-shadow:0 6px 18px rgba(31,58,143,0.10); transform:translateY(-1px); }
+  .c-name { font-size:14px; font-weight:700; color:#111827; }
+  .c-path { font-size:11.5px; color:#9AA3B2; margin-top:3px; font-family:'IBM Plex Mono',monospace; }
+  .foot { margin-top:40px; text-align:center; color:#A6AFBD; font-size:12px; }
+</style>
+</head><body>
+<div class="wrap">
+  <div class="head">
+    <div class="logo"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" fill="#fff" fill-opacity="0.95"/><rect x="13" y="3" width="8" height="8" rx="2" fill="#fff" fill-opacity="0.6"/><rect x="3" y="13" width="8" height="8" rx="2" fill="#fff" fill-opacity="0.6"/><rect x="13" y="13" width="8" height="8" rx="2" fill="#fff" fill-opacity="0.95"/></svg></div>
+    <div><h1>TSM 교직원 인사관리 시스템</h1></div>
+  </div>
+  <div class="sub">전체 화면 목업 · 1920×1080 기준 · 실제 앱 디자인 시스템 동일 적용</div>
+
+  <div class="mod">
+    <div class="mod-title">① 인사기록 관리</div>
+    <div class="grid">
+      <a class="card" href="01_employees.html"><div class="c-name">교직원 정보관리</div><div class="c-path">/employees</div></a>
+      <a class="card" href="01a_record_edu.html"><div class="c-name">인사기록카드 · 학력</div><div class="c-path">/employees/[id]</div></a>
+      <a class="card" href="01b_record_career.html"><div class="c-name">인사기록카드 · 경력</div><div class="c-path">/employees/[id]</div></a>
+      <a class="card" href="01c_record_cert.html"><div class="c-name">인사기록카드 · 자격증</div><div class="c-path">/employees/[id]</div></a>
+      <a class="card" href="01d_record_family.html"><div class="c-name">인사기록카드 · 가족</div><div class="c-path">/employees/[id]</div></a>
+      <a class="card" href="01e_record_military.html"><div class="c-name">인사기록카드 · 병역</div><div class="c-path">/employees/[id]</div></a>
+      <a class="card" href="01f_record_language.html"><div class="c-name">인사기록카드 · 어학</div><div class="c-path">/employees/[id]</div></a>
+    </div>
+  </div>
+
+  <div class="mod">
+    <div class="mod-title">② 인사발령 관리</div>
+    <div class="grid">
+      <a class="card" href="02a_appointments.html"><div class="c-name">발령 등록/승인</div><div class="c-path">/appointments</div></a>
+      <a class="card" href="02b_appointment_history.html"><div class="c-name">발령 이력 조회</div><div class="c-path">/appointments/history</div></a>
+    </div>
+  </div>
+
+  <div class="mod">
+    <div class="mod-title">③ 근태 관리</div>
+    <div class="grid">
+      <a class="card" href="03a_attendance.html"><div class="c-name">일일 근태 등록</div><div class="c-path">/attendance</div></a>
+      <a class="card" href="03b_attendance_monthly.html"><div class="c-name">월 근태 현황</div><div class="c-path">/attendance/monthly</div></a>
+    </div>
+  </div>
+
+  <div class="mod">
+    <div class="mod-title">④ 휴가 관리</div>
+    <div class="grid">
+      <a class="card" href="04a_leaves.html"><div class="c-name">휴가 신청/승인</div><div class="c-path">/leaves</div></a>
+      <a class="card" href="04b_leave_balance.html"><div class="c-name">잔여일수 현황</div><div class="c-path">/leave-balance</div></a>
+      <a class="card" href="04c_leave_policy.html"><div class="c-name">휴가유형·정책 관리</div><div class="c-path">/leaves/policy</div></a>
+    </div>
+  </div>
+
+  <div class="mod">
+    <div class="mod-title">⑤ 급여 관리</div>
+    <div class="grid">
+      <a class="card" href="05a_payroll.html"><div class="c-name">급여 명세서 조회</div><div class="c-path">/payroll</div></a>
+      <a class="card" href="05b_payroll_allowance.html"><div class="c-name">수당 관리</div><div class="c-path">/payroll/allowance</div></a>
+      <a class="card" href="05c_payroll_settlement.html"><div class="c-name">정산 엑셀 다운로드</div><div class="c-path">/payroll/settlement</div></a>
+    </div>
+  </div>
+
+  <div class="mod">
+    <div class="mod-title">⑥ 복지·증명 관리</div>
+    <div class="grid">
+      <a class="card" href="06a_welfare_event.html"><div class="c-name">경조비 신청/승인</div><div class="c-path">/welfare/event-support</div></a>
+      <a class="card" href="06b_welfare_certificate.html"><div class="c-name">증명서 발급</div><div class="c-path">/welfare/certificate</div></a>
+    </div>
+  </div>
+
+  <div class="mod">
+    <div class="mod-title">⑦ 통계 대시보드</div>
+    <div class="grid">
+      <a class="card" href="07a_dashboard_headcount.html"><div class="c-name">부서별 정원 현황</div><div class="c-path">/dashboard/headcount</div></a>
+      <a class="card" href="07b_dashboard_attendance.html"><div class="c-name">당일 근태 현황</div><div class="c-path">/dashboard/attendance</div></a>
+    </div>
+  </div>
+
+  <div class="mod">
+    <div class="mod-title">⑧ 시스템 관리</div>
+    <div class="grid">
+      <a class="card" href="08a_system_roles.html"><div class="c-name">권한 관리 (RBAC)</div><div class="c-path">/system/roles</div></a>
+      <a class="card" href="08b_system_codes.html"><div class="c-name">공통 코드 관리</div><div class="c-path">/system/codes</div></a>
+      <a class="card" href="08c_system_audit.html"><div class="c-name">감사로그 조회</div><div class="c-path">/system/audit</div></a>
+    </div>
+  </div>
+
+  <div class="foot">전체 24개 화면 · 각 파일 자립형(CSS·마크업 내장, 외부 의존 없음) · 실제 구현(HRIS-kbu/frontend) 기준</div>
+</div>
+</body></html>
