@@ -36,18 +36,22 @@ export function LandingHeader() {
 					isVisible ? "translate-y-0" : "-translate-y-full"
 				}`}
 			>
-			<div className="flex items-center gap-3">
+			<button 
+				type="button"
+				onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+				className="flex items-center gap-3 text-left focus:outline-none"
+			>
 				{/* Empty Icon Placeholder */}
-				<div className="h-10 w-10 rounded-xl bg-slate-900 shadow-sm" />
+				<div className="h-10 w-10 rounded-xl bg-slate-900 shadow-sm flex-shrink-0" />
 				{/* Site Title */}
 				<div className="flex flex-col justify-center -space-y-1">
 					<span className="text-2xl font-extrabold tracking-wider text-slate-900 leading-none">TSM</span>
 					<div className="relative">
-						<span className="text-[10px] font-semibold text-slate-400">Teacher System Manage</span>
+						<span className="text-[10px] font-semibold text-slate-400 block whitespace-nowrap">Teacher System Manage</span>
 						<div className="absolute -bottom-0.5 left-0 h-0.5 w-3/4 bg-blue-500 rounded-full" />
 					</div>
 				</div>
-			</div>
+			</button>
 			
 			<nav className="absolute left-1/2 -translate-x-1/2 hidden items-center gap-8 text-sm font-medium text-slate-600 md:flex">
 				<Link href="#attendance" className="hover:text-blue-600">복무·휴가</Link>
