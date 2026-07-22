@@ -7,6 +7,7 @@ import { listDepartments } from "@/lib/api/departments";
 import { countExpiringCertifications, getRecordSummary } from "@/lib/api/records";
 import type { Employee, EmployeeRecordSummary } from "@/lib/types/employee";
 import type { Department } from "@/lib/types/department";
+import { SignupApprovalModal } from "@/components/SignupApprovalModal";
 
 const PAGE_SIZE = 10;
 
@@ -39,6 +40,9 @@ export default function EmployeesPage() {
 	// 미리보기
 	const [selected, setSelected] = useState<Employee | null>(null);
 	const [summary, setSummary] = useState<EmployeeRecordSummary | null>(null);
+
+	// 모달
+	const [showApprovalModal, setShowApprovalModal] = useState(false);
 
 	useEffect(() => {
 		listDepartments().then(setDepartments).catch(() => setDepartments([]));
@@ -126,9 +130,15 @@ export default function EmployeesPage() {
 					<div className="page-title">교직원 정보관리</div>
 					<div className="page-sub">교직원 인사기록카드를 조회·등록하고 학력·경력·자격 이력을 관리합니다</div>
 				</div>
-				<button className="btn-primary" onClick={() => router.push("/employees/new")}>
-					+ 교직원 등록
-				</button>
+				<div className="flex gap-2">
+					<button className="btn-outline text-blue-600 border-blue-600 hover:bg-blue-50 relative px-4" onClick={() => setShowApprovalModal(true)}>
+						교직원 가입 승인
+						<span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+					</button>
+					<button className="btn-primary" onClick={() => router.push("/employees/new")}>
+						+ 교직원 등록
+					</button>
+				</div>
 			</div>
 
 			<div className="stat-grid">
@@ -309,6 +319,8 @@ export default function EmployeesPage() {
 					</div>
 				)}
 			</div>
+			
+			{showApprovalModal && <SignupApprovalModal onClose={() => setShowApprovalModal(false)} />}
 		</>
 	);
 }
