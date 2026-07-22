@@ -44,5 +44,7 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
 		return undefined as T;
 	}
 
-	return res.json() as Promise<T>;
+	// 201 등 본문이 비어 있는 성공 응답도 허용 (빈 본문에 JSON.parse 하지 않음)
+	const text = await res.text();
+	return (text ? (JSON.parse(text) as T) : (undefined as T));
 }

@@ -43,7 +43,7 @@ public class SecurityConfig {
 				})
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(auth -> auth
-						.requestMatchers("/auth/login").permitAll()
+						.requestMatchers("/auth/login", "/auth/signup").permitAll()
 						.anyRequest().authenticated()
 				)
 				// 미인증 요청은 403 대신 401을 반환해 프론트가 세션 만료를 정확히 감지하도록 함

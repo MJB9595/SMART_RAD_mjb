@@ -3,8 +3,10 @@ package com.tphr.hr.common.exception;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -46,6 +48,21 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException e) {
 		return ResponseEntity.status(HttpStatus.FORBIDDEN)
 				.body(ErrorResponse.of(HttpStatus.FORBIDDEN.value(), "접근 권한이 없습니다."));
+	}
+
+	/** DB 제약 위반(중복 사번/이메일 등) — 500 대신 409로 정리. */
+	@ExceptionHandler(DataIntegrityViolationException.class)
+	public ResponseEntity<ErrorResponse> handleDataIntegrity(DataIntegrityViolationException e) {
+		log.warn("Data integrity violation", e);
+		return ResponseEntity.status(HttpStatus.CONFLICT)
+				.body(ErrorResponse.of(HttpStatus.CONFLICT.value(), "이미 존재하거나 제약 조건에 맞지 않는 데이터입니다."));
+	}
+
+	/** 낙관적 락 충돌(동시 수정) — 500 대신 409로 정리. */
+	@ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+	public ResponseEntity<ErrorResponse> handleOptimisticLock(ObjectOptimisticLockingFailureException e) {
+		return ResponseEntity.status(HttpStatus.CONFLICT)
+				.body(ErrorResponse.of(HttpStatus.CONFLICT.value(), "다른 사용자가 먼저 수정했습니다. 새로고침 후 다시 시도하세요."));
 	}
 
 	@ExceptionHandler(Exception.class)

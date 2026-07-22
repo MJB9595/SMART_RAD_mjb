@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createEmployee } from "@/lib/api/employees";
+import { createSlot } from "@/lib/api/slots";
 import { listDepartments } from "@/lib/api/departments";
 import { listEmploymentTypes, listPositions } from "@/lib/api/meta";
 import { ApiError } from "@/lib/api/client";
 import type { Department } from "@/lib/types/department";
 import type { EmploymentType, Position } from "@/lib/types/meta";
 
-export default function EmployeeCreatePage() {
+export default function SlotCreatePage() {
 	const router = useRouter();
 
 	const [departments, setDepartments] = useState<Department[]>([]);
@@ -17,21 +17,13 @@ export default function EmployeeCreatePage() {
 	const [employmentTypes, setEmploymentTypes] = useState<EmploymentType[]>([]);
 
 	const [form, setForm] = useState({
-		employeeNumber: "",
-		name: "",
-		email: "",
-		password: "",
-		phone: "",
 		staffCategory: "FACULTY",
 		departmentId: "",
 		positionId: "",
 		employmentTypeId: "",
 		role: "EMPLOYEE",
 		hireDate: "",
-		birthDate: "",
-		gender: "",
-		address: "",
-		emergencyContact: "",
+		label: "",
 	});
 	const [error, setError] = useState<string | null>(null);
 	const [saving, setSaving] = useState(false);
@@ -54,32 +46,25 @@ export default function EmployeeCreatePage() {
 	async function submit(e: React.FormEvent) {
 		e.preventDefault();
 		setError(null);
-		if (!form.departmentId || !form.positionId || !form.employmentTypeId || !form.hireDate) {
-			setError("소속·직급·임용구분·임용일은 필수입니다.");
+		if (!form.departmentId || !form.positionId || !form.employmentTypeId) {
+			setError("소속·직급·임용구분은 필수입니다.");
 			return;
 		}
 		setSaving(true);
 		try {
-			const created = await createEmployee({
-				employeeNumber: form.employeeNumber,
-				name: form.name,
-				email: form.email,
-				password: form.password,
-				phone: form.phone || null,
+			await createSlot({
 				staffCategory: form.staffCategory,
 				departmentId: Number(form.departmentId),
 				positionId: Number(form.positionId),
 				employmentTypeId: Number(form.employmentTypeId),
 				role: form.role,
-				hireDate: form.hireDate,
-				birthDate: form.birthDate || null,
-				gender: form.gender || null,
-				address: form.address || null,
-				emergencyContact: form.emergencyContact || null,
+				hireDate: form.hireDate || null,
+				label: form.label || null,
 			});
-			router.push(`/employees/${created.id}`);
+			alert("승인 자리가 등록되었습니다. 직원이 회원가입 신청하면 승인 시 이 자리로 매칭할 수 있습니다.");
+			router.push("/employees");
 		} catch (err) {
-			setError(err instanceof ApiError ? err.message : "등록에 실패했습니다.");
+			setError(err instanceof ApiError ? err.message : "자리 등록에 실패했습니다.");
 			setSaving(false);
 		}
 	}
@@ -87,36 +72,22 @@ export default function EmployeeCreatePage() {
 	return (
 		<>
 			<div className="breadcrumb">
-				인사기록 관리 <b>›</b> 교직원 정보관리 <b>›</b> 교직원 등록
+				인사기록 관리 <b>›</b> 교직원 정보관리 <b>›</b> 교직원 등록(승인 자리)
 			</div>
 			<div className="title-row">
 				<div>
-					<div className="page-title">교직원 등록</div>
-					<div className="page-sub">신규 교직원의 기본 인적사항을 입력합니다. 학력·경력 등 상세 이력은 등록 후 인사기록카드에서 관리합니다.</div>
+					<div className="page-title">교직원 등록 — 승인 자리 생성</div>
+					<div className="page-sub">
+						사번·이메일·비밀번호 없이 <b>직위·권한(자리)</b>만 정의합니다. 직원이 회원가입 신청하면, 승인 시 이 자리와 매칭되어 계정이 생성됩니다.
+					</div>
 				</div>
 				<button className="btn-ghost" onClick={() => router.push("/employees")}>목록으로</button>
 			</div>
 
-			<form className="card" onSubmit={submit}>
+			<form className="card" onSubmit={submit} style={{ maxWidth: 760 }}>
 				<div className="modal-body">
 					{error && <div className="modal-err">{error}</div>}
 					<div className="form-grid">
-						<div className="form-field">
-							<label>사번<span className="req">*</span></label>
-							<input value={form.employeeNumber} onChange={(e) => set("employeeNumber", e.target.value)} required />
-						</div>
-						<div className="form-field">
-							<label>성명<span className="req">*</span></label>
-							<input value={form.name} onChange={(e) => set("name", e.target.value)} required />
-						</div>
-						<div className="form-field">
-							<label>이메일<span className="req">*</span></label>
-							<input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} required />
-						</div>
-						<div className="form-field">
-							<label>초기 비밀번호<span className="req">*</span></label>
-							<input type="password" value={form.password} onChange={(e) => set("password", e.target.value)} minLength={8} required />
-						</div>
 						<div className="form-field">
 							<label>교직원 구분<span className="req">*</span></label>
 							<select value={form.staffCategory} onChange={(e) => { set("staffCategory", e.target.value); set("positionId", ""); }}>
@@ -153,38 +124,18 @@ export default function EmployeeCreatePage() {
 							</select>
 						</div>
 						<div className="form-field">
-							<label>임용일<span className="req">*</span></label>
-							<input type="date" value={form.hireDate} onChange={(e) => set("hireDate", e.target.value)} required />
-						</div>
-						<div className="form-field">
-							<label>생년월일</label>
-							<input type="date" value={form.birthDate} onChange={(e) => set("birthDate", e.target.value)} />
-						</div>
-						<div className="form-field">
-							<label>성별</label>
-							<select value={form.gender} onChange={(e) => set("gender", e.target.value)}>
-								<option value="">선택</option>
-								<option value="M">남</option>
-								<option value="F">여</option>
-							</select>
-						</div>
-						<div className="form-field">
-							<label>연락처</label>
-							<input value={form.phone} onChange={(e) => set("phone", e.target.value)} placeholder="010-0000-0000" />
-						</div>
-						<div className="form-field">
-							<label>비상연락처</label>
-							<input value={form.emergencyContact} onChange={(e) => set("emergencyContact", e.target.value)} />
+							<label>예정 임용일</label>
+							<input type="date" value={form.hireDate} onChange={(e) => set("hireDate", e.target.value)} />
 						</div>
 						<div className="form-field full">
-							<label>주소</label>
-							<input value={form.address} onChange={(e) => set("address", e.target.value)} />
+							<label>라벨 / 메모 (선택)</label>
+							<input value={form.label} onChange={(e) => set("label", e.target.value)} placeholder="예: 2026학년도 신임 조교수" />
 						</div>
 					</div>
 				</div>
 				<div className="modal-foot">
 					<button type="button" className="btn-ghost" onClick={() => router.push("/employees")}>취소</button>
-					<button type="submit" className="btn-primary" disabled={saving}>{saving ? "등록 중..." : "교직원 등록"}</button>
+					<button type="submit" className="btn-primary" disabled={saving}>{saving ? "등록 중..." : "승인 자리 등록"}</button>
 				</div>
 			</form>
 		</>
