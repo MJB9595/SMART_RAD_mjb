@@ -43,6 +43,8 @@ export default function EmployeesPage() {
 
 	// 모달
 	const [showApprovalModal, setShowApprovalModal] = useState(false);
+	// 승인 후 목록/통계 새로고침 트리거
+	const [reloadKey, setReloadKey] = useState(0);
 
 	useEffect(() => {
 		listDepartments().then(setDepartments).catch(() => setDepartments([]));
@@ -61,7 +63,7 @@ export default function EmployeesPage() {
 				}),
 			)
 			.catch(console.error);
-	}, []);
+	}, [reloadKey]);
 
 	// 목록 조회 (필터/페이지 변경 시)
 	useEffect(() => {
@@ -88,7 +90,7 @@ export default function EmployeesPage() {
 		return () => {
 			active = false;
 		};
-	}, [keyword, staffCategory, departmentId, employmentStatus, page]);
+	}, [keyword, staffCategory, departmentId, employmentStatus, page, reloadKey]);
 
 	// 선택 교직원 요약 조회
 	useEffect(() => {
@@ -320,7 +322,12 @@ export default function EmployeesPage() {
 				)}
 			</div>
 			
-			{showApprovalModal && <SignupApprovalModal onClose={() => setShowApprovalModal(false)} />}
+			{showApprovalModal && (
+				<SignupApprovalModal
+					onClose={() => setShowApprovalModal(false)}
+					onApproved={() => setReloadKey((k) => k + 1)}
+				/>
+			)}
 		</>
 	);
 }

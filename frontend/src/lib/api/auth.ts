@@ -14,42 +14,36 @@ export function me(): Promise<AuthUser> {
 }
 
 export interface PendingSignup {
-	id: string;
+	id: number;
 	name: string;
 	email: string;
 	school: string;
 	requestedAt: string;
 }
 
-// 임시(Mock) 승인 대기자 데이터
-let MOCK_PENDING_SIGNUPS: PendingSignup[] = [
-	{ id: "1", name: "김선생", email: "kim@daehan.edu", school: "대한대학교", requestedAt: "2026-07-20" },
-	{ id: "2", name: "이직원", email: "lee@mingook.edu", school: "민국고등학교", requestedAt: "2026-07-21" }
-];
-
-export async function getPendingSignups(): Promise<PendingSignup[]> {
-	// 실제 환경이라면 apiFetch<PendingSignup[]>("/auth/pending-signups") 를 호출합니다.
-	return new Promise((resolve) => {
-		setTimeout(() => resolve([...MOCK_PENDING_SIGNUPS]), 500);
-	});
+export interface SignupBody {
+	name: string;
+	email: string;
+	password: string;
+	school: string;
 }
 
-export async function approveSignup(id: string): Promise<void> {
-	// 실제 환경이라면 apiFetch(`/auth/signups/${id}/approve`, { method: "POST" }) 를 호출합니다.
-	return new Promise((resolve) => {
-		setTimeout(() => {
-			MOCK_PENDING_SIGNUPS = MOCK_PENDING_SIGNUPS.filter(s => s.id !== id);
-			resolve();
-		}, 500);
-	});
+/** 회원가입 신청 (공개). 관리자 승인 후 로그인 가능. */
+export function signup(body: SignupBody): Promise<void> {
+	return apiFetch<void>("/auth/signup", { method: "POST", body });
 }
 
-export async function rejectSignup(id: string): Promise<void> {
-	// 실제 환경이라면 apiFetch(`/auth/signups/${id}/reject`, { method: "POST" }) 를 호출합니다.
-	return new Promise((resolve) => {
-		setTimeout(() => {
-			MOCK_PENDING_SIGNUPS = MOCK_PENDING_SIGNUPS.filter(s => s.id !== id);
-			resolve();
-		}, 500);
-	});
+/** 승인 대기 목록 (관리자). */
+export function getPendingSignups(): Promise<PendingSignup[]> {
+	return apiFetch<PendingSignup[]>("/auth/signups/pending");
+}
+
+/** 승인 = 신청건 ↔ 자리(슬롯) 매칭 → 로그인 가능한 교직원 계정 생성 (관리자). */
+export function approveSignup(id: number, slotId: number): Promise<void> {
+	return apiFetch<void>(`/auth/signups/${id}/approve`, { method: "POST", body: { slotId } });
+}
+
+/** 거절 (관리자). */
+export function rejectSignup(id: number): Promise<void> {
+	return apiFetch<void>(`/auth/signups/${id}/reject`, { method: "POST" });
 }
