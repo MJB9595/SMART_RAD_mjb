@@ -5,16 +5,9 @@ import type { AuthUser } from "@/lib/types/auth";
 export function TopNav({ user, onLogout }: { user: AuthUser; onLogout: () => void }) {
 	return (
 		<header className="topbar">
-			<div className="search-box">
-				<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9AA3B2" strokeWidth="2">
-					<circle cx="11" cy="11" r="7" />
-					<path d="M21 21l-4.3-4.3" />
-				</svg>
-				<input 
-					type="text" 
-					placeholder="이름, 사번, 부서로 검색" 
-					className="bg-transparent outline-none w-full"
-				/>
+			<div className="flex items-center text-lg font-bold text-[#E6007E]">
+				<img src="/kbu_logo.png" alt="경복대학교 로고" className="h-8 w-8 object-cover object-left mr-2" />
+				경복대학교
 			</div>
 			<div className="user-box">
 				<span className="notif-dot"></span>
