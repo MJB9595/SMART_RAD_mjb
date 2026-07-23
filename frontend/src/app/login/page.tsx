@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { ApiError } from "@/lib/api/client";
+import { startKakaoLogin } from "@/lib/auth/kakao";
 import { Button, Field, Input } from "@/components/ui";
 
 // 숫자 카운팅 애니메이션 컴포넌트
@@ -106,27 +107,11 @@ export default function LoginPage() {
 
   const handleKakaoLogin = (): void => {
     try {
-      const clientId = process.env.NEXT_PUBLIC_KAKAO_CLIENT_ID;
-      const redirectUri = process.env.NEXT_PUBLIC_KAKAO_REDIRECT_URI;
-
-      if (!clientId || !redirectUri) {
-        setError("카카오 로그인 설정이 없습니다. 관리자에게 문의하세요.");
-        console.error("Missing KAKAO environment variables");
-        return;
-      }
-
+      setError(null);
       setKakaoLoading(true);
-
-      const kakaoAuthUrl = new URL("https://kauth.kakao.com/oauth/authorize");
-      kakaoAuthUrl.searchParams.append("client_id", clientId);
-      kakaoAuthUrl.searchParams.append("redirect_uri", redirectUri);
-      kakaoAuthUrl.searchParams.append("response_type", "code");
-      kakaoAuthUrl.searchParams.append("state", "school_hr_login");
-
-      window.location.href = kakaoAuthUrl.toString();
+      startKakaoLogin();
     } catch (err) {
-      setError("카카오 로그인 중 오류가 발생했습니다.");
-      console.error("Kakao login error:", err);
+      setError(err instanceof Error ? err.message : "카카오 로그인 중 오류가 발생했습니다.");
       setKakaoLoading(false);
     }
   };

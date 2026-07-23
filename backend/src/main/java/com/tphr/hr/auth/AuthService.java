@@ -37,9 +37,15 @@ public class AuthService {
 		}
 
 		CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-		Employee employee = userDetails.getEmployee();
+		return issueToken(userDetails.getEmployee());
+	}
 
-		String token = jwtTokenProvider.createToken(employee.getId(), employee.getEmail(), employee.getRole().name());
+	public LoginResponse issueToken(Employee employee) {
+		String token = jwtTokenProvider.createToken(
+				employee.getId(),
+				employee.getEmail(),
+				employee.getRole().name()
+		);
 
 		return LoginResponse.of(token, employee.getId(), employee.getEmployeeNumber(), employee.getName(),
 				employee.getEmail(), employee.getRole());

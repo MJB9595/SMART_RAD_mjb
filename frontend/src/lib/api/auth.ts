@@ -8,6 +8,13 @@ export function login(email: string, password: string): Promise<LoginResponse> {
 	});
 }
 
+export function kakaoLogin(code: string): Promise<LoginResponse> {
+	return apiFetch<LoginResponse>("/auth/kakao/callback", {
+		method: "POST",
+		body: { code },
+	});
+}
+
 /** 저장된 토큰으로 현재 사용자 검증. 유효하지 않으면 401을 던진다. */
 export function me(): Promise<AuthUser> {
 	return apiFetch<AuthUser>("/auth/me");

@@ -41,10 +41,10 @@ public class SecurityConfig {
 				.csrf(csrf -> csrf.disable())
 				.cors(cors -> {
 				})
-				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				.authorizeHttpRequests(auth -> auth
-						.requestMatchers("/auth/login", "/auth/signup").permitAll()
-						.anyRequest().authenticated()
+					.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+					.authorizeHttpRequests(auth -> auth
+							.requestMatchers("/auth/login", "/auth/signup", "/auth/kakao/**").permitAll()
+							.anyRequest().authenticated()
 				)
 				// 미인증 요청은 403 대신 401을 반환해 프론트가 세션 만료를 정확히 감지하도록 함
 				.exceptionHandling(ex -> ex.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))

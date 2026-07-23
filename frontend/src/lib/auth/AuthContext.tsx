@@ -1,14 +1,15 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { login as loginRequest, me as fetchMe } from "@/lib/api/auth";
+import { kakaoLogin as kakaoLoginRequest, login as loginRequest, me as fetchMe } from "@/lib/api/auth";
 import { clearToken, getToken, setToken } from "@/lib/auth/token";
-import type { AuthUser } from "@/lib/types/auth";
+import type { AuthUser, LoginResponse } from "@/lib/types/auth";
 
 interface AuthContextValue {
 	user: AuthUser | null;
 	loading: boolean;
 	login: (email: string, password: string) => Promise<void>;
+	loginWithKakao: (code: string) => Promise<void>;
 	logout: () => void;
 }
 
@@ -50,8 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		};
 	}, []);
 
-	async function login(email: string, password: string) {
-		const response = await loginRequest(email, password);
+	function applyLoginResponse(response: LoginResponse) {
 		setToken(response.accessToken);
 		setUser({
 			employeeId: response.employeeId,
@@ -62,12 +62,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		});
 	}
 
+	async function login(email: string, password: string) {
+		applyLoginResponse(await loginRequest(email, password));
+	}
+
+	async function loginWithKakao(code: string) {
+		applyLoginResponse(await kakaoLoginRequest(code));
+	}
+
 	function logout() {
 		clearToken();
 		setUser(null);
 	}
 
-	return <AuthContext.Provider value={{ user, loading, login, logout }}>{children}</AuthContext.Provider>;
+	return (
+		<AuthContext.Provider value={{ user, loading, login, loginWithKakao, logout }}>
+			{children}
+		</AuthContext.Provider>
+	);
 }
 
 export function useAuth(): AuthContextValue {
