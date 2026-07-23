@@ -9,6 +9,7 @@ import com.tphr.hr.employee.dto.EmployeeResponse;
 import com.tphr.hr.employee.dto.EmployeeStatusRequest;
 import com.tphr.hr.employee.dto.EmployeeUpdateRequest;
 import com.tphr.hr.employee.dto.PasswordChangeRequest;
+import com.tphr.hr.employee.dto.SelfPasswordChangeRequest;
 import com.tphr.hr.employmenttype.EmploymentType;
 import com.tphr.hr.employmenttype.EmploymentTypeRepository;
 import com.tphr.hr.position.Position;
@@ -81,6 +82,7 @@ public class EmployeeService {
 	@Transactional
 	public EmployeeResponse updateEmployee(Long id, EmployeeUpdateRequest request) {
 		Employee employee = findActive(id);
+		employee.checkOptimisticVersion(request.version());
 		Department department = findDepartment(request.departmentId());
 		Position position = findPosition(request.positionId());
 		EmploymentType employmentType = findEmploymentType(request.employmentTypeId());
@@ -88,6 +90,8 @@ public class EmployeeService {
 
 		employee.updateInfo(request.name(), request.phone(), department, position, employmentType,
 				request.address(), request.emergencyContact());
+		// @Version 증가는 flush 시점에 반영되므로, 응답에 최신 version이 담기도록 즉시 flush.
+		employeeRepository.flush();
 		return EmployeeResponse.from(employee);
 	}
 
@@ -101,6 +105,16 @@ public class EmployeeService {
 	@Transactional
 	public void changePassword(Long id, PasswordChangeRequest request) {
 		Employee employee = findActive(id);
+		employee.changePassword(passwordEncoder.encode(request.newPassword()));
+	}
+
+	/** 본인 비밀번호 변경 — 현재 비밀번호가 일치해야 변경 가능. */
+	@Transactional
+	public void changeOwnPassword(Long employeeId, SelfPasswordChangeRequest request) {
+		Employee employee = findActive(employeeId);
+		if (!passwordEncoder.matches(request.currentPassword(), employee.getPassword())) {
+			throw ApiException.badRequest("현재 비밀번호가 올바르지 않습니다.");
+		}
 		employee.changePassword(passwordEncoder.encode(request.newPassword()));
 	}
 

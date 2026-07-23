@@ -58,6 +58,8 @@ export interface EmployeeUpdateBody {
 	employmentTypeId: number;
 	address?: string | null;
 	emergencyContact?: string | null;
+	/** 낙관적 락: 조회 시점의 version. 그 사이 누가 수정했으면 409. */
+	version?: number;
 }
 
 export function updateEmployee(id: number, body: EmployeeUpdateBody): Promise<Employee> {

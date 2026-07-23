@@ -26,11 +26,12 @@
 ## 🟡 개선 / 스멜
 
 - [x] **5. `ddl-auto=update` + Flyway 동시 사용** — ✅ `application.properties` → `validate` 전환. 모든 엔티티 테이블이 Flyway에 존재함을 대조 확인, 전환 후 정상 부팅 검증.
-- [ ] **6. 직원 본인 비밀번호 변경 불가** — `PATCH /employees/{id}/password`가 ADMIN 전용. 셀프 변경 엔드포인트(현재 비번 검증 포함) 검토.
-- [ ] **7. 수정 API 낙관적 락 미활용** — 요청에 `version` 미전달로 last-write-wins. (409 핸들러는 이미 있음)
+- [x] **6. 직원 본인 비밀번호 변경 불가** — ✅ 완료. `PATCH /employees/me/password`(현재 비번 검증 + 본인만, `@PreAuthorize("isAuthenticated()")`) 신설. E2E: 틀린 현재비번 400 / 정상 변경 후 새 비번 로그인 확인.
+- [x] **7. 수정 API 낙관적 락 미활용** — ✅ 완료(교직원 수정). 요청에 `version` 받아 `AuditedEntity.checkOptimisticVersion()`로 대조 → 낡은 version 시 409. version 미전달 시 하위호환(검증 생략). 프론트 편집도 version 전송. **동일 패턴을 records/발령 수정에도 확장 가능.**
 - [x] **8. welfare/allowance/dashboard 컨트롤러 인가 없음** — ✅ 3번과 함께 `@PreAuthorize(ADMIN)` 부여. 비-ADMIN 403 확인.
 
-> 신규 발견: **없는 경로가 404가 아니라 500으로 응답** — `GlobalExceptionHandler`의 `@ExceptionHandler(Exception.class)` catch-all이 `NoHandlerFound`/`NoResourceFound`를 500으로 삼킴. 404로 매핑하는 핸들러 추가 권장(경미).
+> [x] ✅ **404→500 처리** — `GlobalExceptionHandler`에 `NoHandlerFound`/`NoResourceFound`→404, `MethodNotSupported`→405 핸들러 추가. 없는 경로 404 확인.
+> [x] ✅ **승인 API approverId 스푸핑** — welfare(경조비/증명서) 승인의 `@RequestParam approverId` → `SecurityUtils.getCurrentEmployeeId()`로 교체 + create에 `@Valid` 추가(welfare/allowance).
 
 ## UI / UX
 

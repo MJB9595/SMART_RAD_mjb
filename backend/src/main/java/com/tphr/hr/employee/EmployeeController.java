@@ -6,6 +6,8 @@ import com.tphr.hr.employee.dto.EmployeeResponse;
 import com.tphr.hr.employee.dto.EmployeeStatusRequest;
 import com.tphr.hr.employee.dto.EmployeeUpdateRequest;
 import com.tphr.hr.employee.dto.PasswordChangeRequest;
+import com.tphr.hr.employee.dto.SelfPasswordChangeRequest;
+import com.tphr.hr.security.SecurityUtils;
 import com.tphr.hr.signup.SignupService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -71,6 +73,13 @@ public class EmployeeController {
 	public EmployeeResponse changeEmploymentStatus(@PathVariable Long id,
 			@Valid @RequestBody EmployeeStatusRequest request) {
 		return employeeService.changeEmploymentStatus(id, request);
+	}
+
+	/** 본인 비밀번호 변경 (인증된 직원 누구나 · 현재 비번 검증). ADMIN 리셋과 별도 경로. */
+	@PatchMapping("/me/password")
+	@PreAuthorize("isAuthenticated()")
+	public void changeOwnPassword(@Valid @RequestBody SelfPasswordChangeRequest request) {
+		employeeService.changeOwnPassword(SecurityUtils.getCurrentEmployeeId(), request);
 	}
 
 	@PatchMapping("/{id}/password")

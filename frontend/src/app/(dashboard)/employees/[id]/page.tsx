@@ -219,6 +219,7 @@ export default function EmployeeDetailPage() {
 					employmentTypeId: Number(v.employmentTypeId),
 					address: (v.address as string) || null,
 					emergencyContact: (v.emergencyContact as string) || null,
+					version: employee.version,
 				});
 				reloadEmployee();
 				setModal(null);

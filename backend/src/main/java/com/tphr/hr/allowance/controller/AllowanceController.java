@@ -3,6 +3,7 @@ package com.tphr.hr.allowance.controller;
 import com.tphr.hr.allowance.dto.AllowanceDto;
 import com.tphr.hr.allowance.dto.EmployeeAllowanceDto;
 import com.tphr.hr.allowance.service.AllowanceService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,7 +19,7 @@ public class AllowanceController {
     private final AllowanceService allowanceService;
 
     @PostMapping("/allowances")
-    public ResponseEntity<AllowanceDto.Response> createAllowance(@RequestBody AllowanceDto.Request req) {
+    public ResponseEntity<AllowanceDto.Response> createAllowance(@Valid @RequestBody AllowanceDto.Request req) {
         return ResponseEntity.ok(allowanceService.createAllowance(req));
     }
 
@@ -28,7 +29,7 @@ public class AllowanceController {
     }
 
     @PostMapping("/employee-allowances")
-    public ResponseEntity<EmployeeAllowanceDto.Response> createEmployeeAllowance(@RequestBody EmployeeAllowanceDto.Request req) {
+    public ResponseEntity<EmployeeAllowanceDto.Response> createEmployeeAllowance(@Valid @RequestBody EmployeeAllowanceDto.Request req) {
         return ResponseEntity.ok(allowanceService.createEmployeeAllowance(req));
     }
 

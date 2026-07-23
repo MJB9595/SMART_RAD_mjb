@@ -21,6 +21,9 @@ public record EmployeeUpdateRequest(
 
 		String address,
 
-		String emergencyContact
+		String emergencyContact,
+
+		/** 낙관적 락: 조회 시점의 version. null이면 검증 생략(하위호환). */
+		Long version
 ) {
 }

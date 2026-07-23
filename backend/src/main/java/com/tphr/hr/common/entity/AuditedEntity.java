@@ -1,5 +1,6 @@
 package com.tphr.hr.common.entity;
 
+import com.tphr.hr.common.exception.ApiException;
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
@@ -43,5 +44,15 @@ public abstract class AuditedEntity {
 
 	public void delete() {
 		this.deleted = true;
+	}
+
+	/**
+	 * 낙관적 락 방어 — 클라이언트가 조회한 시점의 version과 현재 version이 다르면(그 사이 누가 수정) 409.
+	 * expectedVersion 이 null 이면(구버전 클라이언트) 검증을 건너뛴다.
+	 */
+	public void checkOptimisticVersion(Long expectedVersion) {
+		if (expectedVersion != null && !expectedVersion.equals(this.version)) {
+			throw ApiException.conflict("다른 사용자가 먼저 수정했습니다. 새로고침 후 다시 시도하세요.");
+		}
 	}
 }

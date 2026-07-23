@@ -9,9 +9,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @Slf4j
 @RestControllerAdvice
@@ -63,6 +66,20 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ErrorResponse> handleOptimisticLock(ObjectOptimisticLockingFailureException e) {
 		return ResponseEntity.status(HttpStatus.CONFLICT)
 				.body(ErrorResponse.of(HttpStatus.CONFLICT.value(), "다른 사용자가 먼저 수정했습니다. 새로고침 후 다시 시도하세요."));
+	}
+
+	/** 매핑되지 않은 경로 — catch-all(500)에 삼켜지지 않도록 404로 처리. */
+	@ExceptionHandler({NoHandlerFoundException.class, NoResourceFoundException.class})
+	public ResponseEntity<ErrorResponse> handleNotFound(Exception e) {
+		return ResponseEntity.status(HttpStatus.NOT_FOUND)
+				.body(ErrorResponse.of(HttpStatus.NOT_FOUND.value(), "요청한 경로를 찾을 수 없습니다."));
+	}
+
+	/** 허용되지 않은 HTTP 메서드 — 405로 처리. */
+	@ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+	public ResponseEntity<ErrorResponse> handleMethodNotAllowed(HttpRequestMethodNotSupportedException e) {
+		return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+				.body(ErrorResponse.of(HttpStatus.METHOD_NOT_ALLOWED.value(), "허용되지 않은 요청 방식입니다."));
 	}
 
 	@ExceptionHandler(Exception.class)
