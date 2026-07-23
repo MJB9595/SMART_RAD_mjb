@@ -13,7 +13,12 @@ public record KakaoUserResponse(
 	public record KakaoAccount(
 			String email,
 			@JsonProperty("is_email_valid") Boolean emailValid,
-			@JsonProperty("is_email_verified") Boolean emailVerified
+			@JsonProperty("is_email_verified") Boolean emailVerified,
+			Profile profile
 	) {
+
+		@JsonIgnoreProperties(ignoreUnknown = true)
+		public record Profile(String nickname) {
+		}
 	}
 }

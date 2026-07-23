@@ -16,6 +16,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -48,34 +49,59 @@ public class KakaoAuthService {
 		return firstContact(kakaoUser, providerUserId);
 	}
 
-	/** 처음 접속한 카카오 계정 처리: 같은 이메일 계정이 있으면 자동 연동, 없으면 회원가입 대기큐로. */
+	/**
+	 * 처음 접속한 카카오 계정 처리.
+	 * - 카카오 이메일이 기존 교직원과 일치 → 기존 계정에 자동 연동(보안상 인증된 이메일에 한함).
+	 * - 일치하는 계정이 없음 → 카카오 정보(닉네임·있으면 이메일)로 회원가입 승인 대기큐에 유입.
+	 *   (이메일 미제공/미인증이어도 큐로 보낸다. 실제 계정은 관리자가 자리와 매칭 승인할 때 생성됨)
+	 */
 	private KakaoLoginResult firstContact(KakaoUserResponse kakaoUser, String providerUserId) {
 		KakaoUserResponse.KakaoAccount account = kakaoUser.account();
-		if (account == null
-				|| account.email() == null
-				|| !Boolean.TRUE.equals(account.emailValid())
-				|| !Boolean.TRUE.equals(account.emailVerified())) {
-			throw ApiException.unauthorized("최초 연결에는 인증된 카카오 이메일 제공 동의가 필요합니다.");
-		}
-		String email = account.email();
+		String email = (account != null) ? account.email() : null;
 
-		Optional<Employee> existing = employeeRepository.findByEmailAndDeletedFalse(email);
-		if (existing.isPresent()) {
-			// 기존 가입 정보와 동일한 이메일 → 기존 계정에 자동 연동 후 로그인.
-			Employee employee = existing.get();
-			ensureLoginAllowed(employee);
-			if (employeeOAuthRepository.existsByEmployee_IdAndProvider(employee.getId(), OAuthProvider.KAKAO)) {
-				throw ApiException.conflict("이 교직원 계정에는 다른 카카오 계정이 이미 연결되어 있습니다.");
+		if (email != null) {
+			Optional<Employee> existing = employeeRepository.findByEmailAndDeletedFalse(email);
+			if (existing.isPresent()) {
+				// 기존 가입 정보와 동일한 이메일 → 기존 계정에 자동 연동 후 로그인.
+				// 계정 탈취 방지를 위해 이 경로에서만 인증된 카카오 이메일을 요구한다.
+				if (!isEmailVerified(account)) {
+					throw ApiException.unauthorized(
+							"이미 가입된 이메일입니다. 기존 계정과 카카오를 연동하려면 카카오에서 이메일 제공·인증에 동의해 주세요.");
+				}
+				Employee employee = existing.get();
+				ensureLoginAllowed(employee);
+				if (employeeOAuthRepository.existsByEmployee_IdAndProvider(employee.getId(), OAuthProvider.KAKAO)) {
+					throw ApiException.conflict("이 교직원 계정에는 다른 카카오 계정이 이미 연결되어 있습니다.");
+				}
+				employeeOAuthRepository.save(EmployeeOAuth.link(employee, OAuthProvider.KAKAO, providerUserId, email));
+				return KakaoLoginResult.loggedIn(authService.issueToken(employee));
 			}
-			employeeOAuthRepository.save(EmployeeOAuth.link(employee, OAuthProvider.KAKAO, providerUserId, email));
-			return KakaoLoginResult.loggedIn(authService.issueToken(employee));
 		}
 
-		// 완전히 새로운 이메일 → 회원가입 승인 대기큐로 유입 (관리자 매칭 승인 필요).
-		String name = email.contains("@") ? email.substring(0, email.indexOf('@')) : email;
-		signupService.requestFromOAuth(email, name, OAuthProvider.KAKAO, providerUserId);
+		// 매칭되는 기존 계정 없음 → 카카오 정보로 회원가입 승인 대기큐에 유입.
+		// 이메일이 없으면 카카오 회원번호 기반 식별자로 대체(로그인은 소셜 연동으로 하므로 문제없음).
+		String queueEmail = (email != null) ? email : "kakao_" + providerUserId + "@kakao.local";
+		String name = resolveKakaoName(account, email, providerUserId);
+		signupService.requestFromOAuth(queueEmail, name, OAuthProvider.KAKAO, providerUserId);
 		return KakaoLoginResult.pendingApproval(
 				"회원가입 승인 요청이 접수되었습니다. 관리자 승인 후 카카오 로그인으로 이용할 수 있습니다.");
+	}
+
+	private boolean isEmailVerified(KakaoUserResponse.KakaoAccount account) {
+		return account != null
+				&& Boolean.TRUE.equals(account.emailValid())
+				&& Boolean.TRUE.equals(account.emailVerified());
+	}
+
+	/** 대기큐 표시용 이름: 카카오 닉네임 > 이메일 앞부분 > 카카오회원번호 순으로 사용. */
+	private String resolveKakaoName(KakaoUserResponse.KakaoAccount account, String email, String providerUserId) {
+		if (account != null && account.profile() != null && StringUtils.hasText(account.profile().nickname())) {
+			return account.profile().nickname();
+		}
+		if (email != null && email.contains("@")) {
+			return email.substring(0, email.indexOf('@'));
+		}
+		return "카카오사용자" + providerUserId;
 	}
 
 	private void ensureLoginAllowed(Employee employee) {
