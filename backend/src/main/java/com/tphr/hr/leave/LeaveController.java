@@ -37,6 +37,7 @@ public class LeaveController {
 	}
 
 	@GetMapping
+	@PreAuthorize("hasRole('ADMIN')")
 	public Page<LeaveRequestResponse> getLeaveRequests(
 			@PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 		return leaveService.getLeaveRequests(pageable);

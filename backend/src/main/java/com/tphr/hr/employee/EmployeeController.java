@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/employees")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class EmployeeController {
 
 	private final EmployeeService employeeService;

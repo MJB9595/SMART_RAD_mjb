@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/appointments")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class AppointmentController {
 
 	private final AppointmentService appointmentService;

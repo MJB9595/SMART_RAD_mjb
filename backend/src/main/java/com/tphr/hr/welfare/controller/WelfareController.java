@@ -5,13 +5,15 @@ import com.tphr.hr.welfare.dto.EmployeeEventSupportDto;
 import com.tphr.hr.welfare.service.WelfareService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/welfare")
+@RequestMapping("/welfare")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class WelfareController {
 
     private final WelfareService welfareService;

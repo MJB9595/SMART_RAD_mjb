@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class RecordController {
 
 	private final RecordService recordService;

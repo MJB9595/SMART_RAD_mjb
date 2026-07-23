@@ -28,6 +28,9 @@ services:
       KAKAO_REST_API_KEY: ${KAKAO_REST_API_KEY:-}
       KAKAO_CLIENT_SECRET: ${KAKAO_CLIENT_SECRET:-}
       KAKAO_REDIRECT_URI: ${KAKAO_REDIRECT_URI:-http://localhost:3000/oauth/kakao/callback}
+      # 운영 배포 시 반드시 호스트 환경변수/.env로 강한 랜덤값 주입 (아래는 로컬 기본값)
+      JWT_SECRET: ${JWT_SECRET:-tp-hr-local-dev-override-in-production-with-strong-random-32b}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000}
     ports:
       - "8080:8080"
     depends_on:

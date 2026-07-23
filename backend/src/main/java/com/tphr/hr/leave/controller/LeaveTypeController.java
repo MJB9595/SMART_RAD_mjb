@@ -4,13 +4,15 @@ import com.tphr.hr.leave.dto.LeaveTypeDto;
 import com.tphr.hr.leave.service.LeaveService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/leave-types")
+@RequestMapping("/leave-types")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class LeaveTypeController {
 
     private final LeaveService leaveService;
