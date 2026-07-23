@@ -24,7 +24,7 @@
 ## 🟡 개선 / 스멜
 
 - [x] **5. `ddl-auto=update` + Flyway 동시 사용** — ✅ `application.properties` → `validate` 전환. 모든 엔티티 테이블이 Flyway에 존재함을 대조 확인, 전환 후 정상 부팅 검증.
-- [x] **6. 직원 본인 비밀번호 변경 불가** — ✅ 완료. `PATCH /employees/me/password`(현재 비번 검증 + 본인만, `@PreAuthorize("isAuthenticated()")`) 신설. E2E: 틀린 현재비번 400 / 정상 변경 후 새 비번 로그인 확인.
+- [x] **6. 직원 본인 비밀번호 변경 불가** — ✅ 완료(백+프론트). 백엔드 `PATCH /employees/me/password`(현재 비번 검증 + 본인만, `@PreAuthorize("isAuthenticated()")`). 프론트: 헤더 "비밀번호 변경" 버튼 → 모달(현재/새/확인 + 눈 토글). E2E: 틀린 현재비번 400/에러표시, 정상 변경 후 새 비번 로그인 확인.
 - [x] **7. 수정 API 낙관적 락 미활용** — ✅ 완료(교직원 수정). 요청에 `version` 받아 `AuditedEntity.checkOptimisticVersion()`로 대조 → 낡은 version 시 409. version 미전달 시 하위호환(검증 생략). 프론트 편집도 version 전송. **동일 패턴을 records/발령 수정에도 확장 가능.**
 - [x] **8. welfare/allowance/dashboard 컨트롤러 인가 없음** — ✅ 3번과 함께 `@PreAuthorize(ADMIN)` 부여. 비-ADMIN 403 확인.
 

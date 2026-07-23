@@ -1,8 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import type { AuthUser } from "@/lib/types/auth";
+import { ChangePasswordModal } from "@/components/ChangePasswordModal";
 
 export function TopNav({ user, onLogout }: { user: AuthUser; onLogout: () => void }) {
+	const [showPasswordModal, setShowPasswordModal] = useState(false);
+
 	return (
 		<header className="topbar">
 			<div className="flex items-center text-lg font-bold text-[#E6007E]">
@@ -16,10 +20,17 @@ export function TopNav({ user, onLogout }: { user: AuthUser; onLogout: () => voi
 					<div className="user-name">{user?.name ?? "사용자"}</div>
 					<div className="user-role">{user?.role ?? "권한 없음"}</div>
 				</div>
-				<button onClick={onLogout} className="ml-4 text-xs font-semibold text-slate-500 hover:text-slate-700">
+				<button
+					onClick={() => setShowPasswordModal(true)}
+					className="ml-4 text-xs font-semibold text-slate-500 hover:text-slate-700"
+				>
+					비밀번호 변경
+				</button>
+				<button onClick={onLogout} className="ml-3 text-xs font-semibold text-slate-500 hover:text-slate-700">
 					로그아웃
 				</button>
 			</div>
+			{showPasswordModal && <ChangePasswordModal onClose={() => setShowPasswordModal(false)} />}
 		</header>
 	);
 }

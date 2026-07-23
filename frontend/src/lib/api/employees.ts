@@ -81,3 +81,11 @@ export function deleteEmployee(id: number): Promise<void> {
 export function unmatchEmployee(id: number): Promise<void> {
 	return apiFetch<void>(`/employees/${id}/unmatch`, { method: "POST" });
 }
+
+/** 본인 비밀번호 변경 — 현재 비밀번호 검증 후 변경 (로그인한 직원 누구나). */
+export function changeOwnPassword(currentPassword: string, newPassword: string): Promise<void> {
+	return apiFetch<void>("/employees/me/password", {
+		method: "PATCH",
+		body: { currentPassword, newPassword },
+	});
+}
