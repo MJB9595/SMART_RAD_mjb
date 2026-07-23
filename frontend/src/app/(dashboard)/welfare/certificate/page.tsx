@@ -1,16 +1,26 @@
 "use client";
 
-import { useState } from "react";
-import { Button, Field, Input, Select } from "@/components/ui";
-import { StatusBadge } from "@/components/StatusBadge";
-
-const MOCK_DATA = [
-	{ id: 1, docNo: "CERT-2026-001", type: "재직증명서", purpose: "은행 제출용 (대출)", date: "2026-07-14", issueStatus: "ISSUED" },
-	{ id: 2, docNo: "CERT-2026-002", type: "경력증명서", purpose: "개인 소장용", date: "2026-07-15", issueStatus: "WAITING" },
-];
+import { useEffect, useState } from "react";
+import { Button, Field, Select } from "@/components/ui";
+import { listCertificates, type Certificate } from "@/lib/api/welfare";
 
 export default function CertificatePage() {
 	const [type, setType] = useState("");
+	const [rows, setRows] = useState<Certificate[]>([]);
+	const [loading, setLoading] = useState(true);
+
+	useEffect(() => {
+		let active = true;
+		listCertificates()
+			.then((data) => active && setRows(data))
+			.catch(() => active && setRows([]))
+			.finally(() => active && setLoading(false));
+		return () => {
+			active = false;
+		};
+	}, []);
+
+	const filtered = type ? rows.filter((d) => d.certificateType === type) : rows;
 
 	return (
 		<div>
@@ -52,26 +62,32 @@ export default function CertificatePage() {
 					</tr>
 				</thead>
 				<tbody>
-					{MOCK_DATA.map((d) => (
-						<tr key={d.id} className="border-b border-slate-100 hover:bg-slate-50">
-							<td className="p-3 text-slate-500">{d.docNo}</td>
-							<td className="p-3 font-medium text-slate-900">{d.type}</td>
-							<td className="p-3">{d.purpose}</td>
-							<td className="p-3 text-slate-500">{d.date}</td>
-							<td className="p-3">
-								{d.issueStatus === "ISSUED" ? (
-									<span className="inline-flex rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-600">발급완료</span>
-								) : (
-									<span className="inline-flex rounded-full bg-orange-50 px-2 py-0.5 text-xs text-orange-600">발급대기</span>
-								)}
-							</td>
-							<td className="p-3">
-								<Button variant="outline" className="px-3 py-1 text-xs" disabled={d.issueStatus !== "ISSUED"}>
-									PDF 다운로드
-								</Button>
-							</td>
-						</tr>
-					))}
+					{loading ? (
+						<tr><td colSpan={6} className="p-6 text-center text-slate-400">불러오는 중...</td></tr>
+					) : filtered.length === 0 ? (
+						<tr><td colSpan={6} className="p-6 text-center text-slate-400">증명서 신청 내역이 없습니다.</td></tr>
+					) : (
+						filtered.map((d) => (
+							<tr key={d.id} className="border-b border-slate-100 hover:bg-slate-50">
+								<td className="p-3 text-slate-500">{d.documentNumber}</td>
+								<td className="p-3 font-medium text-slate-900">{d.certificateType}</td>
+								<td className="p-3">{d.purpose || "-"}</td>
+								<td className="p-3 text-slate-500">{d.applicationDate}</td>
+								<td className="p-3">
+									{d.issueStatus === "ISSUED" ? (
+										<span className="inline-flex rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-600">발급완료</span>
+									) : (
+										<span className="inline-flex rounded-full bg-orange-50 px-2 py-0.5 text-xs text-orange-600">발급대기</span>
+									)}
+								</td>
+								<td className="p-3">
+									<Button variant="outline" className="px-3 py-1 text-xs" disabled={d.issueStatus !== "ISSUED"}>
+										PDF 다운로드
+									</Button>
+								</td>
+							</tr>
+						))
+					)}
 				</tbody>
 			</table>
 		</div>

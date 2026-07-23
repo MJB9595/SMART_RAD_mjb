@@ -1,16 +1,27 @@
 "use client";
 
-import { useState } from "react";
-import { Button, Field, Input, Select } from "@/components/ui";
+import { useEffect, useState } from "react";
+import { Button, Field, Select } from "@/components/ui";
 import { StatusBadge } from "@/components/StatusBadge";
-
-const MOCK_DATA = [
-	{ id: 1, docNo: "ES-2026-001", type: "결혼", target: "본인", amount: "500,000", date: "2026-07-20", status: "APPROVED" },
-	{ id: 2, docNo: "ES-2026-002", type: "출산", target: "배우자", amount: "300,000", date: "2026-08-15", status: "PENDING" },
-];
+import { listEventSupports, type EventSupport } from "@/lib/api/welfare";
 
 export default function EventSupportPage() {
 	const [type, setType] = useState("");
+	const [rows, setRows] = useState<EventSupport[]>([]);
+	const [loading, setLoading] = useState(true);
+
+	useEffect(() => {
+		let active = true;
+		listEventSupports()
+			.then((data) => active && setRows(data))
+			.catch(() => active && setRows([]))
+			.finally(() => active && setLoading(false));
+		return () => {
+			active = false;
+		};
+	}, []);
+
+	const filtered = type ? rows.filter((d) => d.eventType === type) : rows;
 
 	return (
 		<div>
@@ -52,16 +63,22 @@ export default function EventSupportPage() {
 					</tr>
 				</thead>
 				<tbody>
-					{MOCK_DATA.map((d) => (
-						<tr key={d.id} className="border-b border-slate-100 hover:bg-slate-50">
-							<td className="p-3 text-slate-500">{d.docNo}</td>
-							<td className="p-3 font-medium text-slate-900">{d.type}</td>
-							<td className="p-3">{d.target}</td>
-							<td className="p-3 text-right font-medium">{d.amount}원</td>
-							<td className="p-3 text-slate-500">{d.date}</td>
-							<td className="p-3"><StatusBadge status={d.status as any} /></td>
-						</tr>
-					))}
+					{loading ? (
+						<tr><td colSpan={6} className="p-6 text-center text-slate-400">불러오는 중...</td></tr>
+					) : filtered.length === 0 ? (
+						<tr><td colSpan={6} className="p-6 text-center text-slate-400">경조비 신청 내역이 없습니다.</td></tr>
+					) : (
+						filtered.map((d) => (
+							<tr key={d.id} className="border-b border-slate-100 hover:bg-slate-50">
+								<td className="p-3 text-slate-500">{d.documentNumber}</td>
+								<td className="p-3 font-medium text-slate-900">{d.eventType}</td>
+								<td className="p-3">{d.targetName}</td>
+								<td className="p-3 text-right font-medium">{d.requestedAmount?.toLocaleString()}원</td>
+								<td className="p-3 text-slate-500">{d.eventDate}</td>
+								<td className="p-3"><StatusBadge status={d.approvalStatus as never} /></td>
+							</tr>
+						))
+					)}
 				</tbody>
 			</table>
 		</div>

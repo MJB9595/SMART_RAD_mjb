@@ -17,3 +17,17 @@ export function rejectLeave(id: number): Promise<LeaveRequest> {
 export function listLeaveBalances(year: number): Promise<LeaveBalance[]> {
 	return apiFetch<LeaveBalance[]>(`/leaves/balances?year=${year}`);
 }
+
+export interface LeavePolicy {
+	id: number;
+	positionId: number;
+	annualLeaveDays: number;
+	maxCarryOverDays: number;
+	halfDayAllowed: boolean;
+	note: string | null;
+}
+
+/** 직급별 휴가 정책 목록 (ADMIN). */
+export function listLeavePolicies(): Promise<LeavePolicy[]> {
+	return apiFetch<LeavePolicy[]>("/leave-policies");
+}

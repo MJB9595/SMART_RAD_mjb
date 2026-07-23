@@ -159,8 +159,12 @@ export default function EmployeesPage() {
 						교직원 가입 승인
 						<span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
 					</button>
-					<button className="btn-primary" onClick={() => router.push("/employees/new")}>
-						+ 교직원 등록
+					<button
+						className="btn-primary"
+						onClick={() => router.push("/employees/new")}
+						title="사번·이메일 없이 직위·권한(자리)만 정의 — 회원가입 승인 시 이 자리와 매칭됩니다"
+					>
+						+ 승인 자리 등록
 					</button>
 				</div>
 			</div>

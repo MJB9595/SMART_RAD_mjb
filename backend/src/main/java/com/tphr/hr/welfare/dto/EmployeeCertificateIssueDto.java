@@ -19,6 +19,7 @@ public class EmployeeCertificateIssueDto {
         private String documentNumber;
         private String certificateType;
         private LocalDate applicationDate;
+        private String purpose;
         private String issueStatus;
         private String approvalStatus;
     }

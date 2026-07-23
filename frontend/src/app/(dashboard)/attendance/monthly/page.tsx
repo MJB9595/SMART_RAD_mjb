@@ -1,16 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Field, Select, Button } from "@/components/ui";
-
-const MOCK_DATA = [
-	{ id: 1, name: "김교수", empNo: "FAC001", dept: "컴퓨터공학과", totalDays: 22, present: 20, late: 1, absent: 1, leave: 0 },
-	{ id: 2, name: "이직원", empNo: "STA001", dept: "교무처", totalDays: 22, present: 22, late: 0, absent: 0, leave: 0 },
-];
+import { listMonthlyAttendance, type MonthlyAttendance } from "@/lib/api/attendance";
 
 export default function MonthlyAttendancePage() {
 	const [year, setYear] = useState("2026");
 	const [month, setMonth] = useState("07");
+	const [rows, setRows] = useState<MonthlyAttendance[]>([]);
+	const [loading, setLoading] = useState(true);
+
+	useEffect(() => {
+		let active = true;
+		setLoading(true);
+		listMonthlyAttendance(Number(year), Number(month))
+			.then((data) => active && setRows(data))
+			.catch(() => active && setRows([]))
+			.finally(() => active && setLoading(false));
+		return () => {
+			active = false;
+		};
+	}, [year, month]);
 
 	return (
 		<div>
@@ -37,7 +47,7 @@ export default function MonthlyAttendancePage() {
 					</Field>
 					<Field label="월">
 						<Select value={month} onChange={(e) => setMonth(e.target.value)}>
-							{Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, "0")).map(m => (
+							{Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, "0")).map((m) => (
 								<option key={m} value={m}>{m}월</option>
 							))}
 						</Select>
@@ -59,18 +69,24 @@ export default function MonthlyAttendancePage() {
 					</tr>
 				</thead>
 				<tbody>
-					{MOCK_DATA.map((d) => (
-						<tr key={d.id} className="border-b border-slate-100 hover:bg-slate-50">
-							<td className="p-3">{d.dept}</td>
-							<td className="p-3">{d.empNo}</td>
-							<td className="p-3">{d.name}</td>
-							<td className="p-3">{d.totalDays}일</td>
-							<td className="p-3 text-blue-600 font-medium">{d.present}일</td>
-							<td className="p-3 text-orange-600">{d.late}일</td>
-							<td className="p-3 text-red-600">{d.absent}일</td>
-							<td className="p-3 text-slate-600">{d.leave}일</td>
-						</tr>
-					))}
+					{loading ? (
+						<tr><td colSpan={8} className="p-6 text-center text-slate-400">불러오는 중...</td></tr>
+					) : rows.length === 0 ? (
+						<tr><td colSpan={8} className="p-6 text-center text-slate-400">{year}년 {month}월 근태 기록이 없습니다.</td></tr>
+					) : (
+						rows.map((d) => (
+							<tr key={d.employeeId} className="border-b border-slate-100 hover:bg-slate-50">
+								<td className="p-3">{d.departmentName}</td>
+								<td className="p-3">{d.employeeNumber}</td>
+								<td className="p-3">{d.employeeName}</td>
+								<td className="p-3">{d.total}일</td>
+								<td className="p-3 text-blue-600 font-medium">{d.present}일</td>
+								<td className="p-3 text-orange-600">{d.late}일</td>
+								<td className="p-3 text-red-600">{d.absent}일</td>
+								<td className="p-3 text-slate-600">{d.leave}일</td>
+							</tr>
+						))
+					)}
 				</tbody>
 			</table>
 		</div>

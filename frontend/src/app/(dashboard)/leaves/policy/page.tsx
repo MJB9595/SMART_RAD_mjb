@@ -1,15 +1,30 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui";
-
-const MOCK_POLICIES = [
-	{ id: 1, position: "정교수", annualDays: 25, carryOver: 5, halfDay: true, note: "연구년 휴가 별도 산정" },
-	{ id: 2, position: "부교수", annualDays: 22, carryOver: 5, halfDay: true, note: "" },
-	{ id: 3, position: "조교수", annualDays: 20, carryOver: 5, halfDay: true, note: "" },
-	{ id: 4, position: "일반직(정규)", annualDays: 15, carryOver: 3, halfDay: true, note: "근속 2년마다 1일 추가" },
-];
+import { listLeavePolicies, type LeavePolicy } from "@/lib/api/leaves";
+import { listPositions } from "@/lib/api/meta";
 
 export default function LeavePolicyPage() {
+	const [policies, setPolicies] = useState<LeavePolicy[]>([]);
+	const [posName, setPosName] = useState<Record<number, string>>({});
+	const [loading, setLoading] = useState(true);
+
+	useEffect(() => {
+		let active = true;
+		Promise.all([listLeavePolicies(), listPositions()])
+			.then(([pols, positions]) => {
+				if (!active) return;
+				setPolicies(pols);
+				setPosName(Object.fromEntries(positions.map((p) => [p.id, p.name])));
+			})
+			.catch(() => active && setPolicies([]))
+			.finally(() => active && setLoading(false));
+		return () => {
+			active = false;
+		};
+	}, []);
+
 	return (
 		<div>
 			<nav className="mb-2 text-sm text-slate-500">
@@ -36,21 +51,27 @@ export default function LeavePolicyPage() {
 						</tr>
 					</thead>
 					<tbody>
-						{MOCK_POLICIES.map((p) => (
-							<tr key={p.id} className="border-b border-slate-100 hover:bg-slate-50">
-								<td className="p-3 font-medium text-slate-900">{p.position}</td>
-								<td className="p-3 text-right">{p.annualDays}일</td>
-								<td className="p-3 text-right">{p.carryOver}일</td>
-								<td className="p-3 text-center">
-									{p.halfDay ? (
-										<span className="inline-flex rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-600">허용</span>
-									) : (
-										<span className="inline-flex rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">불가</span>
-									)}
-								</td>
-								<td className="p-3 text-slate-500">{p.note || "-"}</td>
-							</tr>
-						))}
+						{loading ? (
+							<tr><td colSpan={5} className="p-6 text-center text-slate-400">불러오는 중...</td></tr>
+						) : policies.length === 0 ? (
+							<tr><td colSpan={5} className="p-6 text-center text-slate-400">등록된 휴가 정책이 없습니다.</td></tr>
+						) : (
+							policies.map((p) => (
+								<tr key={p.id} className="border-b border-slate-100 hover:bg-slate-50">
+									<td className="p-3 font-medium text-slate-900">{posName[p.positionId] ?? `직급#${p.positionId}`}</td>
+									<td className="p-3 text-right">{p.annualLeaveDays}일</td>
+									<td className="p-3 text-right">{p.maxCarryOverDays}일</td>
+									<td className="p-3 text-center">
+										{p.halfDayAllowed ? (
+											<span className="inline-flex rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-600">허용</span>
+										) : (
+											<span className="inline-flex rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">불가</span>
+										)}
+									</td>
+									<td className="p-3 text-slate-500">{p.note || "-"}</td>
+								</tr>
+							))
+						)}
 					</tbody>
 				</table>
 			</div>

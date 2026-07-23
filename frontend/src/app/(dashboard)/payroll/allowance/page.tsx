@@ -1,16 +1,24 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui";
-
-const MOCK_ALLOWANCES = [
-	{ id: 1, name: "직책수당", taxable: true, fixed: true },
-	{ id: 2, name: "가족수당", taxable: true, fixed: true },
-	{ id: 3, name: "식대", taxable: false, fixed: true },
-	{ id: 4, name: "초과근무수당", taxable: true, fixed: false },
-	{ id: 5, name: "연구보조비", taxable: false, fixed: true },
-];
+import { listAllowances, type Allowance } from "@/lib/api/allowance";
 
 export default function AllowancePage() {
+	const [allowances, setAllowances] = useState<Allowance[]>([]);
+	const [loading, setLoading] = useState(true);
+
+	useEffect(() => {
+		let active = true;
+		listAllowances()
+			.then((data) => active && setAllowances(data))
+			.catch(() => active && setAllowances([]))
+			.finally(() => active && setLoading(false));
+		return () => {
+			active = false;
+		};
+	}, []);
+
 	return (
 		<div>
 			<nav className="mb-2 text-sm text-slate-500">
@@ -36,26 +44,32 @@ export default function AllowancePage() {
 						</tr>
 					</thead>
 					<tbody>
-						{MOCK_ALLOWANCES.map((a) => (
-							<tr key={a.id} className="border-b border-slate-100 hover:bg-slate-50">
-								<td className="p-3 font-medium text-slate-500">A{String(a.id).padStart(3, '0')}</td>
-								<td className="p-3 font-medium text-slate-900">{a.name}</td>
-								<td className="p-3 text-center">
-									{a.taxable ? (
-										<span className="inline-flex rounded-full bg-red-50 px-2 py-0.5 text-xs text-red-600">과세</span>
-									) : (
-										<span className="inline-flex rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-600">비과세</span>
-									)}
-								</td>
-								<td className="p-3 text-center">
-									{a.fixed ? (
-										<span className="inline-flex rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">고정수당</span>
-									) : (
-										<span className="inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-xs text-emerald-600">변동수당</span>
-									)}
-								</td>
-							</tr>
-						))}
+						{loading ? (
+							<tr><td colSpan={4} className="p-6 text-center text-slate-400">불러오는 중...</td></tr>
+						) : allowances.length === 0 ? (
+							<tr><td colSpan={4} className="p-6 text-center text-slate-400">등록된 수당이 없습니다.</td></tr>
+						) : (
+							allowances.map((a) => (
+								<tr key={a.id} className="border-b border-slate-100 hover:bg-slate-50">
+									<td className="p-3 font-medium text-slate-500">A{String(a.id).padStart(3, "0")}</td>
+									<td className="p-3 font-medium text-slate-900">{a.name}</td>
+									<td className="p-3 text-center">
+										{a.taxable ? (
+											<span className="inline-flex rounded-full bg-red-50 px-2 py-0.5 text-xs text-red-600">과세</span>
+										) : (
+											<span className="inline-flex rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-600">비과세</span>
+										)}
+									</td>
+									<td className="p-3 text-center">
+										{a.fixed ? (
+											<span className="inline-flex rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">고정수당</span>
+										) : (
+											<span className="inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-xs text-emerald-600">변동수당</span>
+										)}
+									</td>
+								</tr>
+							))
+						)}
 					</tbody>
 				</table>
 			</div>

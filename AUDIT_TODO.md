@@ -18,10 +18,8 @@
 
 - [x] **3. `/api` 경로 이중 접두어** — ✅ 완료. `WelfareController→/welfare`, `AllowanceController→/allowances`·`/employee-allowances`, `DashboardController→/dashboard`, `LeavePolicyController→/leave-policies`, `LeaveTypeController→/leave-types` 로 접두어 제거 + `@PreAuthorize(ADMIN)` 부여. ADMIN GET 200 확인.
 
-- [ ] **4. 프론트 화면 5개 mock (백엔드 미연결)** — 실데이터처럼 보이나 저장/조회 안 됨.
-  - 대상: `attendance/monthly`, `leaves/policy`, `payroll/allowance`, `welfare/event-support`, `welfare/certificate`
-  - 방향: (3번 먼저 고친 뒤) 프론트 API 클라이언트 추가 + 화면 연동. 별도 작업으로 진행 권장.
-  - 참고 — 연결된 화면: 교직원(정보/기록카드/승인), 로그인/회원가입, 발령, 일일근태, 휴가신청·잔여, 급여명세서, 정원대시보드.
+- [x] **4. 프론트 화면 5개 mock (백엔드 미연결)** — ✅ 완료. 5개 전부 실 API 연동(mock 제거, 로딩/빈상태 처리).
+  - `payroll/allowance`→GET /allowances, `leaves/policy`→GET /leave-policies(+positions 조인), `welfare/event-support`→GET /welfare/event-support, `welfare/certificate`→GET /welfare/certificate(응답에 purpose 추가), `attendance/monthly`→**신규 GET /attendances/monthly?year&month**(직원별 출근/지각/결근/연차 집계) 추가 후 연동.
 
 ## 🟡 개선 / 스멜
 
@@ -35,6 +33,6 @@
 
 ## UI / UX
 
-- [ ] **9. 전역 텍스트 줄넘김** — 좁은 컬럼 + CJK 줄바꿈. 성준님 작업요청 문서화됨(`workMd/text_wrap_bug_request_kim-sungjun592.md`).
-- [ ] **10. mock 화면 오해 소지** — 4번 화면이 실데이터처럼 보임. 연동 전까지 "준비중" 표기 고려.
-- [ ] **11. "+ 교직원 등록" 라벨** — 이제 동작은 **승인 자리 생성**인데 라벨은 그대로 → 라벨/설명 정리(경미).
+- [ ] **9. 전역 텍스트 줄넘김** — 좁은 컬럼 + CJK 줄바꿈. **성준님 담당**(문서화됨: `workMd/text_wrap_bug_request_kim-sungjun592.md`).
+- [x] **10. mock 화면 오해 소지** — ✅ 해소. 4번 연동으로 실데이터 표시(빈 상태는 "기록 없음"). 가짜 데이터 제거됨.
+- [x] **11. "+ 교직원 등록" 라벨** — ✅ 완료. 목록 버튼을 "+ 승인 자리 등록"으로 변경 + 툴팁(자리=직위·권한 정의). 자리 생성 페이지는 이미 "교직원 등록 — 승인 자리 생성"으로 명확.

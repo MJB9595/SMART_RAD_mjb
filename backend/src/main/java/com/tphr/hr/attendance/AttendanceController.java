@@ -3,6 +3,7 @@ package com.tphr.hr.attendance;
 import com.tphr.hr.attendance.dto.AttendanceRequest;
 import com.tphr.hr.attendance.dto.AttendanceResponse;
 import com.tphr.hr.attendance.dto.AttendanceSummaryResponse;
+import com.tphr.hr.attendance.dto.MonthlyAttendanceResponse;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
@@ -38,6 +39,12 @@ public class AttendanceController {
 	public AttendanceSummaryResponse getSummary(
 			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate workDate) {
 		return attendanceService.getSummary(workDate);
+	}
+
+	/** 월 근태 현황 — 직원별 월간 집계. */
+	@GetMapping("/monthly")
+	public List<MonthlyAttendanceResponse> getMonthly(@RequestParam int year, @RequestParam int month) {
+		return attendanceService.getMonthlyAttendance(year, month);
 	}
 
 	@PostMapping

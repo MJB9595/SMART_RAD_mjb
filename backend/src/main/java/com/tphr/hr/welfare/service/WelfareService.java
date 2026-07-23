@@ -108,6 +108,7 @@ public class WelfareService {
                 .documentNumber(e.getDocumentNumber())
                 .certificateType(e.getCertificateType())
                 .applicationDate(e.getApplicationDate())
+                .purpose(e.getPurpose())
                 .issueStatus(e.getIssueStatus())
                 .approvalStatus(e.getApprovalStatus())
                 .build();
