@@ -11,6 +11,7 @@ export default function KakaoCallbackPage() {
 	const { loading, loginWithKakao } = useAuth();
 	const started = useRef(false);
 	const [error, setError] = useState<string | null>(null);
+	const [pending, setPending] = useState<string | null>(null);
 
 	useEffect(() => {
 		// 기존 토큰 검증이 끝난 뒤 시작해, 이전 토큰 정리가 새 로그인 토큰을 지우는 경쟁 상태를 막는다.
@@ -38,7 +39,17 @@ export default function KakaoCallbackPage() {
 				}
 				return loginWithKakao(code);
 			})
-			.then(() => router.replace("/employees"))
+			.then((result) => {
+				if (result.status === "PENDING_APPROVAL") {
+					// 새 이메일 → 회원가입 승인 대기큐로 유입됨. 로그인 대신 안내.
+					setPending(
+						result.message ??
+							"회원가입 승인 요청이 접수되었습니다. 관리자 승인 후 이용할 수 있습니다.",
+					);
+				} else {
+					router.replace("/employees");
+				}
+			})
 			.catch((loginError: unknown) => {
 				setError(
 					loginError instanceof Error
@@ -56,6 +67,22 @@ export default function KakaoCallbackPage() {
 						<h1 className="text-xl font-bold">카카오 로그인 실패</h1>
 						<p className="mt-3 text-sm leading-6 text-slate-600" role="alert">
 							{error}
+						</p>
+						<Link
+							href="/login"
+							className="mt-6 inline-flex h-11 items-center justify-center rounded-lg bg-slate-900 px-5 text-sm font-semibold text-white hover:bg-slate-800"
+						>
+							로그인 화면으로 돌아가기
+						</Link>
+					</>
+				) : pending ? (
+					<>
+						<div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-yellow-100 text-2xl" aria-hidden="true">
+							⏳
+						</div>
+						<h1 className="mt-4 text-xl font-bold">회원가입 승인 대기</h1>
+						<p className="mt-3 text-sm leading-6 text-slate-600" aria-live="polite">
+							{pending}
 						</p>
 						<Link
 							href="/login"

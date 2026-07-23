@@ -6,6 +6,7 @@ import com.tphr.hr.employee.dto.EmployeeResponse;
 import com.tphr.hr.employee.dto.EmployeeStatusRequest;
 import com.tphr.hr.employee.dto.EmployeeUpdateRequest;
 import com.tphr.hr.employee.dto.PasswordChangeRequest;
+import com.tphr.hr.signup.SignupService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -33,6 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class EmployeeController {
 
 	private final EmployeeService employeeService;
+	private final SignupService signupService;
 
 	@GetMapping
 	public Page<EmployeeResponse> searchEmployees(
@@ -82,5 +84,16 @@ public class EmployeeController {
 	@PreAuthorize("hasRole('ADMIN')")
 	public void deleteEmployee(@PathVariable Long id) {
 		employeeService.deleteEmployee(id);
+	}
+
+	/**
+	 * 매치 해제 — 잘못 매칭 승인된 계정을 되돌린다.
+	 * 자리를 다시 OPEN, 회원가입 신청을 승인 대기큐로 복귀시키고 이 계정을 삭제한다.
+	 */
+	@PostMapping("/{id}/unmatch")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	@PreAuthorize("hasRole('ADMIN')")
+	public void unmatch(@PathVariable Long id) {
+		signupService.unmatch(id);
 	}
 }

@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { searchEmployees } from "@/lib/api/employees";
+import { searchEmployees, unmatchEmployee } from "@/lib/api/employees";
 import { listDepartments } from "@/lib/api/departments";
 import { countExpiringCertifications, getRecordSummary } from "@/lib/api/records";
+import { ApiError } from "@/lib/api/client";
 import type { Employee, EmployeeRecordSummary } from "@/lib/types/employee";
 import type { Department } from "@/lib/types/department";
 import { SignupApprovalModal } from "@/components/SignupApprovalModal";
@@ -103,6 +104,27 @@ export default function EmployeesPage() {
 			active = false;
 		};
 	}, [selected]);
+
+	async function handleUnmatch(emp: Employee) {
+		if (
+			!confirm(
+				`'${emp.name}'(${emp.email}) 계정의 매치를 해제하시겠습니까?\n\n` +
+					"이 계정은 삭제되고, 회원가입 신청이 승인 대기큐로 되돌아갑니다. 매칭했던 자리도 다시 열립니다.\n" +
+					"(잘못된 매칭을 바로잡을 때 사용하세요.)",
+			)
+		) {
+			return;
+		}
+		try {
+			await unmatchEmployee(emp.id);
+			setSelected(null);
+			setSummary(null);
+			setReloadKey((k) => k + 1);
+			alert("매치를 해제했습니다. 해당 신청이 승인 대기큐로 복귀했고 자리가 다시 열렸습니다.");
+		} catch (err) {
+			alert(err instanceof ApiError ? err.message : "매치 해제에 실패했습니다.");
+		}
+	}
 
 	function changeFilter(setter: (v: string) => void, value: string) {
 		setter(value);
@@ -316,6 +338,14 @@ export default function EmployeesPage() {
 							</div>
 							<button className="btn-outline" onClick={() => router.push(`/employees/${selected.id}`)}>
 								전체 기록 상세보기
+							</button>
+							<button
+								className="btn-outline"
+								style={{ color: "#b91c1c", borderColor: "#fecaca", marginTop: 8 }}
+								onClick={() => handleUnmatch(selected)}
+								title="잘못 매칭 승인된 계정을 되돌려 승인 대기큐로 복귀"
+							>
+								매치 해제 (승인 대기큐로)
 							</button>
 						</div>
 					</div>

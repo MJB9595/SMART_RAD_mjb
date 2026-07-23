@@ -92,4 +92,10 @@ public class ApprovalSlot extends DeletableEntity {
 		this.status = SlotStatus.FILLED;
 		this.filledEmployeeId = employeeId;
 	}
+
+	/** 매치 해제: 채워졌던 자리를 다시 OPEN 상태로 되돌린다. */
+	public void reopen() {
+		this.status = SlotStatus.OPEN;
+		this.filledEmployeeId = null;
+	}
 }

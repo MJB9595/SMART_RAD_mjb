@@ -74,3 +74,8 @@ export function changeEmploymentStatus(
 export function deleteEmployee(id: number): Promise<void> {
 	return apiFetch<void>(`/employees/${id}`, { method: "DELETE" });
 }
+
+/** 매치 해제 — 잘못 매칭 승인된 계정을 되돌려 승인 대기큐로 복귀시킨다 (계정 삭제·자리 원복). */
+export function unmatchEmployee(id: number): Promise<void> {
+	return apiFetch<void>(`/employees/${id}/unmatch`, { method: "POST" });
+}

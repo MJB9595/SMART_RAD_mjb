@@ -11,4 +11,6 @@ public interface SignupRequestRepository extends JpaRepository<SignupRequest, Lo
 	List<SignupRequest> findByStatusAndDeletedFalseOrderByRequestedAtAsc(SignupStatus status);
 
 	boolean existsByEmailAndStatusAndDeletedFalse(String email, SignupStatus status);
+
+	Optional<SignupRequest> findByEmailAndStatusAndDeletedFalse(String email, SignupStatus status);
 }

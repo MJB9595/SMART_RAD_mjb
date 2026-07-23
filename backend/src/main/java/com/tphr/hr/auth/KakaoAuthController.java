@@ -1,7 +1,7 @@
 package com.tphr.hr.auth;
 
 import com.tphr.hr.auth.dto.KakaoLoginRequest;
-import com.tphr.hr.auth.dto.LoginResponse;
+import com.tphr.hr.auth.dto.KakaoLoginResult;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,7 +17,7 @@ public class KakaoAuthController {
 	private final KakaoAuthService kakaoAuthService;
 
 	@PostMapping("/callback")
-	public LoginResponse callback(@Valid @RequestBody KakaoLoginRequest request) {
+	public KakaoLoginResult callback(@Valid @RequestBody KakaoLoginRequest request) {
 		return kakaoAuthService.login(request.code());
 	}
 }

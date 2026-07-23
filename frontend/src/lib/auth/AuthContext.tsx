@@ -3,13 +3,13 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { kakaoLogin as kakaoLoginRequest, login as loginRequest, me as fetchMe } from "@/lib/api/auth";
 import { clearToken, getToken, setToken } from "@/lib/auth/token";
-import type { AuthUser, LoginResponse } from "@/lib/types/auth";
+import type { AuthUser, KakaoLoginResult, LoginResponse } from "@/lib/types/auth";
 
 interface AuthContextValue {
 	user: AuthUser | null;
 	loading: boolean;
 	login: (email: string, password: string) => Promise<void>;
-	loginWithKakao: (code: string) => Promise<void>;
+	loginWithKakao: (code: string) => Promise<KakaoLoginResult>;
 	logout: () => void;
 }
 
@@ -66,8 +66,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		applyLoginResponse(await loginRequest(email, password));
 	}
 
-	async function loginWithKakao(code: string) {
-		applyLoginResponse(await kakaoLoginRequest(code));
+	async function loginWithKakao(code: string): Promise<KakaoLoginResult> {
+		const result = await kakaoLoginRequest(code);
+		// 로그인 완료 건만 토큰 적용. 승인 대기(PENDING_APPROVAL)는 호출부에서 안내 처리.
+		if (result.status === "LOGGED_IN" && result.login) {
+			applyLoginResponse(result.login);
+		}
+		return result;
 	}
 
 	function logout() {

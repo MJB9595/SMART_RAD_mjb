@@ -1,5 +1,5 @@
 import { apiFetch } from "@/lib/api/client";
-import type { AuthUser, LoginResponse } from "@/lib/types/auth";
+import type { AuthUser, KakaoLoginResult, LoginResponse } from "@/lib/types/auth";
 
 export function login(email: string, password: string): Promise<LoginResponse> {
 	return apiFetch<LoginResponse>("/auth/login", {
@@ -8,8 +8,8 @@ export function login(email: string, password: string): Promise<LoginResponse> {
 	});
 }
 
-export function kakaoLogin(code: string): Promise<LoginResponse> {
-	return apiFetch<LoginResponse>("/auth/kakao/callback", {
+export function kakaoLogin(code: string): Promise<KakaoLoginResult> {
+	return apiFetch<KakaoLoginResult>("/auth/kakao/callback", {
 		method: "POST",
 		body: { code },
 	});

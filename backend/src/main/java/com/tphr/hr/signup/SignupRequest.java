@@ -2,6 +2,7 @@ package com.tphr.hr.signup;
 
 import com.tphr.hr.common.entity.DeletableEntity;
 import com.tphr.hr.common.exception.ApiException;
+import com.tphr.hr.oauth.OAuthProvider;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -54,6 +55,14 @@ public class SignupRequest extends DeletableEntity {
 	@Column(name = "processed_by")
 	private Long processedBy;
 
+	/** OAuth(카카오 등)에서 유입된 신청이면 제공자, 일반 가입은 NULL. */
+	@Enumerated(EnumType.STRING)
+	@Column(name = "oauth_provider", length = 20)
+	private OAuthProvider oauthProvider;
+
+	@Column(name = "oauth_provider_user_id", length = 100)
+	private String oauthProviderUserId;
+
 	@Builder
 	public SignupRequest(String name, String email, String password, String school) {
 		this.name = name;
@@ -62,6 +71,18 @@ public class SignupRequest extends DeletableEntity {
 		this.school = school;
 		this.status = SignupStatus.PENDING;
 		this.requestedAt = LocalDateTime.now();
+	}
+
+	/**
+	 * OAuth(카카오) 최초 로그인으로 유입된 가입 신청.
+	 * 비밀번호 로그인은 사용하지 않으므로 랜덤 해시를 넣고, 승인 시 소셜 링크로 로그인한다.
+	 */
+	public static SignupRequest forOAuth(String name, String email, String passwordHash, String school,
+			OAuthProvider provider, String providerUserId) {
+		SignupRequest signup = new SignupRequest(name, email, passwordHash, school);
+		signup.oauthProvider = provider;
+		signup.oauthProviderUserId = providerUserId;
+		return signup;
 	}
 
 	private void ensurePending() {
@@ -82,5 +103,15 @@ public class SignupRequest extends DeletableEntity {
 		this.status = SignupStatus.REJECTED;
 		this.processedAt = LocalDateTime.now();
 		this.processedBy = processorId;
+	}
+
+	/** 매치 해제: 승인됐던 신청을 다시 승인 대기 상태로 되돌린다. */
+	public void resetToPending() {
+		if (this.status != SignupStatus.APPROVED) {
+			throw ApiException.conflict("승인된 신청만 매치 해제로 대기큐에 되돌릴 수 있습니다.");
+		}
+		this.status = SignupStatus.PENDING;
+		this.processedAt = null;
+		this.processedBy = null;
 	}
 }
