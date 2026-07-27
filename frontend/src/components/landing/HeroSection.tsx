@@ -3,57 +3,57 @@ import Link from "next/link";
 
 export function HeroSection() {
 	return (
-		<section className="relative overflow-hidden bg-slate-50 pt-16 md:pt-24 lg:pt-32 pb-16">
+		<section className="relative overflow-hidden bg-slate-50 min-h-screen flex flex-col justify-center py-24">
 			<div className="mx-auto max-w-[1600px] px-8 md:px-16 lg:px-24">
 				<div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-8 items-center">
-					<div className="max-w-2xl mx-auto text-center lg:text-left flex flex-col items-center lg:items-start">
-						<div className="inline-flex items-center gap-2 rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700 mb-6">
-							<CheckCircle2 className="h-4 w-4" />
+					<div className="max-w-3xl mx-auto text-center lg:text-left flex flex-col items-center lg:items-start">
+						<div className="inline-flex items-center gap-2 rounded-full bg-blue-100 px-4 py-1.5 text-base font-medium text-blue-700 mb-8">
+							<CheckCircle2 className="h-5 w-5" />
 							학교 전문 인사관리 플랫폼
 						</div>
-						<h1 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl mb-6">
+						<h1 className="text-5xl font-extrabold tracking-tight text-slate-900 sm:text-6xl lg:text-7xl mb-8 leading-tight">
 							교직원 인사관리,<br />
 							<span className="text-blue-600">이제 하나로 해결하세요</span>
 						</h1>
-						<p className="text-lg text-slate-600 mb-8 leading-relaxed">
+						<p className="text-xl lg:text-2xl text-slate-600 mb-10 leading-relaxed">
 							복무·평가·인사발령·급여를 하나로 연결해 학교 인사 업무의<br />
 							비효율을 없앱니다. 교육부 지침이 바뀌어도 제도는 자동으로 업데이트됩니다.
 						</p>
 						
-						<div className="flex flex-col sm:flex-row gap-4 mb-8">
+						<div className="flex flex-col sm:flex-row gap-6 mb-10">
 							<Link
 								href="/signup"
-								className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-8 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+								className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-10 py-4 text-lg font-semibold text-white transition-colors hover:bg-blue-700"
 							>
 								무료로 시작하기
 							</Link>
 							<Link
 								href="/contact"
-								className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-8 py-3.5 text-sm font-semibold text-slate-900 transition-colors hover:bg-slate-50"
+								className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-10 py-4 text-lg font-semibold text-slate-900 transition-colors hover:bg-slate-50"
 							>
 								소개자료 받기
 							</Link>
 						</div>
 
-						<div className="flex flex-wrap justify-center lg:justify-start items-center gap-6 text-sm text-slate-500">
-							<div className="flex items-center gap-1.5">
-								<CheckCircle2 className="h-4 w-4 text-slate-400" />
+						<div className="flex flex-wrap justify-center lg:justify-start items-center gap-8 text-base text-slate-500">
+							<div className="flex items-center gap-2">
+								<CheckCircle2 className="h-5 w-5 text-slate-400" />
 								교육부 지침 준수
 							</div>
-							<div className="flex items-center gap-1.5">
-								<CheckCircle2 className="h-4 w-4 text-slate-400" />
+							<div className="flex items-center gap-2">
+								<CheckCircle2 className="h-5 w-5 text-slate-400" />
 								전국 1,200+ 학교 도입
 							</div>
-							<div className="flex items-center gap-1.5">
-								<CheckCircle2 className="h-4 w-4 text-slate-400" />
+							<div className="flex items-center gap-2">
+								<CheckCircle2 className="h-5 w-5 text-slate-400" />
 								무료 도입 컨설팅
 							</div>
 						</div>
 					</div>
 
 					{/* Right Side: Mockup */}
-					<div className="relative mx-auto w-full max-w-lg lg:max-w-none hidden lg:block">
-						<div className="relative rounded-2xl bg-white shadow-2xl ring-1 ring-slate-200/50 flex flex-col h-[400px] overflow-hidden">
+					<div className="relative mx-auto w-full max-w-xl lg:max-w-none hidden lg:block">
+						<div className="relative rounded-2xl bg-white shadow-2xl ring-1 ring-slate-200/50 flex flex-col h-[700px] overflow-hidden">
 							{/* Mockup Header */}
 							<div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50/50 px-4 py-3">
 								<div className="flex gap-1.5">

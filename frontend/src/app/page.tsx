@@ -5,14 +5,18 @@ import { FeaturesGridSection } from "@/components/landing/FeaturesGridSection";
 import { FeatureDetailSection } from "@/components/landing/FeatureDetailSection";
 import { SecuritySection } from "@/components/landing/SecuritySection";
 import { ScrollToTopButton } from "@/components/landing/ScrollToTopButton";
+import { FadeInSection } from "@/components/landing/FadeInSection";
 import { Clock, Banknote } from "lucide-react";
 
 export default function LandingPage() {
 	return (
 		<div className="flex min-h-screen flex-col bg-white">
 			<LandingHeader />
-			<main className="flex-1">
-				<HeroSection />
+			<main className="flex-1 overflow-hidden">
+				<FadeInSection direction="up">
+					<HeroSection />
+				</FadeInSection>
+				
 				<FeaturesGridSection />
 				
 				<div id="attendance" className="scroll-mt-16">
@@ -61,7 +65,9 @@ export default function LandingPage() {
 					/>
 				</div>
 				
-				<SecuritySection />
+				<FadeInSection direction="up">
+					<SecuritySection />
+				</FadeInSection>
 			</main>
 			<LandingFooter />
 			<ScrollToTopButton />

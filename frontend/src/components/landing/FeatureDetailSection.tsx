@@ -1,5 +1,6 @@
 import { Check, Clock, CalendarCheck, FileText, Download } from "lucide-react";
 import type { ReactNode } from "react";
+import { FadeInSection } from "./FadeInSection";
 
 interface FeatureDetailProps {
 	badgeText: string;
@@ -14,63 +15,66 @@ interface FeatureDetailProps {
 
 export function FeatureDetailSection({ badgeText, badgeIcon, title, description, features, reverse = false, mockupType, mockupStyle = 'window' }: FeatureDetailProps) {
 	return (
-		<section className={`py-24 ${reverse ? 'bg-slate-50' : 'bg-white'}`}>
+		<section className={`min-h-screen flex flex-col justify-center py-24 ${reverse ? 'bg-slate-50' : 'bg-white'}`}>
 			<div className="mx-auto max-w-[1600px] px-8 md:px-16 lg:px-24">
 				<div className={`grid grid-cols-1 lg:grid-cols-2 gap-16 items-center ${reverse ? 'lg:[&>div:first-child]:order-last' : ''}`}>
 					
 					{/* Text Content */}
-					<div className={`max-w-xl w-full mx-auto text-center lg:text-left flex flex-col items-center lg:items-start ${reverse ? 'lg:mr-auto' : 'lg:ml-auto'}`}>
-						<div className="badge-primary mb-6">
-							{badgeIcon}
-							{badgeText}
+					<div className={`max-w-2xl w-full mx-auto text-center lg:text-left flex flex-col items-center lg:items-start ${reverse ? 'lg:mr-auto' : 'lg:ml-auto'}`}>
+						<div className="badge-primary mb-8 px-4 py-1.5 text-base">
+							{badgeIcon && <span className="[&>svg]:w-5 [&>svg]:h-5 mr-1.5">{badgeIcon}</span>}
+							{!badgeIcon && badgeText}
+							{badgeIcon && badgeText}
 						</div>
-						<h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl mb-6 whitespace-pre-line">
+						<h2 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl mb-8 whitespace-pre-line leading-tight">
 							{title}
 						</h2>
 						{description && (
-							<p className="text-lg text-slate-600 mb-8">
+							<p className="text-xl lg:text-2xl text-slate-600 mb-10 leading-relaxed">
 								{description}
 							</p>
 						)}
-						<ul className="space-y-4">
+						<ul className="space-y-6">
 							{features.map((feature, idx) => (
-								<li key={idx} className="flex items-start gap-3">
-									<div className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-100">
-										<Check className="h-3.5 w-3.5 text-emerald-600" strokeWidth={3} />
+								<li key={idx} className="flex items-start gap-4">
+									<div className="mt-1.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100">
+										<Check className="h-4 w-4 text-emerald-600" strokeWidth={3} />
 									</div>
-									<span className="text-slate-700 font-medium">{feature}</span>
+									<span className="text-lg lg:text-xl text-slate-700 font-medium">{feature}</span>
 								</li>
 							))}
 						</ul>
 					</div>
 
 					{/* Mockup Content */}
-					<div className={`relative w-full max-w-lg mx-auto lg:max-w-[640px] mt-12 lg:mt-0 ${reverse ? 'lg:mx-0 lg:ml-auto' : 'lg:mx-0 lg:mr-auto'}`}>
-						{mockupStyle === 'floating' ? (
-							<div className="w-full flex items-center justify-center relative">
-								{mockupType === 'attendance' && <AttendanceMockup />}
-								{mockupType === 'salary' && <SalaryMockup />}
-								{mockupType === 'hr' && <HRMockup />}
-							</div>
-						) : (
-							<div className="mockup-window !rounded-3xl !shadow-[0_20px_40px_rgb(0,0,0,0.06)] border border-slate-100 !bg-[#F8FAFC]">
-								{/* Mac OS window controls */}
-								<div className="flex items-center px-6 py-5">
-									<div className="flex gap-2.5">
-										<div className="h-3 w-3 rounded-full bg-slate-200" />
-										<div className="h-3 w-3 rounded-full bg-slate-200" />
-										<div className="h-3 w-3 rounded-full bg-slate-200" />
-									</div>
-								</div>
-								
-								<div className="flex-1 px-8 pb-10 sm:px-12 sm:pb-12 overflow-hidden flex flex-col">
+					<FadeInSection direction={reverse ? "left" : "right"}>
+						<div className={`relative w-full max-w-xl mx-auto lg:max-w-[800px] mt-16 lg:mt-0 ${reverse ? 'lg:mx-0 lg:ml-auto' : 'lg:mx-0 lg:mr-auto'}`}>
+							{mockupStyle === 'floating' ? (
+								<div className="w-full flex items-center justify-center relative">
 									{mockupType === 'attendance' && <AttendanceMockup />}
 									{mockupType === 'salary' && <SalaryMockup />}
 									{mockupType === 'hr' && <HRMockup />}
 								</div>
-							</div>
-						)}
-					</div>
+							) : (
+								<div className="mockup-window !rounded-3xl !shadow-[0_20px_40px_rgb(0,0,0,0.06)] border border-slate-100 !bg-[#F8FAFC]">
+									{/* Mac OS window controls */}
+									<div className="flex items-center px-6 py-5">
+										<div className="flex gap-2.5">
+											<div className="h-3 w-3 rounded-full bg-slate-200" />
+											<div className="h-3 w-3 rounded-full bg-slate-200" />
+											<div className="h-3 w-3 rounded-full bg-slate-200" />
+										</div>
+									</div>
+									
+									<div className="flex-1 px-8 pb-10 sm:px-12 sm:pb-12 overflow-hidden flex flex-col">
+										{mockupType === 'attendance' && <AttendanceMockup />}
+										{mockupType === 'salary' && <SalaryMockup />}
+										{mockupType === 'hr' && <HRMockup />}
+									</div>
+								</div>
+							)}
+						</div>
+					</FadeInSection>
 
 				</div>
 			</div>
