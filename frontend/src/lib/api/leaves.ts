@@ -31,3 +31,16 @@ export interface LeavePolicy {
 export function listLeavePolicies(): Promise<LeavePolicy[]> {
 	return apiFetch<LeavePolicy[]>("/leave-policies");
 }
+
+export interface LeavePolicyCreateBody {
+	positionId: number;
+	annualLeaveDays: number;
+	maxCarryOverDays: number;
+	halfDayAllowed: boolean;
+	note?: string | null;
+}
+
+/** 휴가 정책 등록 (ADMIN). */
+export function createLeavePolicy(body: LeavePolicyCreateBody): Promise<LeavePolicy> {
+	return apiFetch<LeavePolicy>("/leave-policies", { method: "POST", body });
+}

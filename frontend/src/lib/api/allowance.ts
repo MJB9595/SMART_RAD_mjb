@@ -12,3 +12,14 @@ export interface Allowance {
 export function listAllowances(): Promise<Allowance[]> {
 	return apiFetch<Allowance[]>("/allowances");
 }
+
+export interface AllowanceCreateBody {
+	name: string;
+	taxable: boolean;
+	fixed: boolean;
+}
+
+/** 수당 마스터 등록 (ADMIN). */
+export function createAllowance(body: AllowanceCreateBody): Promise<Allowance> {
+	return apiFetch<Allowance>("/allowances", { method: "POST", body });
+}
