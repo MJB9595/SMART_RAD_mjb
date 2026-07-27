@@ -109,7 +109,7 @@ export default function MonthlyAttendancePage() {
 	};
 
 	return (
-		<div className="flex w-full h-full gap-6 pb-4">
+		<div className="flex flex-1 w-full gap-6 pb-4 min-h-0">
 			{/* Main Grid View */}
 			<div className="flex-1 flex flex-col bg-white overflow-hidden rounded-xl border border-slate-200 shadow-sm">
 				{/* Header */}
@@ -152,7 +152,7 @@ export default function MonthlyAttendancePage() {
 				</div>
 
 				{/* Table Grid */}
-				<div className="flex-1 overflow-x-auto overflow-y-auto bg-slate-50/50 [&::-webkit-scrollbar]:h-[10px] [&::-webkit-scrollbar]:w-[10px] [&::-webkit-scrollbar-track]:bg-slate-100 [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full">
+				<div className="flex-1 overflow-x-auto overflow-y-auto bg-white [&::-webkit-scrollbar]:h-[10px] [&::-webkit-scrollbar]:w-[10px] [&::-webkit-scrollbar-track]:bg-slate-100 [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full">
 					<table className="w-full border-collapse text-xs whitespace-nowrap min-w-max bg-white">
 						<thead className="sticky top-0 z-30">
 							<tr className="border-b border-slate-200 bg-white">

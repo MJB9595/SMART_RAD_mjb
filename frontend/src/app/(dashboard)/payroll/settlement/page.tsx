@@ -104,12 +104,12 @@ export default function SettlementPage() {
 				</div>
 
 				<div className="flex justify-end pt-4 border-t border-slate-100">
-					<Button className="w-full md:w-auto px-8 py-3 h-auto bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl shadow-lg shadow-slate-200 transition-all text-base flex items-center justify-center gap-2">
+					<button className="w-full md:w-auto px-8 py-3 h-auto bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl shadow-lg shadow-slate-200 transition-all text-base flex items-center justify-center gap-2">
 						<svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
 						</svg>
 						엑셀 파일 생성 및 다운로드
-					</Button>
+					</button>
 				</div>
 			</div>
 		</div>
