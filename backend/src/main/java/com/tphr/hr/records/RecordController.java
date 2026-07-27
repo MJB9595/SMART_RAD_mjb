@@ -33,13 +33,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
 public class RecordController {
 
 	private final RecordService recordService;
 
 	// ===== 학력 =====
 	@GetMapping("/employees/{employeeId}/educations")
+	@PreAuthorize("hasRole('ADMIN') or #employeeId == authentication.principal.employeeId")
 	public List<EducationResponse> getEducations(@PathVariable Long employeeId) {
 		return recordService.getEducations(employeeId);
 	}
@@ -66,6 +66,7 @@ public class RecordController {
 
 	// ===== 경력 =====
 	@GetMapping("/employees/{employeeId}/careers")
+	@PreAuthorize("hasRole('ADMIN') or #employeeId == authentication.principal.employeeId")
 	public List<CareerResponse> getCareers(@PathVariable Long employeeId) {
 		return recordService.getCareers(employeeId);
 	}
@@ -92,6 +93,7 @@ public class RecordController {
 
 	// ===== 자격증 =====
 	@GetMapping("/employees/{employeeId}/certifications")
+	@PreAuthorize("hasRole('ADMIN') or #employeeId == authentication.principal.employeeId")
 	public List<CertificationResponse> getCertifications(@PathVariable Long employeeId) {
 		return recordService.getCertifications(employeeId);
 	}
@@ -120,6 +122,7 @@ public class RecordController {
 
 	// ===== 가족사항 =====
 	@GetMapping("/employees/{employeeId}/families")
+	@PreAuthorize("hasRole('ADMIN') or #employeeId == authentication.principal.employeeId")
 	public List<FamilyResponse> getFamilies(@PathVariable Long employeeId) {
 		return recordService.getFamilies(employeeId);
 	}
@@ -146,6 +149,7 @@ public class RecordController {
 
 	// ===== 병역정보 =====
 	@GetMapping("/employees/{employeeId}/militaries")
+	@PreAuthorize("hasRole('ADMIN') or #employeeId == authentication.principal.employeeId")
 	public List<MilitaryResponse> getMilitaries(@PathVariable Long employeeId) {
 		return recordService.getMilitaries(employeeId);
 	}
@@ -172,6 +176,7 @@ public class RecordController {
 
 	// ===== 어학정보 =====
 	@GetMapping("/employees/{employeeId}/languages")
+	@PreAuthorize("hasRole('ADMIN') or #employeeId == authentication.principal.employeeId")
 	public List<LanguageResponse> getLanguages(@PathVariable Long employeeId) {
 		return recordService.getLanguages(employeeId);
 	}
@@ -198,11 +203,13 @@ public class RecordController {
 
 	// ===== 요약 / 통계 =====
 	@GetMapping("/employees/{employeeId}/record-summary")
+	@PreAuthorize("hasRole('ADMIN') or #employeeId == authentication.principal.employeeId")
 	public EmployeeRecordSummary getRecordSummary(@PathVariable Long employeeId) {
 		return recordService.getSummary(employeeId);
 	}
 
 	@GetMapping("/records/stats/expiring-certifications")
+	@PreAuthorize("hasRole('ADMIN')")
 	public Map<String, Long> countExpiringCertifications(@RequestParam(defaultValue = "90") int days) {
 		return Map.of("count", recordService.countExpiringCertifications(days));
 	}
