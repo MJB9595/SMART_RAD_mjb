@@ -1,0 +1,305 @@
+From 178e39a96e7b445edd5fb5963b9958c42888ee06 Mon Sep 17 00:00:00 2001
+From: hyunminboo <boohyunmin@gmail.com>
+Date: Thu, 23 Jul 2026 10:08:24 +0900
+Subject: [PATCH 1/2] =?UTF-8?q?feat(layout):=20=EC=83=81=EB=8B=A8=20?=
+ =?UTF-8?q?=EB=84=A4=EB=B9=84=EA=B2=8C=EC=9D=B4=EC=85=98=EB=B0=94=20?=
+ =?UTF-8?q?=EA=B2=80=EC=83=89=EC=B0=BD=20=EC=A0=9C=EA=B1=B0=20=EB=B0=8F=20?=
+ =?UTF-8?q?=EA=B2=BD=EB=B3=B5=EB=8C=80=ED=95=99=EA=B5=90=20=EB=A1=9C?=
+ =?UTF-8?q?=EA=B3=A0=20=EC=B6=94=EA=B0=80?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ frontend/public/kbu_logo.png              | Bin 0 -> 6525 bytes
+ frontend/src/components/layout/TopNav.tsx |  13 +++----------
+ 2 files changed, 3 insertions(+), 10 deletions(-)
+ create mode 100644 frontend/public/kbu_logo.png
+
+diff --git a/frontend/public/kbu_logo.png b/frontend/public/kbu_logo.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..efc03637f4b5ba5b819ff0f37a458ba9eba8bc53
+GIT binary patch
+literal 6525
+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
+
+literal 0
+HcmV?d00001
+
+diff --git a/frontend/src/components/layout/TopNav.tsx b/frontend/src/components/layout/TopNav.tsx
+index 3d7cc7b..a3382f8 100644
+--- a/frontend/src/components/layout/TopNav.tsx
++++ b/frontend/src/components/layout/TopNav.tsx
+@@ -5,16 +5,9 @@ import type { AuthUser } from "@/lib/types/auth";
+ export function TopNav({ user, onLogout }: { user: AuthUser; onLogout: () => void }) {
+ 	return (
+ 		<header className="topbar">
+-			<div className="search-box">
+-				<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9AA3B2" strokeWidth="2">
+-					<circle cx="11" cy="11" r="7" />
+-					<path d="M21 21l-4.3-4.3" />
+-				</svg>
+-				<input 
+-					type="text" 
+-					placeholder="이름, 사번, 부서로 검색" 
+-					className="bg-transparent outline-none w-full"
+-				/>
++			<div className="flex items-center text-lg font-bold text-[#E6007E]">
++				<img src="/kbu_logo.png" alt="경복대학교 로고" className="h-8 w-8 object-cover object-left mr-2" />
++				경복대학교
+ 			</div>
+ 			<div className="user-box">
+ 				<span className="notif-dot"></span>
+-- 
+2.52.0
+
+
+From be650400271c72cf512b1d4e7cf955b6bd86c3de Mon Sep 17 00:00:00 2001
+From: hyunminboo <boohyunmin@gmail.com>
+Date: Mon, 27 Jul 2026 09:27:33 +0900
+Subject: [PATCH 2/2] =?UTF-8?q?feat(landing):=20=EB=AA=A8=EB=B0=94?=
+ =?UTF-8?q?=EC=9D=BC=20=EB=B0=8F=20=ED=83=9C=EB=B8=94=EB=A6=BF=20=ED=99=94?=
+ =?UTF-8?q?=EB=A9=B4=EC=97=90=EC=84=9C=20=EB=A0=88=EC=9D=B4=EC=95=84?=
+ =?UTF-8?q?=EC=9B=83=20=EC=A4=91=EC=95=99=20=EC=A0=95=EB=A0=AC=EB=90=98?=
+ =?UTF-8?q?=EB=8F=84=EB=A1=9D=20=EB=B0=98=EC=9D=91=ED=98=95=20=EA=B0=9C?=
+ =?UTF-8?q?=EC=84=A0?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ frontend/src/components/landing/FeatureDetailSection.tsx | 8 ++++----
+ frontend/src/components/landing/FeaturesGridSection.tsx  | 8 ++++----
+ frontend/src/components/landing/HeroSection.tsx          | 4 ++--
+ 3 files changed, 10 insertions(+), 10 deletions(-)
+
+diff --git a/frontend/src/components/landing/FeatureDetailSection.tsx b/frontend/src/components/landing/FeatureDetailSection.tsx
+index 815d24f..a7d9a85 100644
+--- a/frontend/src/components/landing/FeatureDetailSection.tsx
++++ b/frontend/src/components/landing/FeatureDetailSection.tsx
+@@ -19,7 +19,7 @@ export function FeatureDetailSection({ badgeText, badgeIcon, title, description,
+ 				<div className={`grid grid-cols-1 lg:grid-cols-2 gap-16 items-center ${reverse ? 'lg:[&>div:first-child]:order-last' : ''}`}>
+ 					
+ 					{/* Text Content */}
+-					<div className={`max-w-xl w-full ${reverse ? 'lg:mr-auto' : 'lg:ml-auto'}`}>
++					<div className={`max-w-xl w-full mx-auto text-center lg:text-left flex flex-col items-center lg:items-start ${reverse ? 'lg:mr-auto' : 'lg:ml-auto'}`}>
+ 						<div className="badge-primary mb-6">
+ 							{badgeIcon}
+ 							{badgeText}
+@@ -45,7 +45,7 @@ export function FeatureDetailSection({ badgeText, badgeIcon, title, description,
+ 					</div>
+ 
+ 					{/* Mockup Content */}
+-					<div className={`relative w-full max-w-lg lg:max-w-[640px] ${reverse ? 'lg:ml-auto' : 'lg:mr-auto'}`}>
++					<div className={`relative w-full max-w-lg mx-auto lg:max-w-[640px] mt-12 lg:mt-0 ${reverse ? 'lg:mx-0 lg:ml-auto' : 'lg:mx-0 lg:mr-auto'}`}>
+ 						{mockupStyle === 'floating' ? (
+ 							<div className="w-full flex items-center justify-center relative">
+ 								{mockupType === 'attendance' && <AttendanceMockup />}
+@@ -200,7 +200,7 @@ function HRMockup() {
+ 				<div className="w-px h-6 bg-slate-200"></div>
+ 				
+ 				{/* Level 2 */}
+-				<div className="flex gap-4 z-10">
++				<div className="flex flex-wrap justify-center gap-4 z-10 px-4">
+ 					<div className="bg-white text-slate-900 font-bold px-8 py-4 rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.04)] border border-slate-100 text-base min-w-[120px] text-center">
+ 						교감
+ 					</div>
+@@ -212,7 +212,7 @@ function HRMockup() {
+ 				<div className="w-px h-6 bg-slate-200"></div>
+ 				
+ 				{/* Level 3 */}
+-				<div className="flex gap-4 z-10">
++				<div className="flex flex-wrap justify-center gap-4 z-10 px-4">
+ 					<div className="bg-white text-slate-900 font-bold px-6 py-4 rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.04)] border border-slate-100 text-sm min-w-[100px] text-center">
+ 						교무부
+ 					</div>
+diff --git a/frontend/src/components/landing/FeaturesGridSection.tsx b/frontend/src/components/landing/FeaturesGridSection.tsx
+index f3a6b31..aa709ee 100644
+--- a/frontend/src/components/landing/FeaturesGridSection.tsx
++++ b/frontend/src/components/landing/FeaturesGridSection.tsx
+@@ -19,7 +19,7 @@ export function FeaturesGridSection() {
+ 
+ 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+ 					{/* Card 1 */}
+-					<div className="card-base">
++					<div className="card-base text-center flex flex-col items-center lg:items-start lg:text-left">
+ 						<div className="h-12 w-12 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 mb-6">
+ 							<BookOpen className="h-6 w-6" />
+ 						</div>
+@@ -35,7 +35,7 @@ export function FeaturesGridSection() {
+ 					</div>
+ 
+ 					{/* Card 2 */}
+-					<div className="card-base">
++					<div className="card-base text-center flex flex-col items-center lg:items-start lg:text-left">
+ 						<div className="h-12 w-12 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 mb-6">
+ 							<Calendar className="h-6 w-6" />
+ 						</div>
+@@ -51,7 +51,7 @@ export function FeaturesGridSection() {
+ 					</div>
+ 
+ 					{/* Card 3 */}
+-					<div className="card-base">
++					<div className="card-base text-center flex flex-col items-center lg:items-start lg:text-left">
+ 						<div className="h-12 w-12 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 mb-6">
+ 							<Users className="h-6 w-6" />
+ 						</div>
+@@ -67,7 +67,7 @@ export function FeaturesGridSection() {
+ 					</div>
+ 
+ 					{/* Card 4 */}
+-					<div className="card-base">
++					<div className="card-base text-center flex flex-col items-center lg:items-start lg:text-left">
+ 						<div className="h-12 w-12 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 mb-6">
+ 							<ShieldCheck className="h-6 w-6" />
+ 						</div>
+diff --git a/frontend/src/components/landing/HeroSection.tsx b/frontend/src/components/landing/HeroSection.tsx
+index 3327a43..28c723c 100644
+--- a/frontend/src/components/landing/HeroSection.tsx
++++ b/frontend/src/components/landing/HeroSection.tsx
+@@ -6,7 +6,7 @@ export function HeroSection() {
+ 		<section className="relative overflow-hidden bg-slate-50 pt-16 md:pt-24 lg:pt-32 pb-16">
+ 			<div className="mx-auto max-w-[1600px] px-8 md:px-16 lg:px-24">
+ 				<div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-8 items-center">
+-					<div className="max-w-2xl">
++					<div className="max-w-2xl mx-auto text-center lg:text-left flex flex-col items-center lg:items-start">
+ 						<div className="inline-flex items-center gap-2 rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700 mb-6">
+ 							<CheckCircle2 className="h-4 w-4" />
+ 							학교 전문 인사관리 플랫폼
+@@ -35,7 +35,7 @@ export function HeroSection() {
+ 							</Link>
+ 						</div>
+ 
+-						<div className="flex flex-wrap items-center gap-6 text-sm text-slate-500">
++						<div className="flex flex-wrap justify-center lg:justify-start items-center gap-6 text-sm text-slate-500">
+ 							<div className="flex items-center gap-1.5">
+ 								<CheckCircle2 className="h-4 w-4 text-slate-400" />
+ 								교육부 지침 준수
+-- 
+2.52.0
+
