@@ -21,6 +21,7 @@ export default function HeadcountPage() {
 				console.error("Dashboard API Error:", err);
 				setError(err?.message || "대시보드를 불러오지 못했습니다.");
 			});
+	}, []);
 
 	const headcountByDeptName = useMemo(() => {
 		const map = new Map<string, number>();
