@@ -52,7 +52,7 @@ export default function PayrollPage() {
 					<h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">급여 명세서 조회</h1>
 					<p className="mt-2 text-sm text-slate-600 font-medium">근태와 연동된 기초 급여 내역을 조회하고 상세 내역을 확인합니다.</p>
 				</div>
-				<Button className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-200 transition-all">엑셀 다운로드</Button>
+				<button className="px-4 py-2 rounded-lg text-sm font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-200 transition-all">엑셀 다운로드</button>
 			</div>
 
 			{/* Stats Grid */}
@@ -176,9 +176,9 @@ export default function PayrollPage() {
 							</div>
 							
 							<div className="pt-4">
-								<Button className="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium py-2.5 rounded-xl transition-colors">
+								<button className="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium py-2.5 rounded-xl transition-colors">
 									상세 엑셀 다운로드
-								</Button>
+								</button>
 							</div>
 						</div>
 					</div>

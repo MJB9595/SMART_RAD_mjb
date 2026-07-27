@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { searchEmployees, unmatchEmployee } from "@/lib/api/employees";
 import { listDepartments } from "@/lib/api/departments";
 import { countExpiringCertifications, getRecordSummary } from "@/lib/api/records";
+import { getPendingSignups } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/client";
 import type { Employee, EmployeeRecordSummary } from "@/lib/types/employee";
 import type { Department } from "@/lib/types/department";
@@ -44,6 +45,7 @@ export default function EmployeesPage() {
 
 	// 모달
 	const [showApprovalModal, setShowApprovalModal] = useState(false);
+	const [pendingSignupsCount, setPendingSignupsCount] = useState(0);
 	// 승인 후 목록/통계 새로고침 트리거
 	const [reloadKey, setReloadKey] = useState(0);
 
@@ -54,15 +56,17 @@ export default function EmployeesPage() {
 			searchEmployees({ size: 1, employmentStatus: "EMPLOYED" }),
 			searchEmployees({ size: 1, employmentStatus: "ON_LEAVE" }),
 			countExpiringCertifications(90),
+			getPendingSignups(),
 		])
-			.then(([all, emp, leave, exp]) =>
+			.then(([all, emp, leave, exp, signups]) => {
 				setStats({
 					total: all.totalElements,
 					employed: emp.totalElements,
 					onLeave: leave.totalElements,
 					expiring: exp.count,
-				}),
-			)
+				});
+				setPendingSignupsCount(signups.length);
+			})
 			.catch(console.error);
 	}, [reloadKey]);
 
@@ -157,7 +161,7 @@ export default function EmployeesPage() {
 				<div className="flex gap-2">
 					<button className="btn-outline text-blue-600 border-blue-600 hover:bg-blue-50 relative px-4" onClick={() => setShowApprovalModal(true)}>
 						교직원 가입 승인
-						<span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+						{pendingSignupsCount > 0 && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>}
 					</button>
 					<button
 						className="btn-primary"
@@ -340,17 +344,19 @@ export default function EmployeesPage() {
 									<div className="mini-stat-value">{s ? s.careerCount : "-"}</div>
 								</div>
 							</div>
-							<button className="btn-outline" onClick={() => router.push(`/employees/${selected.id}`)}>
-								전체 기록 상세보기
-							</button>
-							<button
-								className="btn-outline"
-								style={{ color: "#b91c1c", borderColor: "#fecaca", marginTop: 8 }}
-								onClick={() => handleUnmatch(selected)}
-								title="잘못 매칭 승인된 계정을 되돌려 승인 대기큐로 복귀"
-							>
-								매치 해제 (승인 대기큐로)
-							</button>
+							<div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: 'auto', paddingTop: '24px' }}>
+								<button className="btn-outline" onClick={() => router.push(`/employees/${selected.id}`)}>
+									전체 기록 상세보기
+								</button>
+								<button
+									className="btn-outline"
+									style={{ color: "#b91c1c", borderColor: "#fecaca" }}
+									onClick={() => handleUnmatch(selected)}
+									title="잘못 매칭 승인된 계정을 되돌려 승인 대기큐로 복귀"
+								>
+									매치 해제 (승인 대기큐로)
+								</button>
+							</div>
 						</div>
 					</div>
 				)}

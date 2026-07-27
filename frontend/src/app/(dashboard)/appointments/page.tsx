@@ -1,8 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { approveAppointment, listAppointments, rejectAppointment } from "@/lib/api/appointments";
+import { approveAppointment, listAppointments, rejectAppointment, createAppointment } from "@/lib/api/appointments";
 import type { Appointment, AppointmentType } from "@/lib/types/appointment";
+import { searchEmployees } from "@/lib/api/employees";
+import { listDepartments } from "@/lib/api/departments";
+import { listPositions } from "@/lib/api/meta";
+import type { Employee } from "@/lib/types/employee";
+import type { Department } from "@/lib/types/department";
+import type { Position } from "@/lib/types/meta";
+import { Button } from "@/components/ui";
 
 const TYPE_LABELS: Record<AppointmentType, string> = {
 	HIRE: "임용",
@@ -16,6 +23,52 @@ export default function AppointmentsPage() {
 	const [totalElements, setTotalElements] = useState(0);
 	const [loading, setLoading] = useState(true);
 	const [selectedAppt, setSelectedAppt] = useState<Appointment | null>(null);
+
+	// Registration Modal State
+	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [employees, setEmployees] = useState<Employee[]>([]);
+	const [departments, setDepartments] = useState<Department[]>([]);
+	const [positions, setPositions] = useState<Position[]>([]);
+	const [form, setForm] = useState({
+		employeeId: "",
+		appointmentType: "TRANSFER" as AppointmentType,
+		fromDepartmentId: "",
+		toDepartmentId: "",
+		fromPositionId: "",
+		toPositionId: "",
+		appointmentDate: new Date().toISOString().split('T')[0],
+		reason: ""
+	});
+
+	useEffect(() => {
+		searchEmployees({ size: 1000 }).then(p => setEmployees(p.content)).catch(console.error);
+		listDepartments().then(setDepartments).catch(console.error);
+		listPositions().then(setPositions).catch(console.error);
+	}, []);
+
+	const handleCreateSubmit = async () => {
+		if (!form.employeeId || !form.appointmentDate) {
+			alert("사원과 발령일자는 필수입니다.");
+			return;
+		}
+		try {
+			await createAppointment({
+				employeeId: Number(form.employeeId),
+				appointmentType: form.appointmentType,
+				fromDepartmentId: form.fromDepartmentId ? Number(form.fromDepartmentId) : null,
+				toDepartmentId: form.toDepartmentId ? Number(form.toDepartmentId) : null,
+				fromPositionId: form.fromPositionId ? Number(form.fromPositionId) : null,
+				toPositionId: form.toPositionId ? Number(form.toPositionId) : null,
+				appointmentDate: form.appointmentDate,
+				reason: form.reason
+			});
+			alert("발령 등록이 완료되었습니다.");
+			setIsModalOpen(false);
+			load();
+		} catch (err: any) {
+			alert(err.message || "등록에 실패했습니다.");
+		}
+	};
 
 	function load() {
 		setLoading(true);
@@ -76,7 +129,7 @@ export default function AppointmentsPage() {
 					<div className="page-title">발령 등록·승인</div>
 					<div className="page-sub">전보·승진·겸임 등 인사발령 건을 등록하고 승인합니다</div>
 				</div>
-				<button className="btn-primary">+ 발령 등록</button>
+				<button className="btn-primary" onClick={() => setIsModalOpen(true)}>+ 발령 등록</button>
 			</div>
 
 			<div className="stat-grid">
@@ -145,7 +198,7 @@ export default function AppointmentsPage() {
 					</div>
 				</div>
 
-				{selectedAppt && (
+				{selectedAppt ? (
 					<div className="card">
 						<div className="panel">
 							<div className="panel-eyebrow">발령 상세 미리보기</div>
@@ -177,7 +230,7 @@ export default function AppointmentsPage() {
 							</div>
 							
 							{selectedAppt.approvalStatus === "PENDING" ? (
-								<div className="flex gap-2 mt-4" style={{display: 'flex', gap: '8px', marginTop: '16px'}}>
+								<div className="flex gap-2 mt-4" style={{display: 'flex', gap: '8px', marginTop: 'auto', paddingTop: '16px'}}>
 									<button className="btn-primary" style={{flex: 1, justifyContent: 'center'}} onClick={() => decide(selectedAppt.id, "approve")}>
 										승인 처리
 									</button>
@@ -186,7 +239,7 @@ export default function AppointmentsPage() {
 									</button>
 								</div>
 							) : (
-								<div style={{marginTop: '16px'}}>
+								<div style={{marginTop: 'auto', paddingTop: '16px'}}>
 									<button className="btn-outline" style={{width: '100%', border: '1px solid #E5E8EE', color: '#9AA3B2', cursor: 'not-allowed'}} disabled>
 										결재 완료됨 ({selectedAppt.approverName || "시스템"})
 									</button>
@@ -194,8 +247,140 @@ export default function AppointmentsPage() {
 							)}
 						</div>
 					</div>
+				) : (
+					<div className="card">
+						<div className="flex-1 flex flex-col items-center justify-center p-8 text-slate-400 text-center h-full min-h-[400px]">
+							<div className="text-4xl mb-4 opacity-50">📄</div>
+							<div className="text-[14px] font-bold text-slate-600 mb-1.5">발령 건을 선택해주세요</div>
+							<div className="text-[12.5px] leading-relaxed">좌측 목록에서 내역을 클릭하면<br/>상세 정보와 결재 버튼이 표시됩니다.</div>
+						</div>
+					</div>
 				)}
 			</div>
+
+			{isModalOpen && (
+				<div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+					<div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
+						<div className="p-5 border-b border-slate-100 flex justify-between items-center bg-white shrink-0">
+							<h2 className="text-lg font-bold text-slate-900 tracking-tight">발령 등록하기</h2>
+							<button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-1.5 rounded-full transition-colors">
+								<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+							</button>
+						</div>
+						<div className="p-6 space-y-4 overflow-y-auto">
+							<div className="space-y-1.5">
+								<label className="text-sm font-bold text-slate-700">대상 직원</label>
+								<select 
+									value={form.employeeId} 
+									onChange={(e) => setForm({...form, employeeId: e.target.value})}
+									className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 text-sm font-medium focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+								>
+									<option value="">직원을 선택하세요</option>
+									{employees.map(emp => (
+										<option key={emp.id} value={emp.id}>{emp.name}</option>
+									))}
+								</select>
+							</div>
+							<div className="space-y-1.5">
+								<label className="text-sm font-bold text-slate-700">발령 구분</label>
+								<select 
+									value={form.appointmentType} 
+									onChange={(e) => setForm({...form, appointmentType: e.target.value as AppointmentType})}
+									className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 text-sm font-medium focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+								>
+									<option value="HIRE">임용</option>
+									<option value="PROMOTION">승진</option>
+									<option value="TRANSFER">전보</option>
+									<option value="CONCURRENT">겸임</option>
+								</select>
+							</div>
+							<div className="grid grid-cols-2 gap-4">
+								<div className="space-y-1.5">
+									<label className="text-sm font-bold text-slate-700">이전 소속</label>
+									<select 
+										value={form.fromDepartmentId} 
+										onChange={(e) => setForm({...form, fromDepartmentId: e.target.value})}
+										className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 text-sm font-medium focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+									>
+										<option value="">(선택 안함)</option>
+										{departments.map(d => (
+											<option key={d.id} value={d.id}>{d.name}</option>
+										))}
+									</select>
+								</div>
+								<div className="space-y-1.5">
+									<label className="text-sm font-bold text-slate-700">발령 소속</label>
+									<select 
+										value={form.toDepartmentId} 
+										onChange={(e) => setForm({...form, toDepartmentId: e.target.value})}
+										className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 text-sm font-medium focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+									>
+										<option value="">(선택 안함)</option>
+										{departments.map(d => (
+											<option key={d.id} value={d.id}>{d.name}</option>
+										))}
+									</select>
+								</div>
+							</div>
+							<div className="grid grid-cols-2 gap-4">
+								<div className="space-y-1.5">
+									<label className="text-sm font-bold text-slate-700">이전 직급</label>
+									<select 
+										value={form.fromPositionId} 
+										onChange={(e) => setForm({...form, fromPositionId: e.target.value})}
+										className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 text-sm font-medium focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+									>
+										<option value="">(선택 안함)</option>
+										{positions.map(p => (
+											<option key={p.id} value={p.id}>{p.name}</option>
+										))}
+									</select>
+								</div>
+								<div className="space-y-1.5">
+									<label className="text-sm font-bold text-slate-700">발령 직급</label>
+									<select 
+										value={form.toPositionId} 
+										onChange={(e) => setForm({...form, toPositionId: e.target.value})}
+										className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 text-sm font-medium focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+									>
+										<option value="">(선택 안함)</option>
+										{positions.map(p => (
+											<option key={p.id} value={p.id}>{p.name}</option>
+										))}
+									</select>
+								</div>
+							</div>
+							<div className="space-y-1.5">
+								<label className="text-sm font-bold text-slate-700">발령 일자</label>
+								<input 
+									type="date" 
+									value={form.appointmentDate} 
+									onChange={(e) => setForm({...form, appointmentDate: e.target.value})}
+									className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 text-sm font-medium focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors" 
+								/>
+							</div>
+							<div className="space-y-1.5">
+								<label className="text-sm font-bold text-slate-700">사유</label>
+								<textarea 
+									rows={2} 
+									value={form.reason} 
+									onChange={(e) => setForm({...form, reason: e.target.value})}
+									placeholder="발령 사유를 자세히 입력하세요" 
+									className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-sm font-medium focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 resize-none transition-colors"
+								></textarea>
+							</div>
+						</div>
+						<div className="p-4 border-t border-slate-100 bg-slate-50 flex gap-3 justify-end shrink-0">
+							<Button variant="outline" onClick={() => setIsModalOpen(false)} className="text-slate-600 hover:bg-slate-200 font-semibold px-5 rounded-lg h-10 border-slate-300">
+								취소
+							</Button>
+							<Button variant="primary" onClick={handleCreateSubmit} className="font-bold px-6 rounded-lg h-10 shadow-sm">
+								발령 등록하기
+							</Button>
+						</div>
+					</div>
+				</div>
+			)}
 		</>
 	);
 }

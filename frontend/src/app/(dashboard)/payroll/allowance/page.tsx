@@ -56,9 +56,9 @@ export default function AllowancePage() {
 					<h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">수당 관리</h1>
 					<p className="mt-2 text-sm text-slate-600 font-medium">급여에 적용되는 고정 및 변동 수당 항목을 손쉽게 설정하세요.</p>
 				</div>
-				<Button onClick={() => setShowForm(true)} className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-200 transition-all font-semibold px-6 py-2">
+				<button onClick={() => setShowForm(true)} className="rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-200 transition-all font-semibold px-6 py-2">
 					+ 신규 수당 등록
-				</Button>
+				</button>
 			</div>
 
 			{/* List Container */}

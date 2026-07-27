@@ -44,3 +44,27 @@ export interface LeavePolicyCreateBody {
 export function createLeavePolicy(body: LeavePolicyCreateBody): Promise<LeavePolicy> {
 	return apiFetch<LeavePolicy>("/leave-policies", { method: "POST", body });
 }
+
+export interface LeaveTypeModel {
+	id: number;
+	name: string;
+	code: string;
+}
+
+export function listLeaveTypes(): Promise<LeaveTypeModel[]> {
+	return apiFetch<LeaveTypeModel[]>("/leaves/types");
+}
+
+export interface LeaveRequestCreate {
+	employeeId: number;
+	leaveTypeId: number;
+	startDate: string;
+	endDate: string;
+	days: number;
+	reason: string;
+}
+
+export function createLeaveRequest(body: LeaveRequestCreate): Promise<LeaveRequest> {
+	return apiFetch<LeaveRequest>("/leaves", { method: "POST", body });
+}
+
