@@ -19,7 +19,7 @@ export function FeaturesGridSection() {
 
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 					{/* Card 1 */}
-					<div className="card-base">
+					<div className="card-base text-center flex flex-col items-center lg:items-start lg:text-left">
 						<div className="h-12 w-12 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 mb-6">
 							<BookOpen className="h-6 w-6" />
 						</div>
@@ -35,7 +35,7 @@ export function FeaturesGridSection() {
 					</div>
 
 					{/* Card 2 */}
-					<div className="card-base">
+					<div className="card-base text-center flex flex-col items-center lg:items-start lg:text-left">
 						<div className="h-12 w-12 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 mb-6">
 							<Calendar className="h-6 w-6" />
 						</div>
@@ -51,7 +51,7 @@ export function FeaturesGridSection() {
 					</div>
 
 					{/* Card 3 */}
-					<div className="card-base">
+					<div className="card-base text-center flex flex-col items-center lg:items-start lg:text-left">
 						<div className="h-12 w-12 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 mb-6">
 							<Users className="h-6 w-6" />
 						</div>
@@ -67,7 +67,7 @@ export function FeaturesGridSection() {
 					</div>
 
 					{/* Card 4 */}
-					<div className="card-base">
+					<div className="card-base text-center flex flex-col items-center lg:items-start lg:text-left">
 						<div className="h-12 w-12 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 mb-6">
 							<ShieldCheck className="h-6 w-6" />
 						</div>

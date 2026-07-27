@@ -6,7 +6,7 @@ export function HeroSection() {
 		<section className="relative overflow-hidden bg-slate-50 pt-16 md:pt-24 lg:pt-32 pb-16">
 			<div className="mx-auto max-w-[1600px] px-8 md:px-16 lg:px-24">
 				<div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-8 items-center">
-					<div className="max-w-2xl">
+					<div className="max-w-2xl mx-auto text-center lg:text-left flex flex-col items-center lg:items-start">
 						<div className="inline-flex items-center gap-2 rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700 mb-6">
 							<CheckCircle2 className="h-4 w-4" />
 							학교 전문 인사관리 플랫폼
@@ -35,7 +35,7 @@ export function HeroSection() {
 							</Link>
 						</div>
 
-						<div className="flex flex-wrap items-center gap-6 text-sm text-slate-500">
+						<div className="flex flex-wrap justify-center lg:justify-start items-center gap-6 text-sm text-slate-500">
 							<div className="flex items-center gap-1.5">
 								<CheckCircle2 className="h-4 w-4 text-slate-400" />
 								교육부 지침 준수

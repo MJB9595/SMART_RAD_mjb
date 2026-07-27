@@ -19,7 +19,7 @@ export function FeatureDetailSection({ badgeText, badgeIcon, title, description,
 				<div className={`grid grid-cols-1 lg:grid-cols-2 gap-16 items-center ${reverse ? 'lg:[&>div:first-child]:order-last' : ''}`}>
 					
 					{/* Text Content */}
-					<div className={`max-w-xl w-full ${reverse ? 'lg:mr-auto' : 'lg:ml-auto'}`}>
+					<div className={`max-w-xl w-full mx-auto text-center lg:text-left flex flex-col items-center lg:items-start ${reverse ? 'lg:mr-auto' : 'lg:ml-auto'}`}>
 						<div className="badge-primary mb-6">
 							{badgeIcon}
 							{badgeText}
@@ -45,7 +45,7 @@ export function FeatureDetailSection({ badgeText, badgeIcon, title, description,
 					</div>
 
 					{/* Mockup Content */}
-					<div className={`relative w-full max-w-lg lg:max-w-[640px] ${reverse ? 'lg:ml-auto' : 'lg:mr-auto'}`}>
+					<div className={`relative w-full max-w-lg mx-auto lg:max-w-[640px] mt-12 lg:mt-0 ${reverse ? 'lg:mx-0 lg:ml-auto' : 'lg:mx-0 lg:mr-auto'}`}>
 						{mockupStyle === 'floating' ? (
 							<div className="w-full flex items-center justify-center relative">
 								{mockupType === 'attendance' && <AttendanceMockup />}
@@ -200,7 +200,7 @@ function HRMockup() {
 				<div className="w-px h-6 bg-slate-200"></div>
 				
 				{/* Level 2 */}
-				<div className="flex gap-4 z-10">
+				<div className="flex flex-wrap justify-center gap-4 z-10 px-4">
 					<div className="bg-white text-slate-900 font-bold px-8 py-4 rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.04)] border border-slate-100 text-base min-w-[120px] text-center">
 						교감
 					</div>
@@ -212,7 +212,7 @@ function HRMockup() {
 				<div className="w-px h-6 bg-slate-200"></div>
 				
 				{/* Level 3 */}
-				<div className="flex gap-4 z-10">
+				<div className="flex flex-wrap justify-center gap-4 z-10 px-4">
 					<div className="bg-white text-slate-900 font-bold px-6 py-4 rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.04)] border border-slate-100 text-sm min-w-[100px] text-center">
 						교무부
 					</div>
