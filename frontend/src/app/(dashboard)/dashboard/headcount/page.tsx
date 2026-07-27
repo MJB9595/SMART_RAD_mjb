@@ -1,31 +1,30 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { searchEmployees } from "@/lib/api/employees";
+import { getDashboardHeadcount, type HeadcountDto } from "@/lib/api/dashboard";
 import { listDepartments } from "@/lib/api/departments";
 import { ApiError } from "@/lib/api/client";
-import type { Employee } from "@/lib/types/employee";
 import type { Department } from "@/lib/types/department";
 
 export default function HeadcountPage() {
-	const [employees, setEmployees] = useState<Employee[]>([]);
+	const [headcounts, setHeadcounts] = useState<HeadcountDto[]>([]);
 	const [departments, setDepartments] = useState<Department[]>([]);
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
-		Promise.all([searchEmployees({ size: 200 }), listDepartments()])
-			.then(([page, depts]) => {
-				setEmployees(page.content);
+		Promise.all([getDashboardHeadcount(), listDepartments()])
+			.then(([stats, depts]) => {
+				setHeadcounts(stats);
 				setDepartments(depts);
 			})
 			.catch((err) => setError(err instanceof ApiError ? err.message : "대시보드를 불러오지 못했습니다."));
 	}, []);
 
-	const headcountByDept = useMemo(() => {
-		const map = new Map<number, number>();
-		for (const e of employees) map.set(e.departmentId, (map.get(e.departmentId) ?? 0) + 1);
+	const headcountByDeptName = useMemo(() => {
+		const map = new Map<string, number>();
+		for (const h of headcounts) map.set(h.departmentName, h.headcount);
 		return map;
-	}, [employees]);
+	}, [headcounts]);
 
 	const leafDepartments = departments.filter((d) => d.headcount > 0);
 
@@ -51,7 +50,7 @@ export default function HeadcountPage() {
 					</thead>
 					<tbody>
 						{leafDepartments.map((d) => {
-							const actual = headcountByDept.get(d.id) ?? 0;
+							const actual = headcountByDeptName.get(d.name) ?? 0;
 							const rate = d.headcount > 0 ? Math.round((actual / d.headcount) * 100) : 0;
 							return (
 								<tr key={d.id} className="border-b border-slate-100 hover:bg-slate-50">
