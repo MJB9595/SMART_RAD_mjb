@@ -25,3 +25,16 @@ export interface MonthlyAttendance {
 export function listMonthlyAttendance(year: number, month: number): Promise<MonthlyAttendance[]> {
 	return apiFetch<MonthlyAttendance[]>(`/attendances/monthly?year=${year}&month=${month}`);
 }
+
+export interface AttendanceCreateBody {
+	employeeId: number;
+	workDate: string;
+	checkInTime?: string | null;
+	checkOutTime?: string | null;
+	status: string;
+}
+
+/** 근태 등록/수정 (같은 직원·날짜면 갱신). ADMIN. */
+export function createAttendance(body: AttendanceCreateBody): Promise<Attendance> {
+	return apiFetch<Attendance>("/attendances", { method: "POST", body });
+}

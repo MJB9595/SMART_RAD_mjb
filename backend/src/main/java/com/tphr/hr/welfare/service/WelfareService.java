@@ -1,5 +1,6 @@
 package com.tphr.hr.welfare.service;
 
+import com.tphr.hr.common.util.DocumentNumberGenerator;
 import com.tphr.hr.employee.Employee;
 import com.tphr.hr.employee.EmployeeRepository;
 import com.tphr.hr.welfare.dto.EmployeeCertificateIssueDto;
@@ -23,14 +24,21 @@ public class WelfareService {
     private final EmployeeEventSupportRepository eventSupportRepository;
     private final EmployeeCertificateIssueRepository certificateIssueRepository;
     private final EmployeeRepository employeeRepository;
+    private final DocumentNumberGenerator documentNumberGenerator;
+
+    private static boolean isBlank(String s) {
+        return s == null || s.isBlank();
+    }
 
     @Transactional
     public EmployeeEventSupportDto.Response createEventSupport(EmployeeEventSupportDto.Request req) {
         Employee emp = employeeRepository.findById(req.getEmployeeId())
                 .orElseThrow(() -> new IllegalArgumentException("Employee not found"));
+        String documentNumber = isBlank(req.getDocumentNumber())
+                ? documentNumberGenerator.generate("ES") : req.getDocumentNumber();
         EmployeeEventSupport entity = EmployeeEventSupport.builder()
                 .employee(emp)
-                .documentNumber(req.getDocumentNumber())
+                .documentNumber(documentNumber)
                 .eventType(req.getEventType())
                 .familyRelation(req.getFamilyRelation())
                 .targetName(req.getTargetName())
@@ -63,9 +71,11 @@ public class WelfareService {
     public EmployeeCertificateIssueDto.Response createCertificateIssue(EmployeeCertificateIssueDto.Request req) {
         Employee emp = employeeRepository.findById(req.getEmployeeId())
                 .orElseThrow(() -> new IllegalArgumentException("Employee not found"));
+        String documentNumber = isBlank(req.getDocumentNumber())
+                ? documentNumberGenerator.generate("CERT") : req.getDocumentNumber();
         EmployeeCertificateIssue entity = EmployeeCertificateIssue.builder()
                 .employee(emp)
-                .documentNumber(req.getDocumentNumber())
+                .documentNumber(documentNumber)
                 .certificateType(req.getCertificateType())
                 .applicationDate(req.getApplicationDate())
                 .purpose(req.getPurpose())
