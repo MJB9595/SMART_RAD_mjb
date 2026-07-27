@@ -32,13 +32,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/employees")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
 public class EmployeeController {
 
 	private final EmployeeService employeeService;
 	private final SignupService signupService;
 
 	@GetMapping
+	@PreAuthorize("hasRole('ADMIN')")
 	public Page<EmployeeResponse> searchEmployees(
 			@RequestParam(required = false) String keyword,
 			@RequestParam(required = false) Long departmentId,
@@ -51,6 +51,7 @@ public class EmployeeController {
 	}
 
 	@GetMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.employeeId")
 	public EmployeeResponse getEmployee(@PathVariable Long id) {
 		return employeeService.getEmployee(id);
 	}
