@@ -65,7 +65,7 @@ INSERT INTO `common_code` (`common_code_id`, `group_code`, `code`, `name`, `sort
 
 -- ══════════════ 교직원 (admin / password: admin1234, 샘플 / user1234) ══════════════
 INSERT INTO `employee` (`employee_id`, `employee_no`, `department_id`, `position_id`, `employment_type_id`, `name`, `staff_category`, `email`, `password`, `role`, `phone`, `birth_date`, `gender`, `hire_date`, `employee_status_code`, `bank_name`, `account_number`, `account_holder`, `created_at`, `updated_at`, `version`, `deleted`) VALUES
-  (1, 'ADM001', 3, 6, 1, '관리자', 'STAFF',   'admin@tphr.com',      '$2y$10$R0S14r6EejQe.6BTBZFvQe8Bt.UsvH6rtDh0323ZOjk5yf8IsAaJG', 'ADMIN',    '010-0000-0000', '1980-01-01', 'M', '2020-01-01', 'EMPLOYED', NULL, NULL, NULL, NOW(), NOW(), 0, FALSE),
+  (1, 'ADM001', 3, 6, 1, '관리자', 'STAFF',   'admin',      '$2b$10$O1TnhjcfyA1FYAuKt7t.0OPzp.B6sN9//lA.fnwrOi6CLgNNTGPcG', 'ADMIN',    '010-0000-0000', '1980-01-01', 'M', '2020-01-01', 'EMPLOYED', NULL, NULL, NULL, NOW(), NOW(), 0, FALSE),
   (2, 'FAC001', 6, 1, 1, '김정교', 'FACULTY', 'prof.kim@tphr.com',   '$2y$10$HBrp.B9cw/40BPare6uwg..KV3JkZ9JkaaXIUxgP5lDKen0KVRtb2', 'EMPLOYEE', '010-1111-0001', '1975-05-12', 'M', '2012-03-01', 'EMPLOYED', '국민은행', '123456-01-000001', '김정교', NOW(), NOW(), 0, FALSE),
   (3, 'FAC002', 6, 2, 1, '이부교', 'FACULTY', 'assoc.lee@tphr.com',  '$2y$10$HBrp.B9cw/40BPare6uwg..KV3JkZ9JkaaXIUxgP5lDKen0KVRtb2', 'EMPLOYEE', '010-1111-0002', '1980-09-03', 'F', '2017-03-01', 'EMPLOYED', '신한은행', '110-000-000002', '이부교', NOW(), NOW(), 0, FALSE),
   (4, 'FAC003', 7, 4, 3, '박강사', 'FACULTY', 'lect.park@tphr.com',  '$2y$10$HBrp.B9cw/40BPare6uwg..KV3JkZ9JkaaXIUxgP5lDKen0KVRtb2', 'EMPLOYEE', '010-1111-0003', '1990-01-20', 'M', '2025-03-01', 'EMPLOYED', NULL, NULL, NULL, NOW(), NOW(), 0, FALSE),
