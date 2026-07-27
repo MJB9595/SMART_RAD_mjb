@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button, Field, Select } from "@/components/ui";
+import { Button } from "@/components/ui";
 import { listCertificates, createCertificate, type Certificate } from "@/lib/api/welfare";
 import { searchEmployees } from "@/lib/api/employees";
 import { ApiError } from "@/lib/api/client";
@@ -16,7 +16,6 @@ export default function CertificatePage() {
 	const [rows, setRows] = useState<Certificate[]>([]);
 	const [loading, setLoading] = useState(true);
 
-	// 신청 폼
 	const [employees, setEmployees] = useState<Employee[]>([]);
 	const [showForm, setShowForm] = useState(false);
 	const [form, setForm] = useState({ employeeId: "", certificateType: "재직증명서", applicationDate: today(), purpose: "" });
@@ -62,112 +61,150 @@ export default function CertificatePage() {
 		}
 	}
 
-	const inputCls = "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none";
-
 	return (
-		<div>
-			<nav className="mb-2 text-sm text-slate-500">
-				복지·증명 관리 <span className="mx-1">›</span>{" "}
-				<span className="font-medium text-slate-900">증명서 발급</span>
-			</nav>
-			<div className="mb-6 flex items-start justify-between">
+		<div className="flex flex-col gap-6 w-full max-w-6xl mx-auto pb-10">
+			{/* Header */}
+			<div className="flex flex-col md:flex-row md:items-end justify-between bg-gradient-to-r from-orange-50 to-white p-6 rounded-2xl shadow-sm border border-orange-100/50 gap-4">
 				<div>
-					<h1 className="text-2xl font-bold text-slate-900">제증명 발급 신청</h1>
-					<p className="mt-1 text-sm text-slate-500">재직, 경력, 원천징수 등 증명서를 신청하고 발급받습니다.</p>
+					<nav className="mb-2 text-xs font-semibold text-orange-500 tracking-wider uppercase">
+						Welfare Management <span className="mx-2 text-orange-300">/</span> Certificates
+					</nav>
+					<h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">제증명 발급 신청</h1>
+					<p className="mt-2 text-sm text-slate-600 font-medium">재직, 경력, 원천징수 등 필요 증명서를 즉시 신청하고 다운로드 받으세요.</p>
 				</div>
-				<Button onClick={() => setShowForm(true)}>증명서 신청</Button>
+				<button onClick={() => setShowForm(true)} className="bg-orange-500 hover:bg-orange-600 text-white shadow-md shadow-orange-200 transition-all font-semibold px-6 py-2.5 rounded-xl border-none">
+					+ 신규 증명서 발급
+				</button>
 			</div>
 
-			<div className="mb-6 rounded-lg border border-slate-200 p-6">
-				<p className="mb-4 text-sm font-semibold text-slate-700">검색조건</p>
-				<div className="flex flex-wrap items-end gap-4">
-					<Field label="증명서 종류">
-						<Select value={type} onChange={(e) => setType(e.target.value)}>
-							<option value="">전체</option>
-							<option value="재직증명서">재직증명서</option>
-							<option value="경력증명서">경력증명서</option>
-							<option value="원천징수영수증">원천징수영수증</option>
-						</Select>
-					</Field>
+			{/* Filter */}
+			<div className="flex items-center gap-3 px-5 py-4 bg-white rounded-2xl shadow-sm border border-slate-200">
+				<span className="text-sm font-bold text-slate-700">증명서 종류 필터</span>
+				<div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl overflow-hidden h-[38px] px-3">
+					<select 
+						value={type} 
+						onChange={(e) => setType(e.target.value)}
+						className="bg-transparent outline-none text-sm font-medium text-slate-700 w-36 cursor-pointer"
+					>
+						<option value="">모든 증명서 내역</option>
+						<option value="재직증명서">재직증명서</option>
+						<option value="경력증명서">경력증명서</option>
+						<option value="원천징수영수증">원천징수영수증</option>
+					</select>
+				</div>
+				<div className="ml-auto text-sm text-slate-500 font-medium">
+					조회된 내역 <span className="font-bold text-orange-500">{filtered.length}</span>건
 				</div>
 			</div>
 
-			<table className="w-full border-collapse text-sm">
-				<thead>
-					<tr className="border-b border-slate-200 bg-slate-50 text-left text-slate-500">
-						<th className="p-3 font-medium">신청번호</th>
-						<th className="p-3 font-medium">증명서 종류</th>
-						<th className="p-3 font-medium">신청사유 (용도)</th>
-						<th className="p-3 font-medium">신청일자</th>
-						<th className="p-3 font-medium">발급상태</th>
-						<th className="p-3 font-medium">다운로드</th>
-					</tr>
-				</thead>
-				<tbody>
-					{loading ? (
-						<tr><td colSpan={6} className="p-6 text-center text-slate-400">불러오는 중...</td></tr>
-					) : filtered.length === 0 ? (
-						<tr><td colSpan={6} className="p-6 text-center text-slate-400">증명서 신청 내역이 없습니다.</td></tr>
-					) : (
-						filtered.map((d) => (
-							<tr key={d.id} className="border-b border-slate-100 hover:bg-slate-50">
-								<td className="p-3 text-slate-500">{d.documentNumber}</td>
-								<td className="p-3 font-medium text-slate-900">{d.certificateType}</td>
-								<td className="p-3">{d.purpose || "-"}</td>
-								<td className="p-3 text-slate-500">{d.applicationDate}</td>
-								<td className="p-3">
-									{d.issueStatus === "ISSUED" ? (
-										<span className="inline-flex rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-600">발급완료</span>
-									) : (
-										<span className="inline-flex rounded-full bg-orange-50 px-2 py-0.5 text-xs text-orange-600">발급대기</span>
-									)}
-								</td>
-								<td className="p-3">
-									<Button variant="outline" className="px-3 py-1 text-xs" disabled={d.issueStatus !== "ISSUED"}>
-										PDF 다운로드
-									</Button>
-								</td>
+			{/* List Container */}
+			<div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+				<div className="overflow-x-auto">
+					<table className="w-full text-left text-sm whitespace-nowrap">
+						<thead className="bg-slate-50 text-slate-500 border-b border-slate-100">
+							<tr>
+								<th className="px-6 py-4 font-semibold text-xs tracking-wider uppercase">신청번호</th>
+								<th className="px-6 py-4 font-semibold text-xs tracking-wider uppercase">증명서 종류</th>
+								<th className="px-6 py-4 font-semibold text-xs tracking-wider uppercase">신청 사유(용도)</th>
+								<th className="px-6 py-4 font-semibold text-xs tracking-wider uppercase">신청일자</th>
+								<th className="px-6 py-4 font-semibold text-xs tracking-wider uppercase text-center">발급상태</th>
+								<th className="px-6 py-4 font-semibold text-xs tracking-wider uppercase text-right">파일 관리</th>
 							</tr>
-						))
-					)}
-				</tbody>
-			</table>
+						</thead>
+						<tbody className="divide-y divide-slate-50">
+							{loading ? (
+								<tr><td colSpan={6} className="px-6 py-12 text-center text-slate-400 font-medium">데이터를 불러오는 중입니다...</td></tr>
+							) : filtered.length === 0 ? (
+								<tr><td colSpan={6} className="px-6 py-12 text-center text-slate-400 font-medium">증명서 발급 신청 내역이 없습니다.</td></tr>
+							) : (
+								filtered.map((d) => (
+									<tr key={d.id} className="hover:bg-slate-50/50 transition-colors">
+										<td className="px-6 py-4 font-medium text-slate-400">
+											<span className="bg-slate-100 px-2 py-1 rounded-md">{d.documentNumber}</span>
+										</td>
+										<td className="px-6 py-4 font-bold text-slate-800">
+											<span className="flex items-center gap-2">
+												<span className="w-2 h-2 rounded-full bg-orange-400"></span>
+												{d.certificateType}
+											</span>
+										</td>
+										<td className="px-6 py-4">
+											<div className="font-semibold text-slate-600">{d.purpose || "-"}</div>
+										</td>
+										<td className="px-6 py-4 font-medium text-slate-500">{d.applicationDate}</td>
+										<td className="px-6 py-4 text-center">
+											{d.issueStatus === "ISSUED" ? (
+												<span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 font-bold text-xs shadow-sm">
+													발급완료
+												</span>
+											) : (
+												<span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-600 font-bold text-xs shadow-sm">
+													발급대기
+												</span>
+											)}
+										</td>
+										<td className="px-6 py-4 text-right">
+											<Button 
+												variant="outline" 
+												className="px-4 py-1.5 text-xs font-bold rounded-lg border-slate-200 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 transition-colors" 
+												disabled={d.issueStatus !== "ISSUED"}
+											>
+												PDF 다운로드
+											</Button>
+										</td>
+									</tr>
+								))
+							)}
+						</tbody>
+					</table>
+				</div>
+			</div>
 
+			{/* Modal Overlay for Form */}
 			{showForm && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-					<form onSubmit={submit} className="w-[440px] max-w-[95vw] rounded-lg bg-white p-6 shadow-xl">
-						<div className="mb-4 flex items-center justify-between">
-							<h2 className="text-lg font-bold text-slate-900">증명서 신청</h2>
-							<button type="button" onClick={() => setShowForm(false)} className="text-2xl leading-none text-slate-400 hover:text-slate-600">&times;</button>
+				<div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+					<form onSubmit={submit} className="w-[480px] rounded-3xl bg-white p-8 shadow-2xl animate-in zoom-in-95 duration-200">
+						<div className="mb-6 flex items-center justify-between">
+							<h2 className="text-2xl font-bold text-slate-900">제증명 발급 신청</h2>
+							<button type="button" onClick={() => setShowForm(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors">
+								&times;
+							</button>
 						</div>
-						<div className="space-y-3">
+						
+						<div className="space-y-5">
 							<div>
-								<label className="mb-1 block text-sm font-medium text-slate-700">신청 교직원</label>
-								<select value={form.employeeId} onChange={(e) => set("employeeId", e.target.value)} className={inputCls} required>
+								<label className="mb-1.5 block text-sm font-semibold text-slate-700">신청 교직원 <span className="text-orange-500">*</span></label>
+								<select value={form.employeeId} onChange={(e) => set("employeeId", e.target.value)} className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 focus:outline-none transition-all font-medium" required>
 									<option value="">교직원 선택</option>
 									{employees.map((emp) => (<option key={emp.id} value={emp.id}>{emp.name} ({emp.employeeNumber})</option>))}
 								</select>
 							</div>
+							
 							<div>
-								<label className="mb-1 block text-sm font-medium text-slate-700">증명서 종류</label>
-								<select value={form.certificateType} onChange={(e) => set("certificateType", e.target.value)} className={inputCls}>
+								<label className="mb-1.5 block text-sm font-semibold text-slate-700">증명서 종류 <span className="text-orange-500">*</span></label>
+								<select value={form.certificateType} onChange={(e) => set("certificateType", e.target.value)} className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 focus:outline-none transition-all font-medium">
 									<option value="재직증명서">재직증명서</option>
 									<option value="경력증명서">경력증명서</option>
 									<option value="원천징수영수증">원천징수영수증</option>
 								</select>
 							</div>
+							
 							<div>
-								<label className="mb-1 block text-sm font-medium text-slate-700">신청일</label>
-								<input type="date" value={form.applicationDate} onChange={(e) => set("applicationDate", e.target.value)} className={inputCls} required />
+								<label className="mb-1.5 block text-sm font-semibold text-slate-700">신청일자 <span className="text-orange-500">*</span></label>
+								<input type="date" value={form.applicationDate} onChange={(e) => set("applicationDate", e.target.value)} className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 focus:outline-none transition-all font-medium" required />
 							</div>
+							
 							<div>
-								<label className="mb-1 block text-sm font-medium text-slate-700">신청 사유 (용도)</label>
-								<input value={form.purpose} onChange={(e) => set("purpose", e.target.value)} className={inputCls} placeholder="예: 은행 제출용" />
+								<label className="mb-1.5 block text-sm font-semibold text-slate-700">신청 사유 (용도)</label>
+								<input value={form.purpose} onChange={(e) => set("purpose", e.target.value)} className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 focus:outline-none transition-all font-medium" placeholder="예: 은행 대출 서류 제출용" />
 							</div>
 						</div>
-						<div className="mt-5 flex justify-end gap-2">
-							<button type="button" onClick={() => setShowForm(false)} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">취소</button>
-							<button type="submit" disabled={saving} className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60">{saving ? "신청 중..." : "신청"}</button>
+						
+						<div className="mt-8 pt-6 border-t border-slate-100 flex justify-end gap-3">
+							<button type="button" onClick={() => setShowForm(false)} className="rounded-xl border border-slate-200 px-6 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors">취소</button>
+							<button type="submit" disabled={saving} className="rounded-xl bg-orange-500 px-8 py-3 text-sm font-bold text-white shadow-md shadow-orange-200 hover:bg-orange-600 disabled:opacity-60 transition-all">
+								{saving ? "신청 중..." : "발급 신청"}
+							</button>
 						</div>
 					</form>
 				</div>

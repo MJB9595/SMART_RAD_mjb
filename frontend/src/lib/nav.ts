@@ -25,6 +25,7 @@ export const topNavTabs: TopNavTab[] = [
 				label: "인사기록 관리",
 				items: [
 					{ label: "교직원 정보관리", href: "/employees" },
+					{ label: "교직원 통계 대시보드", href: "/dashboard/headcount" },
 				],
 			},
 		],
@@ -44,30 +45,15 @@ export const topNavTabs: TopNavTab[] = [
 		],
 	},
 	{
-		key: "attendance",
-		label: "근태 관리",
-		basePath: "/attendance",
+		key: "attendance-leaves",
+		label: "근태·휴가 관리",
+		basePath: "/attendance/monthly",
 		sections: [
 			{
-				label: "근태 관리",
+				label: "근태·휴가 관리",
 				items: [
-					{ label: "일일 근태 등록", href: "/attendance" },
-					{ label: "월 근태 현황", href: "/attendance/monthly" },
-				],
-			},
-		],
-	},
-	{
-		key: "leaves",
-		label: "휴가 관리",
-		basePath: "/leaves",
-		sections: [
-			{
-				label: "휴가 관리",
-				items: [
-					{ label: "휴가 신청/승인", href: "/leaves" },
-					{ label: "잔여일수 현황", href: "/leave-balance" },
-					{ label: "휴가유형·정책 관리", href: "/leaves/policy" },
+					{ label: "월 근태 관리 · 현황", href: "/attendance/monthly" },
+					{ label: "월 휴가 관리 · 현황", href: "/leaves" },
 				],
 			},
 		],
@@ -97,20 +83,6 @@ export const topNavTabs: TopNavTab[] = [
 				items: [
 					{ label: "경조비 신청/승인", href: "/welfare/event-support" },
 					{ label: "증명서 발급", href: "/welfare/certificate" },
-				],
-			},
-		],
-	},
-	{
-		key: "dashboard",
-		label: "통계 대시보드",
-		basePath: "/dashboard/headcount",
-		sections: [
-			{
-				label: "통계 대시보드",
-				items: [
-					{ label: "부서별 정원 현황", href: "/dashboard/headcount" },
-					{ label: "당일 근태 현황", href: "/dashboard/attendance" },
 				],
 			},
 		],
