@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { changeOwnPassword } from "@/lib/api/employees";
 import { ApiError } from "@/lib/api/client";
 
@@ -9,11 +10,11 @@ function EyeToggle({ shown, onToggle }: { shown: boolean; onToggle: () => void }
 		<button
 			type="button"
 			onClick={onToggle}
-			className="absolute inset-y-0 right-2 flex items-center text-slate-400 hover:text-slate-600"
+			className="absolute inset-y-0 right-3 flex items-center text-slate-400 hover:text-slate-600"
 			aria-label={shown ? "비밀번호 숨기기" : "비밀번호 보기"}
 			tabIndex={-1}
 		>
-			{shown ? "🙈" : "👁"}
+			{shown ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
 		</button>
 	);
 }
