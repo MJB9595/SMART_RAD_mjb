@@ -47,11 +47,12 @@ export const topNavTabs: TopNavTab[] = [
 	{
 		key: "attendance-leaves",
 		label: "근태·휴가 관리",
-		basePath: "/attendance/monthly",
+		basePath: "/attendance",
 		sections: [
 			{
 				label: "근태·휴가 관리",
 				items: [
+					{ label: "일일 근태 관리", href: "/attendance" },
 					{ label: "월 근태 관리 · 현황", href: "/attendance/monthly" },
 					{ label: "월 휴가 관리 · 현황", href: "/leaves" },
 				],
