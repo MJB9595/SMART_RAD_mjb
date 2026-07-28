@@ -5,22 +5,23 @@ export function HeroSection() {
 	return (
 		<section className="relative overflow-hidden bg-slate-50 min-h-screen flex flex-col justify-center py-24">
 			<div className="mx-auto max-w-[1600px] px-8 md:px-16 lg:px-24">
-				<div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-8 items-center">
+				<div className="grid grid-cols-1 gap-16 lg:grid-cols-2 lg:gap-24 items-center">
 					<div className="max-w-3xl mx-auto text-center lg:text-left flex flex-col items-center lg:items-start">
 						<div className="inline-flex items-center gap-2 rounded-full bg-blue-100 px-4 py-1.5 text-base font-medium text-blue-700 mb-8">
 							<CheckCircle2 className="h-5 w-5" />
 							학교 전문 인사관리 플랫폼
 						</div>
-						<h1 className="text-5xl font-extrabold tracking-tight text-slate-900 sm:text-6xl lg:text-7xl mb-8 leading-tight">
+						<h1 className="text-5xl font-extrabold tracking-tight text-slate-900 sm:text-6xl lg:text-7xl mb-10 leading-[1.2]">
 							교직원 인사관리,<br />
 							<span className="text-blue-600">이제 하나로 해결하세요</span>
 						</h1>
-						<p className="text-xl lg:text-2xl text-slate-600 mb-10 leading-relaxed">
-							복무·평가·인사발령·급여를 하나로 연결해 학교 인사 업무의<br />
-							비효율을 없앱니다. 교육부 지침이 바뀌어도 제도는 자동으로 업데이트됩니다.
+						<p className="text-xl lg:text-2xl text-slate-600 mb-12 leading-relaxed">
+							복무·평가·인사발령·급여를 하나로 연결해 학교 인사 업무의 비효율을 없앱니다. 
+							<br className="hidden xl:block" />
+							교육부 지침이 바뀌어도 제도는 자동으로 업데이트됩니다.
 						</p>
 						
-						<div className="flex flex-col sm:flex-row gap-6 mb-10">
+						<div className="flex flex-col sm:flex-row gap-6 mb-12">
 							<Link
 								href="/signup"
 								className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-10 py-4 text-lg font-semibold text-white transition-colors hover:bg-blue-700"
