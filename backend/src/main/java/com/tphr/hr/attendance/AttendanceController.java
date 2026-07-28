@@ -4,12 +4,16 @@ import com.tphr.hr.attendance.dto.AttendanceRequest;
 import com.tphr.hr.attendance.dto.AttendanceResponse;
 import com.tphr.hr.attendance.dto.AttendanceSummaryResponse;
 import com.tphr.hr.attendance.dto.MonthlyAttendanceResponse;
+import com.tphr.hr.common.excel.ExcelExportSupport;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AttendanceController {
 
 	private final AttendanceService attendanceService;
+	private final AttendanceExcelService attendanceExcelService;
 
 	@GetMapping
 	public List<AttendanceResponse> getAttendancesByDate(
@@ -45,6 +50,17 @@ public class AttendanceController {
 	@GetMapping("/monthly")
 	public List<MonthlyAttendanceResponse> getMonthly(@RequestParam int year, @RequestParam int month) {
 		return attendanceService.getMonthlyAttendance(year, month);
+	}
+
+	@GetMapping("/monthly/export")
+	public ResponseEntity<byte[]> exportMonthly(@RequestParam int year, @RequestParam int month) {
+		byte[] file = attendanceExcelService.exportMonthly(year, month);
+		String fileName = "%d년_%02d월_근태현황.xlsx".formatted(year, month);
+		return ResponseEntity.ok()
+				.contentType(MediaType.parseMediaType(ExcelExportSupport.XLSX_CONTENT_TYPE))
+				.header(HttpHeaders.CONTENT_DISPOSITION, ExcelExportSupport.contentDisposition(fileName))
+				.contentLength(file.length)
+				.body(file);
 	}
 
 	@PostMapping

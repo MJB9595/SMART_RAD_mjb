@@ -47,7 +47,7 @@ public class AttendanceService {
 		Map<Long, Employee> employees = new LinkedHashMap<>();
 		Map<Long, int[]> counts = new LinkedHashMap<>(); // [present, late, absent, leave]
 		for (Attendance a : attendanceRepository
-				.findByWorkDateBetweenAndDeletedFalseOrderByEmployee_EmployeeNumberAsc(start, end)) {
+				.findByWorkDateBetweenAndDeletedFalseOrderByEmployee_EmployeeNumberAscWorkDateAsc(start, end)) {
 			Employee e = a.getEmployee();
 			employees.putIfAbsent(e.getId(), e);
 			int[] c = counts.computeIfAbsent(e.getId(), k -> new int[4]);
