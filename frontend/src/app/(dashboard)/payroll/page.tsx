@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { listPayrolls } from "@/lib/api/payroll";
+import { exportPayroll, exportPayrolls, listPayrolls } from "@/lib/api/payroll";
 import type { Payroll } from "@/lib/types/payroll";
 
 export default function PayrollPage() {
@@ -9,6 +9,16 @@ export default function PayrollPage() {
 	const [totalElements, setTotalElements] = useState(0);
 	const [loading, setLoading] = useState(true);
 	const [selectedPayroll, setSelectedPayroll] = useState<Payroll | null>(null);
+	const [downloading, setDownloading] = useState<"all" | "one" | null>(null);
+
+	function runExport(kind: "all" | "one", task: Promise<void>) {
+		setDownloading(kind);
+		task
+			.catch((error) => {
+				alert(error instanceof Error ? error.message : "엑셀 다운로드에 실패했습니다.");
+			})
+			.finally(() => setDownloading(null));
+	}
 
 	function load() {
 		setLoading(true);
@@ -47,7 +57,9 @@ export default function PayrollPage() {
 					<div className="page-title">급여 명세서 조회</div>
 					<div className="page-sub">근태와 연동된 기초 급여 내역을 조회하고 상세 내역을 확인합니다</div>
 				</div>
-				<button className="btn-primary">엑셀 다운로드</button>
+				<button className="btn-primary" onClick={() => runExport("all", exportPayrolls())} disabled={downloading !== null}>
+					{downloading === "all" ? "다운로드 중" : "엑셀 다운로드"}
+				</button>
 			</div>
 
 			<div className="stat-grid">
@@ -157,7 +169,9 @@ export default function PayrollPage() {
 							</div>
 							
 							<div style={{marginTop: "auto", paddingTop: "20px"}}>
-								<button className="btn-outline">상세 엑셀 다운로드</button>
+								<button className="btn-outline" onClick={() => runExport("one", exportPayroll(selectedPayroll.id))} disabled={downloading !== null}>
+									{downloading === "one" ? "다운로드 중" : "상세 엑셀 다운로드"}
+								</button>
 							</div>
 						</div>
 					</div>

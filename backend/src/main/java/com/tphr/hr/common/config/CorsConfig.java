@@ -20,6 +20,8 @@ public class CorsConfig {
 		configuration.setAllowedOrigins(List.of(allowedOrigins.split(",")));
 		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 		configuration.setAllowedHeaders(List.of("*"));
+		// 엑셀 다운로드 파일명을 프런트엔드에서 읽을 수 있도록 노출한다.
+		configuration.setExposedHeaders(List.of("Content-Disposition"));
 		configuration.setAllowCredentials(true);
 
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

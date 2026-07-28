@@ -48,3 +48,61 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
 	const text = await res.text();
 	return (text ? (JSON.parse(text) as T) : (undefined as T));
 }
+
+/** Content-Disposition에서 파일명 추출. RFC 5987 `filename*`을 우선 사용한다. */
+function parseFileName(disposition: string | null, fallback: string): string {
+	if (!disposition) return fallback;
+
+	const encoded = /filename\*=UTF-8''([^;]+)/i.exec(disposition);
+	if (encoded) {
+		try {
+			return decodeURIComponent(encoded[1].trim());
+		} catch {
+			// 인코딩이 깨진 경우 아래 plain filename으로 넘어간다.
+		}
+	}
+
+	const plain = /filename="?([^";]+)"?/i.exec(disposition);
+	return plain ? plain[1].trim() : fallback;
+}
+
+/**
+ * 엑셀 등 첨부파일 응답을 받아 브라우저 다운로드를 실행한다.
+ * 인증/401 처리와 오류 메시지 규약은 apiFetch와 동일하게 유지한다.
+ */
+export async function apiDownload(path: string, fallbackFileName: string): Promise<void> {
+	const token = getToken();
+
+	const res = await fetch(`${API_BASE_URL}${path}`, {
+		headers: token ? { Authorization: `Bearer ${token}` } : {},
+	});
+
+	if (res.status === 401) {
+		clearToken();
+		window.dispatchEvent(new Event("tp-hr:unauthorized"));
+	}
+
+	if (!res.ok) {
+		const message = await res
+			.text()
+			.then((text) => (text ? (JSON.parse(text).message as string) : ""))
+			.catch(() => "")
+			.then((parsed) => parsed || `파일을 내려받지 못했습니다. (${res.status})`);
+		throw new ApiError(res.status, message);
+	}
+
+	const blob = await res.blob();
+	const fileName = parseFileName(res.headers.get("Content-Disposition"), fallbackFileName);
+	const url = window.URL.createObjectURL(blob);
+
+	try {
+		const link = document.createElement("a");
+		link.href = url;
+		link.download = fileName;
+		document.body.appendChild(link);
+		link.click();
+		link.remove();
+	} finally {
+		window.URL.revokeObjectURL(url);
+	}
+}

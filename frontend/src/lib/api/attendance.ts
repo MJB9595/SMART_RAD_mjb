@@ -1,4 +1,4 @@
-import { apiFetch } from "@/lib/api/client";
+import { apiDownload, apiFetch } from "@/lib/api/client";
 import type { Attendance, AttendanceSummary } from "@/lib/types/attendance";
 
 export function listAttendances(workDate: string): Promise<Attendance[]> {
@@ -24,6 +24,14 @@ export interface MonthlyAttendance {
 /** 월 근태 현황 — 직원별 월간 집계 (ADMIN). */
 export function listMonthlyAttendance(year: number, month: number): Promise<MonthlyAttendance[]> {
 	return apiFetch<MonthlyAttendance[]>(`/attendances/monthly?year=${year}&month=${month}`);
+}
+
+/** 월 근태 현황 엑셀 다운로드 (ADMIN). */
+export function exportMonthlyAttendance(year: number, month: number): Promise<void> {
+	return apiDownload(
+		`/attendances/monthly/export?year=${year}&month=${month}`,
+		`${year}년_${String(month).padStart(2, "0")}월_근태현황.xlsx`,
+	);
 }
 
 export interface AttendanceCreateBody {

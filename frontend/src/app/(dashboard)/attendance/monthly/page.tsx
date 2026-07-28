@@ -2,7 +2,11 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { Button } from "@/components/ui";
-import { listMonthlyAttendance, type MonthlyAttendance } from "@/lib/api/attendance";
+import {
+	exportMonthlyAttendance,
+	listMonthlyAttendance,
+	type MonthlyAttendance,
+} from "@/lib/api/attendance";
 
 // Mock Daily Data Interface
 interface DailyData {
@@ -20,6 +24,16 @@ export default function MonthlyAttendancePage() {
 	const [showLateOnly, setShowLateOnly] = useState(false);
 	const [selectedEmployee, setSelectedEmployee] = useState<MonthlyAttendance | null>(null);
 	const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+	const [downloading, setDownloading] = useState(false);
+
+	function handleExport() {
+		setDownloading(true);
+		exportMonthlyAttendance(Number(year), Number(month))
+			.catch((error) => {
+				alert(error instanceof Error ? error.message : "엑셀 다운로드에 실패했습니다.");
+			})
+			.finally(() => setDownloading(false));
+	}
 
 	useEffect(() => {
 		let active = true;
@@ -117,8 +131,8 @@ export default function MonthlyAttendancePage() {
 					<div className="flex items-center gap-4 sm:gap-8 flex-wrap">
 						<h1 className="text-[22px] font-bold text-slate-900 tracking-tight">출퇴근기록 관리</h1>
 					</div>
-					<Button variant="outline" className="text-indigo-600 border-indigo-200 hover:bg-indigo-50 hover:border-indigo-300 font-medium h-9 px-5">
-						다운로드
+					<Button variant="outline" className="text-indigo-600 border-indigo-200 hover:bg-indigo-50 hover:border-indigo-300 font-medium h-9 px-5" onClick={handleExport} disabled={downloading}>
+						{downloading ? "다운로드 중" : "다운로드"}
 					</Button>
 				</div>
 

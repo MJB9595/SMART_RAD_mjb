@@ -2,11 +2,22 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui";
+import { exportSettlement, type SettlementFormType } from "@/lib/api/payroll";
 
 export default function SettlementPage() {
 	const [year, setYear] = useState("2026");
 	const [month, setMonth] = useState("07");
 	const [formType, setFormType] = useState("bank");
+	const [downloading, setDownloading] = useState(false);
+
+	function handleExport() {
+		setDownloading(true);
+		exportSettlement(`${year}${month}`, formType as SettlementFormType)
+			.catch((error) => {
+				alert(error instanceof Error ? error.message : "엑셀 다운로드에 실패했습니다.");
+			})
+			.finally(() => setDownloading(false));
+	}
 
 	return (
 		<>
@@ -92,11 +103,11 @@ export default function SettlementPage() {
 					</div>
 
 					<div style={{display: "flex", justifyContent: "flex-end", paddingTop: "16px", borderTop: "1px solid #F1F3F6"}}>
-						<button className="btn-primary" style={{padding: "10px 20px"}}>
+						<button className="btn-primary" style={{padding: "10px 20px"}} onClick={handleExport} disabled={downloading}>
 							<svg style={{width: "16px", height: "16px", marginRight: "4px"}} fill="none" viewBox="0 0 24 24" stroke="currentColor">
 								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
 							</svg>
-							엑셀 파일 생성 및 다운로드
+							{downloading ? "엑셀 파일 생성 중" : "엑셀 파일 생성 및 다운로드"}
 						</button>
 					</div>
 				</div>
