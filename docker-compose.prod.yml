@@ -1,0 +1,83 @@
+# 유그린 NAS 배포용 (이미지 빌드 포함 + Synology 역방향 프록시)
+#  - 서버에서 소스 빌드를 직접 수행하여 컨테이너를 생성합니다.
+#  - Caddy 없이 Synology NAS의 역방향 프록시를 통해 접속을 처리합니다.
+#  - 환경 변수는 .env.prod 를 읽습니다.
+
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: tp-hr-mysql-prod
+    # secure-file-priv 강제 무시 및 메모리 최적화 옵션
+    command: --secure-file-priv="" --innodb-buffer-pool-size=256M --max-connections=50
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME:-tp_hr}
+      MYSQL_USER: ${DB_USER:-tp_hr_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3307:3306"
+    volumes:
+      - tp-hr-mysql-prod-data:/var/lib/mysql
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 2g
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-uroot", "-p${DB_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: tp-hr-backend-prod
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xms512m -Xmx512m -XX:+UseSerialGC"
+      SPRING_PROFILES_ACTIVE: docker
+      DB_USER: ${DB_USER:-tp_hr_user}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
+      KAKAO_REST_API_KEY: ${KAKAO_REST_API_KEY:-}
+      KAKAO_CLIENT_SECRET: ${KAKAO_CLIENT_SECRET:-}
+      KAKAO_REDIRECT_URI: ${KAKAO_REDIRECT_URI:-}
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 2g
+    env_file:
+      - .env.prod
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ${API_BASE_URL:-http://localhost:8080/api}
+        NEXT_PUBLIC_KAKAO_CLIENT_ID: ${KAKAO_REST_API_KEY:-}
+        NEXT_PUBLIC_KAKAO_REDIRECT_URI: ${KAKAO_REDIRECT_URI:-http://localhost:3000/oauth/kakao/callback}
+    container_name: tp-hr-frontend-prod
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 2g
+    env_file:
+      - .env.prod
+
+volumes:
+  tp-hr-mysql-prod-data:
