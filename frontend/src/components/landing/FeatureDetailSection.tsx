@@ -15,8 +15,14 @@ interface FeatureDetailProps {
 
 export function FeatureDetailSection({ badgeText, badgeIcon, title, description, features, reverse = false, mockupType, mockupStyle = 'window' }: FeatureDetailProps) {
 	return (
-		<section className={`min-h-screen flex flex-col justify-center py-24 ${reverse ? 'bg-slate-50' : 'bg-white'}`}>
-			<div className="mx-auto max-w-[1600px] px-8 md:px-16 lg:px-24">
+		<section className={`relative min-h-screen flex flex-col justify-center py-24 lg:py-32 overflow-hidden ${reverse ? 'bg-slate-50' : 'bg-white'}`}>
+			{/* Decorative background blur */}
+			<div className="absolute inset-0 overflow-hidden pointer-events-none">
+				<div className={`absolute -top-[20%] -right-[10%] w-[50%] h-[50%] rounded-full mix-blend-multiply filter blur-[100px] opacity-40 transition-colors duration-500 ${reverse ? 'bg-blue-200' : 'bg-slate-200'}`}></div>
+				<div className={`absolute -bottom-[20%] -left-[10%] w-[50%] h-[50%] rounded-full mix-blend-multiply filter blur-[100px] opacity-40 transition-colors duration-500 ${reverse ? 'bg-indigo-200' : 'bg-blue-100'}`}></div>
+			</div>
+
+			<div className="relative mx-auto max-w-[1600px] px-8 md:px-16 lg:px-24 z-10">
 				<div className={`grid grid-cols-1 lg:grid-cols-2 gap-16 items-center ${reverse ? 'lg:[&>div:first-child]:order-last' : ''}`}>
 					
 					{/* Text Content */}
@@ -185,51 +191,102 @@ function SalaryMockup() {
 
 function HRMockup() {
 	return (
-		<div className="w-full max-w-[640px] bg-white rounded-3xl shadow-[0_20px_40px_rgb(0,0,0,0.08)] border border-slate-100 flex flex-col overflow-hidden">
-			{/* Header */}
-			<div className="flex justify-between items-center px-8 py-5 border-b border-slate-100">
-				<div className="font-bold text-slate-900 text-lg">학교 조직도</div>
-				<div className="bg-blue-50 text-blue-600 font-bold text-sm px-4 py-2 rounded-full">
-					교직원 142명
+		<div className="relative w-full max-w-[680px]">
+			{/* Main Chart Card */}
+			<div className="w-full bg-white rounded-3xl shadow-[0_20px_40px_rgb(0,0,0,0.08)] border border-slate-100 flex flex-col overflow-hidden transition-all duration-300 hover:shadow-[0_20px_50px_rgb(0,0,0,0.12)]">
+				{/* Header */}
+				<div className="flex justify-between items-center px-8 py-5 border-b border-slate-100">
+					<div className="font-bold text-slate-900 text-lg">학교 조직도</div>
+					<div className="bg-blue-50 text-blue-600 font-bold text-sm px-4 py-2 rounded-full">
+						교직원 142명
+					</div>
+				</div>
+				
+				{/* Chart Content */}
+				<div className="py-12 flex flex-col items-center bg-slate-50/50 overflow-x-auto">
+					{/* Level 1 */}
+					<div className="bg-blue-600 text-white font-bold px-10 py-4 rounded-2xl shadow-md text-lg z-10 min-w-[140px] text-center transform transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+						교장
+					</div>
+					
+					<div className="w-px h-8 bg-slate-300"></div>
+					
+					{/* Level 2 & 3 wrapper */}
+					<div className="relative flex justify-center gap-6 w-full max-w-[540px] px-4">
+						{/* Main horizontal line connecting Left & Right blocks */}
+						<div className="absolute top-0 left-1/4 right-1/4 h-px bg-slate-300"></div>
+						<div className="absolute top-0 left-1/4 w-px h-8 bg-slate-300"></div>
+						<div className="absolute top-0 right-1/4 w-px h-8 bg-slate-300"></div>
+						
+						{/* Left Block (교감) */}
+						<div className="flex flex-col items-center pt-8 w-1/2">
+							<div className="bg-white text-slate-900 font-bold px-6 py-4 rounded-2xl shadow-sm border border-slate-200 text-base w-full max-w-[180px] text-center transform transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-blue-200 z-10">
+								교감
+							</div>
+							
+							<div className="w-px h-8 bg-slate-300"></div>
+							
+							<div className="relative flex justify-between w-full">
+								<div className="absolute top-0 left-1/4 right-1/4 h-px bg-slate-300"></div>
+								<div className="absolute top-0 left-1/4 w-px h-8 bg-slate-300"></div>
+								<div className="absolute top-0 right-1/4 w-px h-8 bg-slate-300"></div>
+								
+								<div className="flex justify-between w-full pt-8 gap-3">
+									<div className="bg-white text-slate-700 font-bold px-2 py-3 rounded-xl shadow-sm border border-slate-200 text-sm flex-1 text-center transform transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:text-blue-600 hover:border-blue-200 z-10">
+										교무부
+									</div>
+									<div className="bg-white text-slate-700 font-bold px-2 py-3 rounded-xl shadow-sm border border-slate-200 text-sm flex-1 text-center transform transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:text-blue-600 hover:border-blue-200 z-10">
+										연구부
+									</div>
+								</div>
+							</div>
+						</div>
+						
+						{/* Right Block (행정실장) */}
+						<div className="flex flex-col items-center pt-8 w-1/2">
+							<div className="bg-white text-slate-900 font-bold px-6 py-4 rounded-2xl shadow-sm border border-slate-200 text-base w-full max-w-[180px] text-center transform transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-blue-200 z-10">
+								행정실장
+							</div>
+							
+							<div className="w-px h-8 bg-slate-300"></div>
+							
+							<div className="relative flex justify-between w-full">
+								<div className="absolute top-0 left-1/4 right-1/4 h-px bg-slate-300"></div>
+								<div className="absolute top-0 left-1/4 w-px h-8 bg-slate-300"></div>
+								<div className="absolute top-0 right-1/4 w-px h-8 bg-slate-300"></div>
+								
+								<div className="flex justify-between w-full pt-8 gap-3">
+									<div className="bg-white text-slate-700 font-bold px-2 py-3 rounded-xl shadow-sm border border-slate-200 text-sm flex-1 text-center transform transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:text-blue-600 hover:border-blue-200 z-10">
+										생활지도
+									</div>
+									<div className="bg-white text-slate-700 font-bold px-2 py-3 rounded-xl shadow-sm border border-slate-200 text-sm flex-1 text-center transform transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:text-blue-600 hover:border-blue-200 z-10">
+										행정팀
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			{/* Floating Notification Card (Bottom Left) */}
+			<div className="hidden lg:flex absolute -bottom-10 -left-12 bg-white p-5 rounded-2xl shadow-[0_15px_30px_rgb(0,0,0,0.12)] border border-slate-100 items-center gap-4 z-20 hover:-translate-y-1 transition-transform">
+				<div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
+					<Check className="w-6 h-6" strokeWidth={2.5} />
+				</div>
+				<div className="pr-4">
+					<div className="text-sm font-bold text-slate-900">인사발령 자동 반영 완료</div>
+					<div className="text-xs text-slate-500 mt-1">김성민 교사 · 3학년 담임 승진</div>
 				</div>
 			</div>
 			
-			{/* Chart Content */}
-			<div className="py-16 flex flex-col items-center bg-slate-50/30">
-				{/* Level 1 */}
-				<div className="bg-blue-600 text-white font-bold px-10 py-4 rounded-2xl shadow-sm text-lg z-10 min-w-[120px] text-center">
-					교장
+			{/* Floating Status Card (Top Right) */}
+			<div className="hidden lg:flex absolute -top-6 -right-8 bg-white p-4 rounded-2xl shadow-[0_15px_30px_rgb(0,0,0,0.12)] border border-slate-100 items-center gap-3 z-20 hover:-translate-y-1 transition-transform">
+				<div className="relative flex h-3 w-3">
+					<span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+					<span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
 				</div>
-				
-				<div className="w-px h-6 bg-slate-200"></div>
-				
-				{/* Level 2 */}
-				<div className="flex flex-wrap justify-center gap-4 z-10 px-4">
-					<div className="bg-white text-slate-900 font-bold px-8 py-4 rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.04)] border border-slate-100 text-base min-w-[120px] text-center">
-						교감
-					</div>
-					<div className="bg-white text-slate-900 font-bold px-8 py-4 rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.04)] border border-slate-100 text-base min-w-[120px] text-center">
-						행정실장
-					</div>
-				</div>
-				
-				<div className="w-px h-6 bg-slate-200"></div>
-				
-				{/* Level 3 */}
-				<div className="flex flex-wrap justify-center gap-4 z-10 px-4">
-					<div className="bg-white text-slate-900 font-bold px-6 py-4 rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.04)] border border-slate-100 text-sm min-w-[100px] text-center">
-						교무부
-					</div>
-					<div className="bg-white text-slate-900 font-bold px-6 py-4 rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.04)] border border-slate-100 text-sm min-w-[100px] text-center">
-						연구부
-					</div>
-					<div className="bg-white text-slate-900 font-bold px-6 py-4 rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.04)] border border-slate-100 text-sm min-w-[100px] text-center">
-						생활지도부
-					</div>
-					<div className="bg-white text-slate-900 font-bold px-6 py-4 rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.04)] border border-slate-100 text-sm min-w-[100px] text-center">
-						행정팀
-					</div>
-				</div>
+				<div className="text-sm font-bold text-slate-700 pr-2">조직도 실시간 동기화 중</div>
 			</div>
 		</div>
 	);

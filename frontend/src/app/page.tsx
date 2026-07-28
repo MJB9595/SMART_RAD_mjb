@@ -55,10 +55,12 @@ export default function LandingPage() {
 					<FeatureDetailSection
 						badgeText="인사관리"
 						title={"조직도부터 인사발령까지,\n모든 교직원 이력을 한 곳에"}
+						description="더 이상 수작업으로 인사 데이터를 관리하지 마세요. 복잡한 학교 구성원 변동부터 세밀한 인사발령까지 자동으로 기록되고 시각화되어 교무 업무 부담을 획기적으로 줄여줍니다."
 						features={[
 							"실시간 반영되는 학교 조직도와 구성원",
 							"신규·승진·파견 인사발령 이력 자동 기록",
-							"권한별로 열람 범위를 세밀하게 통제"
+							"권한별로 열람 범위를 세밀하게 통제",
+							"과거 발령 이력 기반의 간편한 증명서 발급"
 						]}
 						mockupType="hr"
 						mockupStyle="floating"
