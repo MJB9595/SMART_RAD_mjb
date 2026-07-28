@@ -16,6 +16,6 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 
 	/** 월 근태 집계용: 기간 내 근태를 직원·소속과 함께 로딩(N+1 차단). */
 	@EntityGraph(attributePaths = {"employee", "employee.department"})
-	List<Attendance> findByWorkDateBetweenAndDeletedFalseOrderByEmployee_EmployeeNumberAsc(
+	List<Attendance> findByWorkDateBetweenAndDeletedFalseOrderByEmployee_EmployeeNumberAscWorkDateAsc(
 			LocalDate start, LocalDate end);
 }

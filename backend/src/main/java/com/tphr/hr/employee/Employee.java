@@ -92,6 +92,15 @@ public class Employee extends DeletableEntity {
 	@Column(name = "emergency_contact", length = 50)
 	private String emergencyContact;
 
+	@Column(name = "bank_name", length = 100)
+	private String bankName;
+
+	@Column(name = "account_number", length = 100)
+	private String accountNumber;
+
+	@Column(name = "account_holder", length = 100)
+	private String accountHolder;
+
 	@Builder
 	public Employee(String employeeNumber, String name, String email, String password, String phone,
 			StaffCategory staffCategory, Department department, Position position, EmploymentType employmentType,
