@@ -15,7 +15,7 @@ services:
       MYSQL_USER: ${DB_USER:-tp_hr_user}
       MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "3307:3306"
+      - "3349:3306"
     volumes:
       - tp-hr-mysql-prod-data:/var/lib/mysql
     restart: always
@@ -46,7 +46,7 @@ services:
       KAKAO_CLIENT_SECRET: ${KAKAO_CLIENT_SECRET:-}
       KAKAO_REDIRECT_URI: ${KAKAO_REDIRECT_URI:-}
     ports:
-      - "8080:8080"
+      - "8049:8080"
     depends_on:
       mysql:
         condition: service_healthy
@@ -70,7 +70,7 @@ services:
     depends_on:
       - backend
     ports:
-      - "3000:3000"
+      - "3049:3000"
     restart: always
     deploy:
       resources:
