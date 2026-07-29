@@ -16,37 +16,34 @@ interface FeatureDetailProps {
 export function FeatureDetailSection({ badgeText, badgeIcon, title, description, features, reverse = false, mockupType, mockupStyle = 'window' }: FeatureDetailProps) {
 	return (
 		<section className={`relative min-h-screen flex flex-col justify-center py-24 lg:py-32 overflow-hidden ${reverse ? 'bg-slate-50' : 'bg-white'}`}>
-			{/* Decorative background blur */}
-			<div className="absolute inset-0 overflow-hidden pointer-events-none">
-				<div className={`absolute -top-[20%] -right-[10%] w-[50%] h-[50%] rounded-full mix-blend-multiply filter blur-[100px] opacity-40 transition-colors duration-500 ${reverse ? 'bg-blue-200' : 'bg-slate-200'}`}></div>
-				<div className={`absolute -bottom-[20%] -left-[10%] w-[50%] h-[50%] rounded-full mix-blend-multiply filter blur-[100px] opacity-40 transition-colors duration-500 ${reverse ? 'bg-indigo-200' : 'bg-blue-100'}`}></div>
-			</div>
+			{/* Removed the messy blur gradients and replaced with a clean crisp subtle pattern if needed, or just clean background */}
+			<div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:40px_40px]"></div>
 
-			<div className="relative mx-auto max-w-[1600px] px-8 md:px-16 lg:px-24 z-10">
+			<div className="relative mx-auto max-w-[1400px] px-8 md:px-16 z-10">
 				<div className={`grid grid-cols-1 lg:grid-cols-2 gap-16 items-center ${reverse ? 'lg:[&>div:first-child]:order-last' : ''}`}>
 					
 					{/* Text Content */}
 					<div className={`max-w-2xl w-full mx-auto text-center lg:text-left flex flex-col items-center lg:items-start ${reverse ? 'lg:mr-auto' : 'lg:ml-auto'}`}>
-						<div className="badge-primary mb-8 px-4 py-1.5 text-base">
-							{badgeIcon && <span className="[&>svg]:w-5 [&>svg]:h-5 mr-1.5">{badgeIcon}</span>}
+						<div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white shadow-sm px-4 py-1.5 text-sm font-bold text-slate-700 mb-8">
+							{badgeIcon && <span className="text-blue-600">{badgeIcon}</span>}
 							{!badgeIcon && badgeText}
 							{badgeIcon && badgeText}
 						</div>
-						<h2 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl mb-8 whitespace-pre-line leading-tight">
+						<h2 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl mb-8 whitespace-pre-line leading-tight">
 							{title}
 						</h2>
 						{description && (
-							<p className="text-xl lg:text-2xl text-slate-600 mb-10 leading-relaxed">
+							<p className="text-lg lg:text-xl text-slate-500 mb-10 leading-relaxed font-medium">
 								{description}
 							</p>
 						)}
 						<ul className="space-y-6">
 							{features.map((feature, idx) => (
 								<li key={idx} className="flex items-start gap-4">
-									<div className="mt-1.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100">
-										<Check className="h-4 w-4 text-emerald-600" strokeWidth={3} />
+									<div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100">
+										<Check className="h-4 w-4 text-blue-600" strokeWidth={3} />
 									</div>
-									<span className="text-lg lg:text-xl text-slate-700 font-medium">{feature}</span>
+									<span className="text-lg lg:text-xl text-slate-700 font-bold">{feature}</span>
 								</li>
 							))}
 						</ul>
@@ -54,7 +51,7 @@ export function FeatureDetailSection({ badgeText, badgeIcon, title, description,
 
 					{/* Mockup Content */}
 					<FadeInSection direction={reverse ? "left" : "right"}>
-						<div className={`relative w-full max-w-xl mx-auto lg:max-w-[800px] mt-16 lg:mt-0 ${reverse ? 'lg:mx-0 lg:ml-auto' : 'lg:mx-0 lg:mr-auto'}`}>
+						<div className={`relative w-full max-w-xl mx-auto lg:max-w-[700px] mt-16 lg:mt-0 ${reverse ? 'lg:mx-0 lg:ml-auto' : 'lg:mx-0 lg:mr-auto'}`}>
 							{mockupStyle === 'floating' ? (
 								<div className="w-full flex items-center justify-center relative">
 									{mockupType === 'attendance' && <AttendanceMockup />}
@@ -62,17 +59,17 @@ export function FeatureDetailSection({ badgeText, badgeIcon, title, description,
 									{mockupType === 'hr' && <HRMockup />}
 								</div>
 							) : (
-								<div className="mockup-window !rounded-3xl !shadow-[0_20px_40px_rgb(0,0,0,0.06)] border border-slate-100 !bg-[#F8FAFC]">
-									{/* Mac OS window controls */}
-									<div className="flex items-center px-6 py-5">
-										<div className="flex gap-2.5">
-											<div className="h-3 w-3 rounded-full bg-slate-200" />
-											<div className="h-3 w-3 rounded-full bg-slate-200" />
-											<div className="h-3 w-3 rounded-full bg-slate-200" />
+								<div className="mockup-window !rounded-2xl !shadow-[0_20px_40px_rgb(0,0,0,0.06)] border border-slate-200 !bg-white">
+									{/* Browser window controls */}
+									<div className="flex items-center px-4 py-3 border-b border-slate-100 bg-slate-50/50">
+										<div className="flex gap-2">
+											<div className="h-3 w-3 rounded-full bg-slate-300" />
+											<div className="h-3 w-3 rounded-full bg-slate-300" />
+											<div className="h-3 w-3 rounded-full bg-slate-300" />
 										</div>
 									</div>
 									
-									<div className="flex-1 px-8 pb-10 sm:px-12 sm:pb-12 overflow-hidden flex flex-col">
+									<div className="flex-1 overflow-hidden bg-slate-50/30 pb-0 flex items-end justify-center">
 										{mockupType === 'attendance' && <AttendanceMockup />}
 										{mockupType === 'salary' && <SalaryMockup />}
 										{mockupType === 'hr' && <HRMockup />}
@@ -90,55 +87,49 @@ export function FeatureDetailSection({ badgeText, badgeIcon, title, description,
 
 function AttendanceMockup() {
 	return (
-		<div className="relative w-full h-[480px] max-w-[640px]">
-			{/* Back Card (Bottom Left) */}
-			<div className="absolute left-0 bottom-12 w-full max-w-[460px] bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-slate-100 p-6 flex flex-col gap-4 z-10">
-				<div className="font-bold text-slate-900 text-sm mb-2">출퇴근 현황</div>
+		<div className="relative w-full h-[400px] max-w-[560px] pt-8">
+			{/* Clean realistic layout for Attendance */}
+			<div className="absolute left-4 bottom-0 w-full max-w-[400px] bg-white rounded-t-2xl shadow-[0_10px_40px_rgb(0,0,0,0.08)] border border-slate-200 border-b-0 p-6 flex flex-col gap-4 z-10 h-[300px]">
+				<div className="font-bold text-slate-900 text-base mb-2 border-b border-slate-100 pb-3">주간 근태 현황</div>
 				{[
-					{ initial: '김', name: '김성민 · 3학년 담임', time: '38.5h / 40h' },
-					{ initial: '이', name: '이수진 · 수학과 교사', time: '39.5h / 40h' },
-					{ initial: '박', name: '박지훈 · 교무행정사', time: '35.0h / 40h' },
-					{ initial: '최', name: '최다연 · 영어과 교사', time: '40.0h / 40h' },
+					{ name: '김성민', role: '3학년 담임', status: '출근', color: 'bg-emerald-50 text-emerald-600' },
+					{ name: '이수진', role: '수학과 교사', status: '출근', color: 'bg-emerald-50 text-emerald-600' },
+					{ name: '박지훈', role: '교무행정사', status: '연차', color: 'bg-slate-100 text-slate-600' },
 				].map((user, idx) => (
-					<div key={idx} className="flex items-center gap-3">
-						<div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-600 text-sm font-medium shrink-0">
-							{user.initial}
+					<div key={idx} className="flex items-center justify-between py-2">
+						<div className="flex items-center gap-3">
+							<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-50 border border-slate-100 text-slate-700 font-bold">
+								{user.name.charAt(0)}
+							</div>
+							<div className="flex flex-col">
+								<span className="text-sm font-bold text-slate-900">{user.name}</span>
+								<span className="text-xs text-slate-500 font-medium">{user.role}</span>
+							</div>
 						</div>
-						<div className="flex flex-col">
-							<span className="text-sm font-semibold text-slate-900">{user.name}</span>
-							<span className="text-[11px] text-slate-400">이번 주 복무 시간: {user.time}</span>
+						<div className={`px-3 py-1 rounded-md text-xs font-bold ${user.color}`}>
+							{user.status}
 						</div>
 					</div>
 				))}
 			</div>
 
-			{/* Front Card (Top Right) */}
-			<div className="absolute right-0 top-8 w-full max-w-[460px] bg-white rounded-2xl shadow-[0_20px_40px_rgb(0,0,0,0.12)] border border-slate-100 p-6 flex flex-col gap-5 z-20">
+			<div className="absolute right-4 top-10 w-full max-w-[340px] bg-white rounded-2xl shadow-[0_20px_50px_rgb(0,0,0,0.12)] border border-slate-200 p-6 flex flex-col gap-5 z-20">
 				<div className="flex items-center justify-between mb-2">
-					<div className="font-bold text-slate-900 text-sm">휴가 신청 내역</div>
-					<div className="rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-semibold text-blue-600">승인 대기 4</div>
+					<div className="font-bold text-slate-900 text-sm">연가 신청 승인 대기</div>
+					<div className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-bold text-blue-700">3건</div>
 				</div>
-				{[
-					{ initial: '정', name: '정하은 · 연가', date: '07/14 - 07/15 · 2일', status: '대기', statusColor: 'bg-amber-50 text-amber-600' },
-					{ initial: '오', name: '오준혁 · 병가', date: '07/10 · 1일', status: '승인', statusColor: 'bg-emerald-50 text-emerald-600' },
-					{ initial: '윤', name: '윤서아 · 공가(연수)', date: '07/18 - 07/19 · 2일', status: '대기', statusColor: 'bg-amber-50 text-amber-600' },
-					{ initial: '한', name: '한지수 · 특별휴가', date: '07/07 - 07/08 · 2일', status: '완료', statusColor: 'bg-blue-50 text-blue-600' },
-				].map((item, idx) => (
-					<div key={idx} className="flex items-center justify-between">
-						<div className="flex items-center gap-3">
-							<div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-600 text-sm font-medium shrink-0">
-								{item.initial}
-							</div>
-							<div className="flex flex-col">
-								<span className="text-sm font-semibold text-slate-900">{item.name}</span>
-								<span className="text-[11px] text-slate-400">{item.date}</span>
-							</div>
-						</div>
-						<div className={`rounded-full px-3 py-1 text-[11px] font-bold shrink-0 ${item.statusColor}`}>
-							{item.status}
+				<div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+					<div className="flex justify-between items-start mb-3">
+						<div>
+							<div className="text-sm font-bold text-slate-900">정하은 교사</div>
+							<div className="text-xs text-slate-500 mt-0.5">병가 신청 (1일)</div>
 						</div>
 					</div>
-				))}
+					<div className="flex gap-2 mt-4">
+						<div className="flex-1 bg-white border border-slate-200 text-slate-600 text-xs font-bold py-2 rounded-lg text-center cursor-pointer">반려</div>
+						<div className="flex-1 bg-blue-600 text-white text-xs font-bold py-2 rounded-lg text-center cursor-pointer shadow-sm">승인하기</div>
+					</div>
+				</div>
 			</div>
 		</div>
 	);
@@ -146,43 +137,33 @@ function AttendanceMockup() {
 
 function SalaryMockup() {
 	return (
-		<div className="w-full max-w-[640px] bg-white rounded-3xl shadow-[0_20px_40px_rgb(0,0,0,0.08)] border border-slate-100 flex flex-col overflow-hidden">
-			{/* Header */}
-			<div className="flex justify-between items-center px-8 py-6 border-b border-slate-100">
-				<div className="font-bold text-slate-900 text-lg">급여 명세 · 2026년 6월</div>
-				<div className="bg-blue-50 text-blue-600 font-bold text-sm px-5 py-2 rounded-full">
-					확정
+		<div className="w-full max-w-[560px] bg-white rounded-t-2xl shadow-[0_-10px_40px_rgb(0,0,0,0.06)] border border-slate-200 border-b-0 flex flex-col overflow-hidden mt-10">
+			<div className="flex justify-between items-center px-6 py-5 border-b border-slate-100 bg-slate-50/50">
+				<div>
+					<div className="text-xs font-bold text-blue-600 mb-1">2026년 6월</div>
+					<div className="font-bold text-slate-900 text-lg">급여 정산 대장</div>
+				</div>
+				<div className="bg-white border border-slate-200 text-slate-700 font-bold text-xs px-4 py-2 rounded-lg shadow-sm flex items-center gap-2">
+					<Download className="w-3 h-3" /> 엑셀 다운로드
 				</div>
 			</div>
 			
-			{/* Table Header */}
-			<div className="flex justify-between items-center px-8 py-3 bg-slate-50 border-b border-slate-100">
-				<div className="text-sm font-semibold text-slate-500">항목</div>
-				<div className="text-sm font-semibold text-slate-500">금액 (원)</div>
-			</div>
-			
-			{/* Rows */}
-			<div className="flex flex-col">
-				<div className="flex justify-between px-8 py-5 border-b border-slate-100">
-					<span className="text-slate-600 font-medium">기본급</span>
-					<span className="font-bold text-slate-900">3,850,000</span>
+			<div className="flex flex-col p-6 gap-4 bg-white">
+				<div className="flex justify-between items-center p-4 rounded-xl border border-slate-100 bg-slate-50">
+					<span className="text-slate-600 font-semibold text-sm">기본급 총액</span>
+					<span className="font-bold text-slate-900 text-base">142,500,000 원</span>
 				</div>
-				<div className="flex justify-between px-8 py-5 border-b border-slate-100">
-					<span className="text-slate-600 font-medium">정근수당</span>
-					<span className="font-bold text-slate-900">192,500</span>
+				<div className="flex justify-between items-center p-4 rounded-xl border border-slate-100 bg-slate-50">
+					<span className="text-slate-600 font-semibold text-sm">초과근무 수당</span>
+					<span className="font-bold text-slate-900 text-base">12,450,000 원</span>
 				</div>
-				<div className="flex justify-between px-8 py-5 border-b border-slate-100">
-					<span className="text-slate-600 font-medium">4대 보험 공제</span>
-					<span className="font-bold text-slate-900">-356,200</span>
+				<div className="flex justify-between items-center p-4 rounded-xl border border-slate-100 bg-slate-50">
+					<span className="text-slate-600 font-semibold text-sm">4대 보험 및 공제</span>
+					<span className="font-bold text-rose-600 text-base">- 28,140,000 원</span>
 				</div>
-				<div className="flex justify-between px-8 py-5 border-b border-slate-100">
-					<span className="text-slate-600 font-medium">소득세 공제</span>
-					<span className="font-bold text-slate-900">-148,300</span>
-				</div>
-				{/* Footer Row */}
-				<div className="flex justify-between px-8 py-6 bg-blue-50/50">
-					<span className="font-bold text-blue-600">실지급액</span>
-					<span className="font-bold text-blue-600">3,538,000</span>
+				<div className="flex justify-between items-center p-5 rounded-xl bg-blue-50 border border-blue-100 mt-2">
+					<span className="font-bold text-blue-800">실지급 총액</span>
+					<span className="font-extrabold text-blue-700 text-xl">126,810,000 원</span>
 				</div>
 			</div>
 		</div>
@@ -191,102 +172,40 @@ function SalaryMockup() {
 
 function HRMockup() {
 	return (
-		<div className="relative w-full max-w-[680px]">
-			{/* Main Chart Card */}
-			<div className="w-full bg-white rounded-3xl shadow-[0_20px_40px_rgb(0,0,0,0.08)] border border-slate-100 flex flex-col overflow-hidden transition-all duration-300 hover:shadow-[0_20px_50px_rgb(0,0,0,0.12)]">
-				{/* Header */}
-				<div className="flex justify-between items-center px-8 py-5 border-b border-slate-100">
-					<div className="font-bold text-slate-900 text-lg">학교 조직도</div>
-					<div className="bg-blue-50 text-blue-600 font-bold text-sm px-4 py-2 rounded-full">
-						교직원 142명
-					</div>
-				</div>
+		<div className="relative w-full max-w-[600px] h-[400px] flex items-center justify-center p-6">
+			{/* Timeline style mockup instead of generic tree */}
+			<div className="w-full h-full bg-white rounded-2xl shadow-[0_10px_40px_rgb(0,0,0,0.08)] border border-slate-200 p-8 flex flex-col">
+				<div className="font-bold text-slate-900 text-lg mb-6 border-b border-slate-100 pb-4">인사발령 타임라인</div>
 				
-				{/* Chart Content */}
-				<div className="py-12 flex flex-col items-center bg-slate-50/50 overflow-x-auto">
-					{/* Level 1 */}
-					<div className="bg-blue-600 text-white font-bold px-10 py-4 rounded-2xl shadow-md text-lg z-10 min-w-[140px] text-center transform transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
-						교장
-					</div>
+				<div className="relative flex-1">
+					<div className="absolute left-[19px] top-2 bottom-0 w-0.5 bg-slate-100"></div>
 					
-					<div className="w-px h-8 bg-slate-300"></div>
-					
-					{/* Level 2 & 3 wrapper */}
-					<div className="relative flex justify-center gap-6 w-full max-w-[540px] px-4">
-						{/* Main horizontal line connecting Left & Right blocks */}
-						<div className="absolute top-0 left-1/4 right-1/4 h-px bg-slate-300"></div>
-						<div className="absolute top-0 left-1/4 w-px h-8 bg-slate-300"></div>
-						<div className="absolute top-0 right-1/4 w-px h-8 bg-slate-300"></div>
-						
-						{/* Left Block (교감) */}
-						<div className="flex flex-col items-center pt-8 w-1/2">
-							<div className="bg-white text-slate-900 font-bold px-6 py-4 rounded-2xl shadow-sm border border-slate-200 text-base w-full max-w-[180px] text-center transform transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-blue-200 z-10">
-								교감
-							</div>
-							
-							<div className="w-px h-8 bg-slate-300"></div>
-							
-							<div className="relative flex justify-between w-full">
-								<div className="absolute top-0 left-1/4 right-1/4 h-px bg-slate-300"></div>
-								<div className="absolute top-0 left-1/4 w-px h-8 bg-slate-300"></div>
-								<div className="absolute top-0 right-1/4 w-px h-8 bg-slate-300"></div>
-								
-								<div className="flex justify-between w-full pt-8 gap-3">
-									<div className="bg-white text-slate-700 font-bold px-2 py-3 rounded-xl shadow-sm border border-slate-200 text-sm flex-1 text-center transform transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:text-blue-600 hover:border-blue-200 z-10">
-										교무부
-									</div>
-									<div className="bg-white text-slate-700 font-bold px-2 py-3 rounded-xl shadow-sm border border-slate-200 text-sm flex-1 text-center transform transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:text-blue-600 hover:border-blue-200 z-10">
-										연구부
-									</div>
-								</div>
+					<div className="flex gap-6 relative mb-8">
+						<div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center border-4 border-white shadow-sm z-10 shrink-0">
+							<div className="w-3 h-3 bg-blue-600 rounded-full"></div>
+						</div>
+						<div>
+							<div className="text-xs font-bold text-slate-400 mb-1">2026. 03. 01</div>
+							<div className="bg-slate-50 border border-slate-100 rounded-xl p-4">
+								<div className="font-bold text-slate-900 text-sm mb-1">김성민 교사 정규 승진</div>
+								<div className="text-xs text-slate-500 font-medium">2학년 담임 ➔ 3학년 담임 (승진 발령)</div>
 							</div>
 						</div>
-						
-						{/* Right Block (행정실장) */}
-						<div className="flex flex-col items-center pt-8 w-1/2">
-							<div className="bg-white text-slate-900 font-bold px-6 py-4 rounded-2xl shadow-sm border border-slate-200 text-base w-full max-w-[180px] text-center transform transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-blue-200 z-10">
-								행정실장
-							</div>
-							
-							<div className="w-px h-8 bg-slate-300"></div>
-							
-							<div className="relative flex justify-between w-full">
-								<div className="absolute top-0 left-1/4 right-1/4 h-px bg-slate-300"></div>
-								<div className="absolute top-0 left-1/4 w-px h-8 bg-slate-300"></div>
-								<div className="absolute top-0 right-1/4 w-px h-8 bg-slate-300"></div>
-								
-								<div className="flex justify-between w-full pt-8 gap-3">
-									<div className="bg-white text-slate-700 font-bold px-2 py-3 rounded-xl shadow-sm border border-slate-200 text-sm flex-1 text-center transform transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:text-blue-600 hover:border-blue-200 z-10">
-										생활지도
-									</div>
-									<div className="bg-white text-slate-700 font-bold px-2 py-3 rounded-xl shadow-sm border border-slate-200 text-sm flex-1 text-center transform transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:text-blue-600 hover:border-blue-200 z-10">
-										행정팀
-									</div>
-								</div>
+					</div>
+					
+					<div className="flex gap-6 relative">
+						<div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center border-4 border-white shadow-sm z-10 shrink-0">
+							<div className="w-2 h-2 bg-slate-400 rounded-full"></div>
+						</div>
+						<div>
+							<div className="text-xs font-bold text-slate-400 mb-1">2025. 09. 01</div>
+							<div className="bg-slate-50 border border-slate-100 rounded-xl p-4">
+								<div className="font-bold text-slate-900 text-sm mb-1">신규 채용 발령</div>
+								<div className="text-xs text-slate-500 font-medium">박지훈 교무행정사 신규 부임</div>
 							</div>
 						</div>
 					</div>
 				</div>
-			</div>
-
-			{/* Floating Notification Card (Bottom Left) */}
-			<div className="hidden lg:flex absolute -bottom-10 -left-12 bg-white p-5 rounded-2xl shadow-[0_15px_30px_rgb(0,0,0,0.12)] border border-slate-100 items-center gap-4 z-20 hover:-translate-y-1 transition-transform">
-				<div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
-					<Check className="w-6 h-6" strokeWidth={2.5} />
-				</div>
-				<div className="pr-4">
-					<div className="text-sm font-bold text-slate-900">인사발령 자동 반영 완료</div>
-					<div className="text-xs text-slate-500 mt-1">김성민 교사 · 3학년 담임 승진</div>
-				</div>
-			</div>
-			
-			{/* Floating Status Card (Top Right) */}
-			<div className="hidden lg:flex absolute -top-6 -right-8 bg-white p-4 rounded-2xl shadow-[0_15px_30px_rgb(0,0,0,0.12)] border border-slate-100 items-center gap-3 z-20 hover:-translate-y-1 transition-transform">
-				<div className="relative flex h-3 w-3">
-					<span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-					<span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
-				</div>
-				<div className="text-sm font-bold text-slate-700 pr-2">조직도 실시간 동기화 중</div>
 			</div>
 		</div>
 	);
