@@ -208,7 +208,7 @@ export default function LoginPage() {
                     <div className="text-sm text-gray-500 p-4 text-center">목록을 불러오는 중...</div>
                   ) : (
                     demoUsers
-                      .filter(u => selectedRole === 'ADMIN' ? u.role === 'ADMIN' : u.role === 'EMPLOYEE')
+                      .filter(u => selectedRole === 'ADMIN' ? u.role === 'ADMIN' : (u.role === 'EMPLOYEE' || u.role === 'HR'))
                       .map(u => (
                       <button
                         key={u.employeeId}
