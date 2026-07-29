@@ -51,4 +51,12 @@ public class WelfareController {
         welfareService.approveCertificateIssue(id, SecurityUtils.getCurrentEmployeeId());
         return ResponseEntity.ok().build();
     }
+
+    /** 증명서 발급 반려 (사유는 선택). */
+    @PostMapping("/certificate/{id}/reject")
+    public ResponseEntity<Void> rejectCertificate(@PathVariable Long id,
+            @RequestParam(required = false) String memo) {
+        welfareService.rejectCertificateIssue(id, SecurityUtils.getCurrentEmployeeId(), memo);
+        return ResponseEntity.ok().build();
+    }
 }

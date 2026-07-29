@@ -97,6 +97,14 @@ public class WelfareService {
         entity.approve(approver);
     }
 
+    /** 증명서 발급 반려 (사유 메모). */
+    @Transactional
+    public void rejectCertificateIssue(Long id, Long approverId, String memo) {
+        EmployeeCertificateIssue entity = certificateIssueRepository.findById(id).orElseThrow();
+        Employee approver = employeeRepository.findById(approverId).orElseThrow();
+        entity.reject(approver, memo);
+    }
+
     private EmployeeEventSupportDto.Response toEventSupportDto(EmployeeEventSupport e) {
         return EmployeeEventSupportDto.Response.builder()
                 .id(e.getId())
@@ -121,6 +129,13 @@ public class WelfareService {
                 .purpose(e.getPurpose())
                 .issueStatus(e.getIssueStatus())
                 .approvalStatus(e.getApprovalStatus())
+                // 증명서 서식 출력에 필요한 대상자 정보
+                .employeeName(e.getEmployee().getName())
+                .employeeNumber(e.getEmployee().getEmployeeNumber())
+                .departmentName(e.getEmployee().getDepartment().getName())
+                .positionName(e.getEmployee().getPosition().getName())
+                .hireDate(e.getEmployee().getHireDate())
+                .issuedAt(e.getIssuedAt())
                 .build();
     }
 }
