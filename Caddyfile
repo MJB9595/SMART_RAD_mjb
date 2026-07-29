@@ -1,0 +1,21 @@
+# 리버스 프록시 + HTTPS 자동 발급(Let's Encrypt)
+# {$DOMAIN} 은 .env 의 DOMAIN 값을 읽는다. 예: DOMAIN=hris.example.com
+#
+# 같은 도메인 안에서 /api 는 백엔드로, 나머지는 프론트로 보낸다.
+# → 프론트와 API가 같은 오리진이 되어 CORS 문제가 발생하지 않는다.
+{$DOMAIN} {
+	# 백엔드는 context-path 가 /api 이므로 경로를 그대로 넘긴다.
+	handle /api/* {
+		reverse_proxy backend:8080
+	}
+
+	handle {
+		reverse_proxy frontend:3000
+	}
+
+	encode gzip
+
+	log {
+		output file /var/log/caddy/access.log
+	}
+}

@@ -10,6 +10,8 @@ import { ApiError } from "@/lib/api/client";
 import type { Employee, EmployeeRecordSummary } from "@/lib/types/employee";
 import type { Department } from "@/lib/types/department";
 import { SignupApprovalModal } from "@/components/SignupApprovalModal";
+import { useAuth } from "@/lib/auth/AuthContext";
+import { isAdminOrHr } from "@/lib/auth/permissions";
 
 const PAGE_SIZE = 10;
 
@@ -148,6 +150,9 @@ export default function EmployeesPage() {
 	// 이전 선택의 요약이 남아있을 수 있어 employeeId로 정합성 확인
 	const s = summary && selected && summary.employeeId === selected.id ? summary : null;
 
+	const { user } = useAuth();
+	const isAdmin = isAdminOrHr(user);
+
 	return (
 		<>
 			<div className="breadcrumb">
@@ -159,17 +164,21 @@ export default function EmployeesPage() {
 					<div className="page-sub">교직원 인사기록카드를 조회·등록하고 학력·경력·자격 이력을 관리합니다</div>
 				</div>
 				<div className="flex gap-2">
-					<button className="btn-outline text-blue-600 border-blue-600 hover:bg-blue-50 relative px-4" onClick={() => setShowApprovalModal(true)}>
-						교직원 가입 승인
-						{pendingSignupsCount > 0 && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>}
-					</button>
-					<button
-						className="btn-primary"
-						onClick={() => router.push("/employees/new")}
-						title="사번·이메일 없이 직위·권한(자리)만 정의 — 회원가입 승인 시 이 자리와 매칭됩니다"
-					>
-						+ 승인 자리 등록
-					</button>
+					{isAdmin && (
+						<>
+							<button className="btn-outline text-blue-600 border-blue-600 hover:bg-blue-50 relative px-4" onClick={() => setShowApprovalModal(true)}>
+								교직원 가입 승인
+								{pendingSignupsCount > 0 && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>}
+							</button>
+							<button
+								className="btn-primary"
+								onClick={() => router.push("/employees/new")}
+								title="사번·이메일 없이 직위·권한(자리)만 정의 — 회원가입 승인 시 이 자리와 매칭됩니다"
+							>
+								+ 승인 자리 등록
+							</button>
+						</>
+					)}
 				</div>
 			</div>
 
@@ -348,14 +357,16 @@ export default function EmployeesPage() {
 								<button className="btn-outline" onClick={() => router.push(`/employees/${selected.id}`)}>
 									전체 기록 상세보기
 								</button>
-								<button
-									className="btn-outline"
-									style={{ color: "#b91c1c", borderColor: "#fecaca" }}
-									onClick={() => handleUnmatch(selected)}
-									title="잘못 매칭 승인된 계정을 되돌려 승인 대기큐로 복귀"
-								>
-									매치 해제 (승인 대기큐로)
-								</button>
+								{isAdmin && (
+									<button
+										className="btn-outline"
+										style={{ color: "#b91c1c", borderColor: "#fecaca" }}
+										onClick={() => handleUnmatch(selected)}
+										title="잘못 매칭 승인된 계정을 되돌려 승인 대기큐로 복귀"
+									>
+										매치 해제 (승인 대기큐로)
+									</button>
+								)}
 							</div>
 						</div>
 					</div>

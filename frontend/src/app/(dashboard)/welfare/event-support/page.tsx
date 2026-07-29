@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { listEventSupports, createEventSupport, type EventSupport } from "@/lib/api/welfare";
+import { listEventSupports, createEventSupport, approveEventSupport, rejectEventSupport, type EventSupport } from "@/lib/api/welfare";
 import { searchEmployees } from "@/lib/api/employees";
 import { ApiError } from "@/lib/api/client";
 import type { Employee } from "@/lib/types/employee";
+import { useAuth } from "@/lib/auth/AuthContext";
+import { canApproveTarget } from "@/lib/auth/permissions";
 
 function today() {
 	return new Date().toISOString().slice(0, 10);
@@ -14,6 +16,8 @@ export default function EventSupportPage() {
 	const [type, setType] = useState("");
 	const [rows, setRows] = useState<EventSupport[]>([]);
 	const [loading, setLoading] = useState(true);
+
+	const { user } = useAuth();
 
 	// 신청 폼
 	const [employees, setEmployees] = useState<Employee[]>([]);
@@ -81,6 +85,26 @@ export default function EventSupportPage() {
 		return <span className="pill gray">{status || "대기"}</span>;
 	};
 
+	async function handleApprove(d: EventSupport) {
+		if (!confirm(`${d.targetName}님의 ${d.eventType} 경조비를 승인하시겠습니까?`)) return;
+		try {
+			await approveEventSupport(d.id);
+			reload();
+		} catch (err) {
+			alert(err instanceof ApiError ? err.message : "승인 처리에 실패했습니다.");
+		}
+	}
+
+	async function handleReject(d: EventSupport) {
+		if (!confirm(`${d.targetName}님의 ${d.eventType} 경조비를 반려하시겠습니까?`)) return;
+		try {
+			await rejectEventSupport(d.id);
+			reload();
+		} catch (err) {
+			alert(err instanceof ApiError ? err.message : "반려 처리에 실패했습니다.");
+		}
+	}
+
 	return (
 		<>
 			<div className="title-row">
@@ -116,13 +140,14 @@ export default function EventSupportPage() {
 								<th style={{textAlign: "right"}}>신청금액</th>
 								<th>경조일자</th>
 								<th style={{textAlign: "center"}}>결재상태</th>
+								<th style={{textAlign: "right"}}>결재 관리</th>
 							</tr>
 						</thead>
 						<tbody>
 							{loading ? (
-								<tr className="empty-row"><td colSpan={6}>데이터를 불러오는 중입니다...</td></tr>
+								<tr className="empty-row"><td colSpan={7}>데이터를 불러오는 중입니다...</td></tr>
 							) : filtered.length === 0 ? (
-								<tr className="empty-row"><td colSpan={6}>조회된 경조비 신청 내역이 없습니다.</td></tr>
+								<tr className="empty-row"><td colSpan={7}>조회된 경조비 신청 내역이 없습니다.</td></tr>
 							) : (
 								filtered.map((d) => (
 									<tr key={d.id}>
@@ -133,6 +158,18 @@ export default function EventSupportPage() {
 										<td className="mono">{d.eventDate}</td>
 										<td style={{textAlign: "center"}}>
 											{getStatusPill(d.approvalStatus)}
+										</td>
+										<td style={{textAlign: "right"}}>
+											{d.approvalStatus === "PENDING" && canApproveTarget(user, d.employeeId, d.departmentId, d.positionLevel) ? (
+												<>
+													<button className="btn-primary" style={{display: "inline-flex", marginRight: "6px"}} onClick={() => handleApprove(d)}>승인</button>
+													<button className="btn-ghost" style={{display: "inline-flex", color: "#DC2626", borderColor: "#FECACA"}} onClick={() => handleReject(d)}>반려</button>
+												</>
+											) : d.approvalStatus === "APPROVED" ? (
+												<span style={{fontSize: "12.5px", color: "#10B981"}}>승인됨</span>
+											) : d.approvalStatus === "REJECTED" ? (
+												<span style={{fontSize: "12.5px", color: "#9AA3B2"}}>반려됨</span>
+											) : null}
 										</td>
 									</tr>
 								))

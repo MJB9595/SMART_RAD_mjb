@@ -12,6 +12,8 @@ import { searchEmployees } from "@/lib/api/employees";
 import { ApiError } from "@/lib/api/client";
 import type { Employee } from "@/lib/types/employee";
 import { CertificatePrintModal } from "@/components/CertificatePrintModal";
+import { useAuth } from "@/lib/auth/AuthContext";
+import { canApproveTarget } from "@/lib/auth/permissions";
 
 function today() {
 	return new Date().toISOString().slice(0, 10);
@@ -21,6 +23,8 @@ export default function CertificatePage() {
 	const [type, setType] = useState("");
 	const [rows, setRows] = useState<Certificate[]>([]);
 	const [loading, setLoading] = useState(true);
+
+	const { user } = useAuth();
 
 	const [employees, setEmployees] = useState<Employee[]>([]);
 	const [showForm, setShowForm] = useState(false);
@@ -159,12 +163,12 @@ export default function CertificatePage() {
 													<button className="btn-ghost" style={{display: "inline-flex"}} onClick={() => setPrintTarget(d)}>증명서 보기 / 인쇄</button>
 												) : d.issueStatus === "REJECTED" ? (
 													<span style={{fontSize: "12.5px", color: "#9AA3B2"}}>반려됨</span>
-												) : (
+												) : canApproveTarget(user, d.employeeId, d.departmentId, d.positionLevel) ? (
 													<>
 														<button className="btn-primary" style={{display: "inline-flex", marginRight: "6px"}} onClick={() => handleIssue(d)}>발급 처리</button>
 														<button className="btn-ghost" style={{display: "inline-flex", color: "#DC2626", borderColor: "#FECACA"}} onClick={() => handleReject(d)}>반려</button>
 													</>
-												)}
+												) : null}
 										</td>
 									</tr>
 								))

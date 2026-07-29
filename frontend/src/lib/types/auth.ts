@@ -8,6 +8,9 @@ export interface LoginResponse {
 	name: string;
 	email: string;
 	role: EmployeeRole;
+	positionLevel: number | null;
+	departmentId: number | null;
+	departmentName: string | null;
 }
 
 export type AuthUser = Omit<LoginResponse, "accessToken" | "tokenType">;

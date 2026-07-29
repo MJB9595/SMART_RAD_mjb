@@ -47,7 +47,16 @@ public class AuthService {
 				employee.getRole().name()
 		);
 
-		return LoginResponse.of(token, employee.getId(), employee.getEmployeeNumber(), employee.getName(),
-				employee.getEmail(), employee.getRole());
+		return LoginResponse.of(
+				token,
+				employee.getId(),
+				employee.getEmployeeNumber(),
+				employee.getName(),
+				employee.getEmail(),
+				employee.getRole(),
+				employee.getPosition() != null ? employee.getPosition().getSortOrder() : null,
+				employee.getDepartment() != null ? employee.getDepartment().getId() : null,
+				employee.getDepartment() != null ? employee.getDepartment().getName() : null
+		);
 	}
 }

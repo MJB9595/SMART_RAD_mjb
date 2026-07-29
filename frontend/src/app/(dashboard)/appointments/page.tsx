@@ -10,6 +10,8 @@ import type { Employee } from "@/lib/types/employee";
 import type { Department } from "@/lib/types/department";
 import type { Position } from "@/lib/types/meta";
 import { Button } from "@/components/ui";
+import { useAuth } from "@/lib/auth/AuthContext";
+import { isAdminOrHr, canApproveTarget } from "@/lib/auth/permissions";
 
 const TYPE_LABELS: Record<AppointmentType, string> = {
 	HIRE: "임용",
@@ -23,6 +25,9 @@ export default function AppointmentsPage() {
 	const [totalElements, setTotalElements] = useState(0);
 	const [loading, setLoading] = useState(true);
 	const [selectedAppt, setSelectedAppt] = useState<Appointment | null>(null);
+
+	const { user } = useAuth();
+	const isAdmin = isAdminOrHr(user);
 
 	// Registration Modal State
 	const [isModalOpen, setIsModalOpen] = useState(false);
@@ -151,7 +156,9 @@ export default function AppointmentsPage() {
 					<div className="page-title">발령 등록·승인</div>
 					<div className="page-sub">전보·승진·겸임 등 인사발령 건을 등록하고 승인합니다</div>
 				</div>
-				<button className="btn-primary" onClick={() => setIsModalOpen(true)}>+ 발령 등록</button>
+				{isAdmin && (
+					<button className="btn-primary" onClick={() => setIsModalOpen(true)}>+ 발령 등록</button>
+				)}
 			</div>
 
 			<div className="stat-grid">

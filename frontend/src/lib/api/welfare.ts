@@ -10,6 +10,12 @@ export interface EventSupport {
 	eventDate: string;
 	requestedAmount: number;
 	approvalStatus: string;
+	employeeName: string;
+	employeeNumber: string;
+	departmentId: number | null;
+	departmentName: string | null;
+	positionLevel: number | null;
+	positionName: string | null;
 }
 
 export interface Certificate {
@@ -24,8 +30,10 @@ export interface Certificate {
 	// 증명서 서식 출력용 대상자 정보
 	employeeName: string;
 	employeeNumber: string;
-	departmentName: string;
-	positionName: string;
+	departmentId: number | null;
+	departmentName: string | null;
+	positionLevel: number | null;
+	positionName: string | null;
 	hireDate: string | null;
 	issuedAt: string | null;
 }
@@ -54,6 +62,16 @@ export interface EventSupportCreateBody {
 /** 경조비 신청 (문서번호는 서버에서 자동 채번). ADMIN. */
 export function createEventSupport(body: EventSupportCreateBody): Promise<EventSupport> {
 	return apiFetch<EventSupport>("/welfare/event-support", { method: "POST", body });
+}
+
+/** 경조비 신청 승인 */
+export function approveEventSupport(id: number): Promise<void> {
+	return apiFetch<void>(`/welfare/event-support/${id}/approve`, { method: "POST" });
+}
+
+/** 경조비 신청 반려 */
+export function rejectEventSupport(id: number): Promise<void> {
+	return apiFetch<void>(`/welfare/event-support/${id}/reject`, { method: "POST" });
 }
 
 export interface CertificateCreateBody {

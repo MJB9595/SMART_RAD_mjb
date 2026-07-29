@@ -9,11 +9,22 @@ public record UserResponse(
 		String employeeNumber,
 		String name,
 		String email,
-		EmployeeRole role
+		EmployeeRole role,
+		Integer positionLevel,
+		Long departmentId,
+		String departmentName
 ) {
 
 	public static UserResponse from(Employee employee) {
-		return new UserResponse(employee.getId(), employee.getEmployeeNumber(), employee.getName(),
-				employee.getEmail(), employee.getRole());
+		return new UserResponse(
+				employee.getId(),
+				employee.getEmployeeNumber(),
+				employee.getName(),
+				employee.getEmail(),
+				employee.getRole(),
+				employee.getPosition() != null ? employee.getPosition().getSortOrder() : null,
+				employee.getDepartment() != null ? employee.getDepartment().getId() : null,
+				employee.getDepartment() != null ? employee.getDepartment().getName() : null
+		);
 	}
 }

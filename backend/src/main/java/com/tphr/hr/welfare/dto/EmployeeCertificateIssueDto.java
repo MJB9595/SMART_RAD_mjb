@@ -26,7 +26,9 @@ public class EmployeeCertificateIssueDto {
         // 증명서 서식 출력용 대상자 정보
         private String employeeName;
         private String employeeNumber;
+        private Long departmentId;
         private String departmentName;
+        private Integer positionLevel;
         private String positionName;
         private LocalDate hireDate;
         private LocalDateTime issuedAt;

@@ -15,7 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/welfare")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("isAuthenticated()")
 public class WelfareController {
 
     private final WelfareService welfareService;
@@ -31,6 +31,7 @@ public class WelfareController {
     }
 
     @PostMapping("/event-support/{id}/approve")
+    @PreAuthorize("@permissionService.canApproveEventSupport(authentication, #id)")
     public ResponseEntity<Void> approveEventSupport(@PathVariable Long id) {
         welfareService.approveEventSupport(id, SecurityUtils.getCurrentEmployeeId());
         return ResponseEntity.ok().build();
@@ -47,13 +48,14 @@ public class WelfareController {
     }
 
     @PostMapping("/certificate/{id}/approve")
+    @PreAuthorize("@permissionService.canApproveCertificate(authentication, #id)")
     public ResponseEntity<Void> approveCertificate(@PathVariable Long id) {
         welfareService.approveCertificateIssue(id, SecurityUtils.getCurrentEmployeeId());
         return ResponseEntity.ok().build();
     }
 
-    /** 증명서 발급 반려 (사유는 선택). */
     @PostMapping("/certificate/{id}/reject")
+    @PreAuthorize("@permissionService.canApproveCertificate(authentication, #id)")
     public ResponseEntity<Void> rejectCertificate(@PathVariable Long id,
             @RequestParam(required = false) String memo) {
         welfareService.rejectCertificateIssue(id, SecurityUtils.getCurrentEmployeeId(), memo);

@@ -1,0 +1,86 @@
+# 외부 VPS 배포용 (.env.prod2 사용)
+# - Caddy 포함 (https 자동화)
+# - 빌드 없이 전송된 이미지(tp-hr-*:vps) 사용
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: caddy-vps
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - frontend
+      - backend
+    env_file:
+      - .env
+
+  mysql:
+    image: mysql:8.4
+    container_name: tp-hr-mysql-vps
+    command: --secure-file-priv="" --innodb-buffer-pool-size=128M --max-connections=30
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME:-tp_hr}
+      MYSQL_USER: ${DB_USER:-tp_hr_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - tp-hr-mysql-vps-data:/var/lib/mysql
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-uroot", "-p${DB_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+  backend:
+    image: tp-hr-backend:vps
+    container_name: tp-hr-backend-vps
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xms256m -Xmx256m -XX:+UseSerialGC"
+      SPRING_PROFILES_ACTIVE: docker
+      DB_USER: ${DB_USER:-tp_hr_user}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-https://tsms.o-r.kr}
+      KAKAO_REST_API_KEY: ${KAKAO_REST_API_KEY:-}
+      KAKAO_CLIENT_SECRET: ${KAKAO_CLIENT_SECRET:-}
+      KAKAO_REDIRECT_URI: ${KAKAO_REDIRECT_URI:-}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+    env_file:
+      - .env
+
+  frontend:
+    image: tp-hr-frontend:vps
+    container_name: tp-hr-frontend-vps
+    depends_on:
+      - backend
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+    env_file:
+      - .env
+
+volumes:
+  tp-hr-mysql-vps-data:
+  caddy_data:
+  caddy_config:

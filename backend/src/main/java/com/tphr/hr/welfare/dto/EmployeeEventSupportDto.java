@@ -31,5 +31,11 @@ public class EmployeeEventSupportDto {
         private LocalDate eventDate;
         private BigDecimal requestedAmount;
         private String approvalStatus;
+        private String employeeName;
+        private String employeeNumber;
+        private Long departmentId;
+        private String departmentName;
+        private Integer positionLevel;
+        private String positionName;
     }
 }

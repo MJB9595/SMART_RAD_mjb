@@ -1,4 +1,4 @@
-export type EmployeeRole = "ADMIN" | "EMPLOYEE";
+export type EmployeeRole = "ADMIN" | "HR" | "EMPLOYEE";
 export type EmploymentStatus = "EMPLOYED" | "ON_LEAVE" | "RESIGNED";
 export type StaffCategory = "FACULTY" | "STAFF";
 

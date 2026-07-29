@@ -33,7 +33,7 @@ public class SignupController {
 
 	/** 승인 대기 목록 (관리자). */
 	@GetMapping("/signups/pending")
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("@permissionService.isAdminOrHr(authentication)")
 	public List<SignupResponse> pending() {
 		return signupService.getPending();
 	}
@@ -41,7 +41,7 @@ public class SignupController {
 	/** 승인 = 신청건 ↔ 자리(슬롯) 매칭 → 로그인 가능한 교직원 계정 생성 (관리자). */
 	@PostMapping("/signups/{id}/approve")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("@permissionService.isAdminOrHr(authentication)")
 	public void approve(@PathVariable Long id, @Valid @RequestBody ApproveRequest request) {
 		signupService.approve(id, request.slotId(), SecurityUtils.getCurrentEmployeeId());
 	}
@@ -49,7 +49,7 @@ public class SignupController {
 	/** 거절 (관리자). */
 	@PostMapping("/signups/{id}/reject")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("@permissionService.isAdminOrHr(authentication)")
 	public void reject(@PathVariable Long id) {
 		signupService.reject(id, SecurityUtils.getCurrentEmployeeId());
 	}

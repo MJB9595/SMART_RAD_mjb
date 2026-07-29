@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/approval-slots")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("@permissionService.isAdminOrHr(authentication)")
 public class SlotController {
 
 	private final SlotService slotService;

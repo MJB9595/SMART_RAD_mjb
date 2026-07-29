@@ -116,6 +116,12 @@ public class WelfareService {
                 .eventDate(e.getEventDate())
                 .requestedAmount(e.getRequestedAmount())
                 .approvalStatus(e.getApprovalStatus())
+                .employeeName(e.getEmployee().getName())
+                .employeeNumber(e.getEmployee().getEmployeeNumber())
+                .departmentId(e.getEmployee().getDepartment() != null ? e.getEmployee().getDepartment().getId() : null)
+                .departmentName(e.getEmployee().getDepartment() != null ? e.getEmployee().getDepartment().getName() : null)
+                .positionLevel(e.getEmployee().getPosition() != null ? e.getEmployee().getPosition().getSortOrder() : null)
+                .positionName(e.getEmployee().getPosition() != null ? e.getEmployee().getPosition().getName() : null)
                 .build();
     }
 
@@ -132,8 +138,10 @@ public class WelfareService {
                 // 증명서 서식 출력에 필요한 대상자 정보
                 .employeeName(e.getEmployee().getName())
                 .employeeNumber(e.getEmployee().getEmployeeNumber())
-                .departmentName(e.getEmployee().getDepartment().getName())
-                .positionName(e.getEmployee().getPosition().getName())
+                .departmentId(e.getEmployee().getDepartment() != null ? e.getEmployee().getDepartment().getId() : null)
+                .departmentName(e.getEmployee().getDepartment() != null ? e.getEmployee().getDepartment().getName() : null)
+                .positionLevel(e.getEmployee().getPosition() != null ? e.getEmployee().getPosition().getSortOrder() : null)
+                .positionName(e.getEmployee().getPosition() != null ? e.getEmployee().getPosition().getName() : null)
                 .hireDate(e.getEmployee().getHireDate())
                 .issuedAt(e.getIssuedAt())
                 .build();
