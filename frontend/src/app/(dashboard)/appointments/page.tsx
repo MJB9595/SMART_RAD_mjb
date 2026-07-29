@@ -46,9 +46,31 @@ export default function AppointmentsPage() {
 		listPositions().then(setPositions).catch(console.error);
 	}, []);
 
+	// 현재 선택된 직원 (발령 전 소속·직급 표시용)
+	const selectedEmployee = employees.find((e) => String(e.id) === form.employeeId);
+
+	/** 대상 직원을 고르면 '이전 소속·직급'에 그 직원의 현재 값을 자동 반영한다. */
+	const handleEmployeeChange = (employeeId: string) => {
+		const emp = employees.find((e) => String(e.id) === employeeId);
+		setForm((f) => ({
+			...f,
+			employeeId,
+			fromDepartmentId: emp ? String(emp.departmentId) : "",
+			fromPositionId: emp ? String(emp.positionId) : "",
+			// 발령 후 값은 '변함없음'으로 초기화 — 실제로 바뀌는 항목만 선택하면 된다.
+			toDepartmentId: "",
+			toPositionId: "",
+		}));
+	};
+
 	const handleCreateSubmit = async () => {
 		if (!form.employeeId || !form.appointmentDate) {
 			alert("사원과 발령일자는 필수입니다.");
+			return;
+		}
+		// 소속·직급 모두 '변함없음'이면 실제로 바뀌는 것이 없다.
+		if (!form.toDepartmentId && !form.toPositionId) {
+			alert("발령 소속 또는 발령 직급 중 최소 하나는 선택해야 합니다.\n(둘 다 '변함없음'이면 변경 사항이 없습니다)");
 			return;
 		}
 		try {
@@ -270,16 +292,21 @@ export default function AppointmentsPage() {
 						<div className="p-6 space-y-4 overflow-y-auto">
 							<div className="space-y-1.5">
 								<label className="text-sm font-bold text-slate-700">대상 직원</label>
-								<select 
-									value={form.employeeId} 
-									onChange={(e) => setForm({...form, employeeId: e.target.value})}
+								<select
+									value={form.employeeId}
+									onChange={(e) => handleEmployeeChange(e.target.value)}
 									className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 text-sm font-medium focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
 								>
 									<option value="">직원을 선택하세요</option>
 									{employees.map(emp => (
-										<option key={emp.id} value={emp.id}>{emp.name}</option>
+										<option key={emp.id} value={emp.id}>{emp.name} ({emp.employeeNumber})</option>
 									))}
 								</select>
+								{selectedEmployee && (
+									<p className="text-xs font-medium text-indigo-600">
+										현재 소속·직급: {selectedEmployee.departmentName} / {selectedEmployee.positionName} — 아래 &lsquo;이전&rsquo; 항목에 자동 반영되었습니다.
+									</p>
+								)}
 							</div>
 							<div className="space-y-1.5">
 								<label className="text-sm font-bold text-slate-700">발령 구분</label>
@@ -296,13 +323,15 @@ export default function AppointmentsPage() {
 							</div>
 							<div className="grid grid-cols-2 gap-4">
 								<div className="space-y-1.5">
-									<label className="text-sm font-bold text-slate-700">이전 소속</label>
-									<select 
-										value={form.fromDepartmentId} 
+									<label className="text-sm font-bold text-slate-700">
+										이전 소속 <span className="text-xs font-medium text-slate-400">(자동)</span>
+									</label>
+									<select
+										value={form.fromDepartmentId}
 										onChange={(e) => setForm({...form, fromDepartmentId: e.target.value})}
 										className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 text-sm font-medium focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
 									>
-										<option value="">(선택 안함)</option>
+										<option value="">(직원 선택 시 자동)</option>
 										{departments.map(d => (
 											<option key={d.id} value={d.id}>{d.name}</option>
 										))}
@@ -310,12 +339,12 @@ export default function AppointmentsPage() {
 								</div>
 								<div className="space-y-1.5">
 									<label className="text-sm font-bold text-slate-700">발령 소속</label>
-									<select 
-										value={form.toDepartmentId} 
+									<select
+										value={form.toDepartmentId}
 										onChange={(e) => setForm({...form, toDepartmentId: e.target.value})}
 										className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 text-sm font-medium focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
 									>
-										<option value="">(선택 안함)</option>
+										<option value="">변함없음 (현 소속 유지)</option>
 										{departments.map(d => (
 											<option key={d.id} value={d.id}>{d.name}</option>
 										))}
@@ -324,13 +353,15 @@ export default function AppointmentsPage() {
 							</div>
 							<div className="grid grid-cols-2 gap-4">
 								<div className="space-y-1.5">
-									<label className="text-sm font-bold text-slate-700">이전 직급</label>
-									<select 
-										value={form.fromPositionId} 
+									<label className="text-sm font-bold text-slate-700">
+										이전 직급 <span className="text-xs font-medium text-slate-400">(자동)</span>
+									</label>
+									<select
+										value={form.fromPositionId}
 										onChange={(e) => setForm({...form, fromPositionId: e.target.value})}
 										className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 text-sm font-medium focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
 									>
-										<option value="">(선택 안함)</option>
+										<option value="">(직원 선택 시 자동)</option>
 										{positions.map(p => (
 											<option key={p.id} value={p.id}>{p.name}</option>
 										))}
@@ -338,18 +369,21 @@ export default function AppointmentsPage() {
 								</div>
 								<div className="space-y-1.5">
 									<label className="text-sm font-bold text-slate-700">발령 직급</label>
-									<select 
-										value={form.toPositionId} 
+									<select
+										value={form.toPositionId}
 										onChange={(e) => setForm({...form, toPositionId: e.target.value})}
 										className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 text-sm font-medium focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
 									>
-										<option value="">(선택 안함)</option>
+										<option value="">변함없음 (현 직급 유지)</option>
 										{positions.map(p => (
 											<option key={p.id} value={p.id}>{p.name}</option>
 										))}
 									</select>
 								</div>
 							</div>
+							<p className="text-xs text-slate-500 -mt-1">
+								바뀌는 항목만 고르면 됩니다. 예) 승진 → 발령 소속은 <b>변함없음</b>, 발령 직급만 선택
+							</p>
 							<div className="space-y-1.5">
 								<label className="text-sm font-bold text-slate-700">발령 일자</label>
 								<input 
