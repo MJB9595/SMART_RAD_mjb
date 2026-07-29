@@ -23,15 +23,24 @@ public class SlotService {
 
 	@Transactional
 	public SlotResponse create(SlotCreateRequest req) {
+		var department = departmentRepository.findByIdAndDeletedFalse(req.departmentId())
+				.orElseThrow(() -> ApiException.notFound("소속을 찾을 수 없습니다."));
+
+		var role = req.role();
+		if (department.getName().contains("인사")) {
+			role = com.tphr.hr.employee.EmployeeRole.HR;
+		} else if (role == com.tphr.hr.employee.EmployeeRole.HR) {
+			throw ApiException.badRequest("인사팀 소속이 아닌 직원은 HR 권한을 가질 수 없습니다.");
+		}
+
 		ApprovalSlot slot = ApprovalSlot.builder()
 				.staffCategory(req.staffCategory())
-				.department(departmentRepository.findByIdAndDeletedFalse(req.departmentId())
-						.orElseThrow(() -> ApiException.notFound("소속을 찾을 수 없습니다.")))
+				.department(department)
 				.position(positionRepository.findByIdAndDeletedFalse(req.positionId())
 						.orElseThrow(() -> ApiException.notFound("직급을 찾을 수 없습니다.")))
 				.employmentType(employmentTypeRepository.findByIdAndDeletedFalse(req.employmentTypeId())
 						.orElseThrow(() -> ApiException.notFound("임용구분을 찾을 수 없습니다.")))
-				.role(req.role())
+				.role(role)
 				.hireDate(req.hireDate())
 				.label(req.label())
 				.build();

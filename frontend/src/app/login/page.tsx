@@ -15,7 +15,7 @@ const HARDCODED_DEMO_USERS: AuthUser[] = [
   { employeeId: 3, employeeNumber: "FAC002", name: "이부교", email: "assoc.lee@tphr.com", role: "EMPLOYEE", positionLevel: 2, departmentId: 6, departmentName: "컴퓨터공학과" },
   { employeeId: 4, employeeNumber: "FAC003", name: "박강사", email: "lect.park@tphr.com", role: "EMPLOYEE", positionLevel: 4, departmentId: 7, departmentName: "전자공학과" },
   { employeeId: 5, employeeNumber: "FAC004", name: "최조교수", email: "assist.choi@tphr.com", role: "EMPLOYEE", positionLevel: 3, departmentId: 9, departmentName: "국어국문학과" },
-  { employeeId: 6, employeeNumber: "STA001", name: "정직원", email: "staff.jung@tphr.com", role: "EMPLOYEE", positionLevel: 7, departmentId: 3, departmentName: "인사팀" },
+  { employeeId: 6, employeeNumber: "STA001", name: "정직원", email: "staff.jung@tphr.com", role: "HR", positionLevel: 7, departmentId: 3, departmentName: "인사팀" },
   { employeeId: 7, employeeNumber: "STA002", name: "한주임", email: "staff.han@tphr.com", role: "EMPLOYEE", positionLevel: 8, departmentId: 2, departmentName: "총무처" }
 ];
 

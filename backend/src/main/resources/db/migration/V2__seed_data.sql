@@ -70,10 +70,10 @@ INSERT INTO `employee` (`employee_id`, `employee_no`, `department_id`, `position
   (3, 'FAC002', 6, 2, 1, '이부교', 'FACULTY', 'assoc.lee@tphr.com',  '$2y$10$HBrp.B9cw/40BPare6uwg..KV3JkZ9JkaaXIUxgP5lDKen0KVRtb2', 'EMPLOYEE', '010-1111-0002', '1980-09-03', 'F', '2017-03-01', 'EMPLOYED', '신한은행', '110-000-000002', '이부교', NOW(), NOW(), 0, FALSE),
   (4, 'FAC003', 7, 4, 3, '박강사', 'FACULTY', 'lect.park@tphr.com',  '$2y$10$HBrp.B9cw/40BPare6uwg..KV3JkZ9JkaaXIUxgP5lDKen0KVRtb2', 'EMPLOYEE', '010-1111-0003', '1990-01-20', 'M', '2025-03-01', 'EMPLOYED', NULL, NULL, NULL, NOW(), NOW(), 0, FALSE),
   (5, 'FAC004', 9, 3, 1, '최조교수', 'FACULTY','assist.choi@tphr.com','$2y$10$HBrp.B9cw/40BPare6uwg..KV3JkZ9JkaaXIUxgP5lDKen0KVRtb2', 'EMPLOYEE', '010-1111-0004', '1985-07-07', 'F', '2021-09-01', 'ON_LEAVE', NULL, NULL, NULL, NOW(), NOW(), 0, FALSE),
-  (6, 'STA001', 3, 7, 1, '정직원', 'STAFF',   'staff.jung@tphr.com', '$2y$10$HBrp.B9cw/40BPare6uwg..KV3JkZ9JkaaXIUxgP5lDKen0KVRtb2', 'EMPLOYEE', '010-1111-0005', '1992-11-30', 'M', '2019-01-14', 'EMPLOYED', '신한은행', '110-000-000001', '정직원', NOW(), NOW(), 0, FALSE),
+  (6, 'STA001', 3, 7, 1, '정직원', 'STAFF',   'staff.jung@tphr.com', '$2y$10$HBrp.B9cw/40BPare6uwg..KV3JkZ9JkaaXIUxgP5lDKen0KVRtb2', 'HR', '010-1111-0005', '1992-11-30', 'M', '2019-01-14', 'EMPLOYED', '신한은행', '110-000-000001', '정직원', NOW(), NOW(), 0, FALSE),
   (7, 'STA002', 2, 8, 1, '한주임', 'STAFF',   'staff.han@tphr.com',  '$2y$10$HBrp.B9cw/40BPare6uwg..KV3JkZ9JkaaXIUxgP5lDKen0KVRtb2', 'EMPLOYEE', '010-1111-0006', '1995-04-18', 'F', '2022-07-01', 'EMPLOYED', NULL, NULL, NULL, NOW(), NOW(), 0, FALSE);
 
-INSERT INTO `employee_role` (`employee_id`, `role_id`) VALUES (1,1),(2,3),(3,3),(4,3),(5,3),(6,3),(7,3);
+INSERT INTO `employee_role` (`employee_id`, `role_id`) VALUES (1,1),(2,3),(3,3),(4,3),(5,3),(6,2),(7,3);
 
 -- 인사기록 샘플
 INSERT INTO `employee_education` (`employee_id`, `school_name`, `major`, `degree`, `graduation_date`, `status`, `created_at`, `updated_at`, `version`, `deleted`) VALUES

@@ -96,17 +96,35 @@ export default function SlotCreatePage() {
 							</select>
 						</div>
 						<div className="form-field">
-							<label>권한<span className="req">*</span></label>
-							<select value={form.role} onChange={(e) => set("role", e.target.value)}>
-								<option value="EMPLOYEE">일반</option>
-								<option value="ADMIN">관리자</option>
+							<label>소속<span className="req">*</span></label>
+							<select
+								value={form.departmentId}
+								onChange={(e) => {
+									const deptId = e.target.value;
+									set("departmentId", deptId);
+									const dept = departments.find(d => d.id.toString() === deptId);
+									if (dept && dept.name.includes("인사")) {
+										set("role", "HR");
+									} else if (form.role === "HR") {
+										set("role", "EMPLOYEE");
+									}
+								}}
+								required
+							>
+								<option value="">선택</option>
+								{departments.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
 							</select>
 						</div>
 						<div className="form-field">
-							<label>소속<span className="req">*</span></label>
-							<select value={form.departmentId} onChange={(e) => set("departmentId", e.target.value)} required>
-								<option value="">선택</option>
-								{departments.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+							<label>권한<span className="req">*</span></label>
+							<select
+								value={form.role}
+								onChange={(e) => set("role", e.target.value)}
+								disabled={departments.find(d => d.id.toString() === form.departmentId)?.name.includes("인사")}
+							>
+								<option value="EMPLOYEE">일반</option>
+								<option value="HR">인사 담당자</option>
+								<option value="ADMIN">관리자</option>
 							</select>
 						</div>
 						<div className="form-field">
