@@ -203,7 +203,6 @@ export default function LoginPage() {
               </div>
 
               <div className="animate-in fade-in slide-in-from-top-2 mb-2">
-                <span className="text-sm font-medium text-gray-700 mb-2 block">데모 로그인 계정 (클릭하여 자동 입력)</span>
                 <div className="flex flex-col gap-2 max-h-48 overflow-y-auto border border-gray-200 p-2 rounded-lg bg-gray-50 shadow-inner">
                   {demoUsers.length === 0 ? (
                     <div className="text-sm text-gray-500 p-4 text-center">목록을 불러오는 중...</div>
