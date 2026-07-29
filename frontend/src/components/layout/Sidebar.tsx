@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { topNavTabs, findActiveTab, isNavItemActive } from "@/lib/nav";
+import { useAuth } from "@/lib/auth/AuthContext";
 
 export function Sidebar() {
 	const pathname = usePathname();
 	const activeTab = findActiveTab(pathname);
+	const { user } = useAuth();
 
 	return (
 		<aside className="sidebar">
@@ -27,7 +29,9 @@ export function Sidebar() {
 			
 			<div className="nav-label">HR MODULES</div>
 			
-			{topNavTabs.map((tab) => {
+			{topNavTabs
+				.filter(tab => !tab.allowedRoles || (user && tab.allowedRoles.includes(user.role)))
+				.map((tab) => {
 				const isTabActive = tab.key === activeTab.key;
 				return (
 					<div key={tab.key}>
@@ -37,7 +41,10 @@ export function Sidebar() {
 						
 						{isTabActive && (
 							<div className="nav-sub">
-								{tab.sections.flatMap(section => section.items).map(item => {
+								{tab.sections
+									.flatMap(section => section.items)
+									.filter(item => !item.allowedRoles || (user && item.allowedRoles.includes(user.role)))
+									.map(item => {
 									const isActive = isNavItemActive(pathname, item.href, tab.sections.flatMap(s => s.items).map(i => i.href));
 									return (
 										<Link key={item.href} href={item.href} className={isActive ? "on" : ""}>

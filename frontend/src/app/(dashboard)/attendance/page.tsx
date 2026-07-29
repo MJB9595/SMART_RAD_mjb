@@ -6,12 +6,14 @@ import { searchEmployees } from "@/lib/api/employees";
 import { ApiError } from "@/lib/api/client";
 import type { Attendance, AttendanceSummary } from "@/lib/types/attendance";
 import type { Employee } from "@/lib/types/employee";
+import { useAuth } from "@/lib/auth/AuthContext";
 
 function today() {
 	return new Date().toISOString().slice(0, 10);
 }
 
 export default function AttendancePage() {
+	const { user } = useAuth();
 	const [workDate, setWorkDate] = useState(today());
 	const [attendances, setAttendances] = useState<Attendance[]>([]);
 	const [summary, setSummary] = useState<AttendanceSummary | null>(null);
@@ -44,10 +46,14 @@ export default function AttendancePage() {
 	}, [workDate]);
 
 	useEffect(() => {
-		searchEmployees({ size: 200 })
-			.then((res) => setEmployees(res.content))
-			.catch(() => setEmployees([]));
-	}, []);
+		if (user?.role === "ADMIN") {
+			searchEmployees({ size: 200 })
+				.then((res) => setEmployees(res.content))
+				.catch(() => setEmployees([]));
+		} else if (user) {
+			setEmployees([user as unknown as Employee]);
+		}
+	}, [user]);
 
 	async function submit(e: React.FormEvent) {
 		e.preventDefault();

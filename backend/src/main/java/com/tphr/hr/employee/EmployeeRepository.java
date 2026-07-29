@@ -12,6 +12,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>, JpaSp
 
 	Optional<Employee> findByIdAndDeletedFalse(Long id);
 
+	@EntityGraph(attributePaths = {"department", "position", "employmentType"})
 	Optional<Employee> findByEmailAndDeletedFalse(String email);
 
 	boolean existsByEmployeeNumber(String employeeNumber);

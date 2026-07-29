@@ -1,6 +1,7 @@
 export interface NavItem {
 	label: string;
 	href: string;
+	allowedRoles?: string[];
 }
 
 export interface NavSection {
@@ -13,6 +14,7 @@ export interface TopNavTab {
 	label: string;
 	basePath: string;
 	sections: NavSection[];
+	allowedRoles?: string[];
 }
 
 export const topNavTabs: TopNavTab[] = [
@@ -34,6 +36,7 @@ export const topNavTabs: TopNavTab[] = [
 		key: "appointment",
 		label: "인사발령 관리",
 		basePath: "/appointments",
+		allowedRoles: ["ADMIN", "HR"],
 		sections: [
 			{
 				label: "인사발령 관리",
@@ -68,8 +71,8 @@ export const topNavTabs: TopNavTab[] = [
 				label: "급여 관리",
 				items: [
 					{ label: "급여 명세서 조회", href: "/payroll" },
-					{ label: "수당 관리", href: "/payroll/allowance" },
-					{ label: "정산 엑셀 다운로드", href: "/payroll/settlement" },
+					{ label: "수당 관리", href: "/payroll/allowance", allowedRoles: ["ADMIN", "HR"] },
+					{ label: "정산 엑셀 다운로드", href: "/payroll/settlement", allowedRoles: ["ADMIN", "HR"] },
 				],
 			},
 		],
@@ -92,6 +95,7 @@ export const topNavTabs: TopNavTab[] = [
 		key: "system",
 		label: "시스템 관리",
 		basePath: "/system/roles",
+		allowedRoles: ["ADMIN"],
 		sections: [
 			{
 				label: "시스템 관리",

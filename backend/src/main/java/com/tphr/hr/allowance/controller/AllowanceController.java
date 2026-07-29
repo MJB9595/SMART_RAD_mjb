@@ -13,12 +13,13 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN', 'HR')")
 public class AllowanceController {
 
     private final AllowanceService allowanceService;
 
     @PostMapping("/allowances")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('HR') and @permissionService.isHighRank(authentication))")
     public ResponseEntity<AllowanceDto.Response> createAllowance(@Valid @RequestBody AllowanceDto.Request req) {
         return ResponseEntity.ok(allowanceService.createAllowance(req));
     }

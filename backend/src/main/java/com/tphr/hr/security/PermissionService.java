@@ -32,6 +32,16 @@ public class PermissionService {
 				.anyMatch(a -> a.getAuthority().equals("ROLE_HR"));
 	}
 
+	public boolean isHighRank(Authentication authentication) {
+		if (authentication == null || !authentication.isAuthenticated()) return false;
+		if (authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
+			Employee current = userDetails.getEmployee();
+			if (current.getPosition() == null) return false;
+			return current.getPosition().getSortOrder() <= 3; // 팀장급(3) 이상
+		}
+		return false;
+	}
+
 	/**
 	 * 특정 대상 교직원(targetEmployeeId)에 대한 승인 권한이 있는지 확인.
 	 * 규칙: ADMIN/HR은 무조건 승인 가능.
@@ -74,7 +84,7 @@ public class PermissionService {
 
 	@Transactional(readOnly = true)
 	public boolean canApproveCertificate(Authentication authentication, Long certificateId) {
-		if (isHr(authentication)) return true;
+		if (isAdminOrHr(authentication)) return true;
 		var certOpt = certificateIssueRepository.findById(certificateId);
 		if (certOpt.isEmpty()) return false;
 		return canApproveTarget(authentication, certOpt.get().getEmployee().getId());
@@ -82,7 +92,7 @@ public class PermissionService {
 
 	@Transactional(readOnly = true)
 	public boolean canApproveEventSupport(Authentication authentication, Long eventSupportId) {
-		if (isHr(authentication)) return true;
+		if (isAdminOrHr(authentication)) return true;
 		var eventOpt = eventSupportRepository.findById(eventSupportId);
 		if (eventOpt.isEmpty()) return false;
 		return canApproveTarget(authentication, eventOpt.get().getEmployee().getId());

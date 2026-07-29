@@ -38,7 +38,7 @@ public class EmployeeController {
 	private final SignupService signupService;
 
 	@GetMapping
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'HR')")
 	public Page<EmployeeResponse> searchEmployees(
 			@RequestParam(required = false) String keyword,
 			@RequestParam(required = false) Long departmentId,

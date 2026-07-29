@@ -7,6 +7,7 @@ import { searchEmployees } from "@/lib/api/employees";
 import type { Employee } from "@/lib/types/employee";
 import { ApiError } from "@/lib/api/client";
 import { StatusBadge } from "@/components/StatusBadge";
+import { useAuth } from "@/lib/auth/AuthContext";
 import type { LeaveRequest, LeaveBalance } from "@/lib/types/leave";
 
 interface EmployeeLeaveData {
@@ -16,6 +17,7 @@ interface EmployeeLeaveData {
 }
 
 export default function LeavesPage() {
+	const { user } = useAuth();
 	const today = new Date();
 	const [year, setYear] = useState(today.getFullYear().toString());
 	const [month, setMonth] = useState((today.getMonth() + 1).toString().padStart(2, '0'));
@@ -38,9 +40,13 @@ export default function LeavesPage() {
 	});
 
 	useEffect(() => {
-		searchEmployees({ size: 100 }).then(res => setEmployeeList(res.content)).catch(console.error);
+		if (user?.role === "ADMIN") {
+			searchEmployees({ size: 100 }).then(res => setEmployeeList(res.content)).catch(console.error);
+		} else if (user) {
+			setEmployeeList([user as unknown as Employee]);
+		}
 		listLeaveTypes().then(setLeaveTypes).catch(console.error);
-	}, []);
+	}, [user]);
 
 	const handleApplySubmit = async () => {
 		try {
