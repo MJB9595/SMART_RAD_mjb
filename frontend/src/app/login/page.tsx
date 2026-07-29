@@ -6,7 +6,18 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { ApiError } from "@/lib/api/client";
 import { startKakaoLogin } from "@/lib/auth/kakao";
+import type { AuthUser } from "@/lib/types/auth";
 import { Button, Field, Input } from "@/components/ui";
+
+const HARDCODED_DEMO_USERS: AuthUser[] = [
+  { employeeId: 1, employeeNumber: "ADM001", name: "관리자", email: "admin", role: "ADMIN" },
+  { employeeId: 2, employeeNumber: "FAC001", name: "김정교", email: "prof.kim@tphr.com", role: "EMPLOYEE" },
+  { employeeId: 3, employeeNumber: "FAC002", name: "이부교", email: "assoc.lee@tphr.com", role: "EMPLOYEE" },
+  { employeeId: 4, employeeNumber: "FAC003", name: "박강사", email: "lect.park@tphr.com", role: "EMPLOYEE" },
+  { employeeId: 5, employeeNumber: "FAC004", name: "최조교수", email: "assist.choi@tphr.com", role: "EMPLOYEE" },
+  { employeeId: 6, employeeNumber: "STA001", name: "정직원", email: "staff.jung@tphr.com", role: "EMPLOYEE" },
+  { employeeId: 7, employeeNumber: "STA002", name: "한주임", email: "staff.han@tphr.com", role: "EMPLOYEE" }
+];
 
 // 숫자 카운팅 애니메이션 컴포넌트
 function AnimatedNumber({
@@ -72,11 +83,26 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [kakaoLoading, setKakaoLoading] = useState<boolean>(false);
 
+  const [step, setStep] = useState<1 | 2>(1);
+  const [selectedRole, setSelectedRole] = useState<'ADMIN' | 'USER'>('ADMIN');
+  const [empNumber, setEmpNumber] = useState<string>("");
+  const [demoUsers, setDemoUsers] = useState<AuthUser[]>([]);
+
   useEffect(() => {
     if (!loading && user) {
       router.replace("/employees");
     }
   }, [user, loading, router]);
+
+  useEffect(() => {
+    setDemoUsers(HARDCODED_DEMO_USERS);
+  }, []);
+
+  useEffect(() => {
+    setEmail("");
+    setPassword("");
+    setEmpNumber("");
+  }, [selectedRole]);
 
   if (loading) {
     return (
@@ -91,11 +117,24 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
+    if (!email || !password) {
+      setError("아이디와 비밀번호를 모두 입력해주세요.");
+      return;
+    }
+    if (selectedRole === 'USER' && !empNumber) {
+      setError("사원 번호를 입력해주세요.");
+      return;
+    }
+
     setError(null);
     setSubmitting(true);
     try {
       await login(email, password);
-      router.replace("/employees");
+      if (selectedRole === 'ADMIN') {
+        router.replace("/employees");
+      } else {
+        router.replace("/attendance");
+      }
     } catch (err) {
       setError(
         err instanceof ApiError ? err.message : "로그인에 실패했습니다.",
@@ -141,6 +180,60 @@ export default function LoginPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-5" autoComplete="off">
+              {/* 접속 유형 탭 */}
+              <div className="flex bg-gray-100 p-1 rounded-lg mb-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedRole('ADMIN')}
+                  className={`flex-1 py-2 text-sm font-bold rounded-md transition-all duration-200 ${
+                    selectedRole === 'ADMIN' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  관리자
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedRole('USER')}
+                  className={`flex-1 py-2 text-sm font-bold rounded-md transition-all duration-200 ${
+                    selectedRole === 'USER' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  일반 회원
+                </button>
+              </div>
+
+              <div className="animate-in fade-in slide-in-from-top-2 mb-2">
+                <span className="text-sm font-medium text-gray-700 mb-2 block">데모 로그인 계정 (클릭하여 자동 입력)</span>
+                <div className="flex flex-col gap-2 max-h-48 overflow-y-auto border border-gray-200 p-2 rounded-lg bg-gray-50 shadow-inner">
+                  {demoUsers.length === 0 ? (
+                    <div className="text-sm text-gray-500 p-4 text-center">목록을 불러오는 중...</div>
+                  ) : (
+                    demoUsers
+                      .filter(u => selectedRole === 'ADMIN' ? u.role === 'ADMIN' : u.role === 'EMPLOYEE')
+                      .map(u => (
+                      <button
+                        key={u.employeeId}
+                        type="button"
+                        onClick={() => {
+                          setEmail(u.email);
+                          if (selectedRole === 'USER') {
+                            setEmpNumber(u.employeeNumber);
+                          }
+                          setPassword(selectedRole === 'ADMIN' ? "admin1234" : "user1234");
+                        }}
+                        className="flex justify-between items-center p-3 hover:bg-blue-50 border border-transparent hover:border-blue-200 rounded-md text-left transition-all text-sm group bg-white shadow-sm"
+                      >
+                        <div>
+                          <span className="font-semibold text-gray-800 block group-hover:text-blue-700">{u.name}</span>
+                          <span className="text-gray-500 text-xs">사원번호: {u.employeeNumber}</span>
+                        </div>
+                        <span className="text-gray-400 text-xs">{u.email}</span>
+                      </button>
+                    ))
+                  )}
+                </div>
+              </div>
+
               <Field label="아이디">
                 <Input
                   type="text"
@@ -170,9 +263,7 @@ export default function LoginPage() {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 active:text-gray-800 focus:outline-none select-none p-1 z-10 transition-colors duration-150"
-                    aria-label={
-                      showPassword ? "비밀번호 숨기기" : "비밀번호 보기"
-                    }
+                    aria-label={showPassword ? "비밀번호 숨기기" : "비밀번호 보기"}
                     title={showPassword ? "비밀번호 숨기기" : "비밀번호 보기"}
                   >
                     {showPassword ? (
@@ -215,6 +306,21 @@ export default function LoginPage() {
                 </div>
               </Field>
 
+              {selectedRole === 'USER' && (
+                <div className="animate-in fade-in slide-in-from-top-2">
+                  <Field label="사원 번호">
+                    <Input
+                      type="text"
+                      placeholder="사원 번호를 입력하세요"
+                      value={empNumber}
+                      onChange={(e) => setEmpNumber(e.currentTarget.value)}
+                      className="w-full h-12 min-h-[48px]"
+                      required
+                    />
+                  </Field>
+                </div>
+              )}
+
               <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-500 mt-1">
                 <label className="flex items-center gap-2 cursor-pointer text-gray-500 dark:text-gray-500">
                   <input
@@ -243,9 +349,7 @@ export default function LoginPage() {
 
               <div className="relative flex items-center py-4">
                 <div className="flex-grow border-t border-gray-200 dark:border-gray-200"></div>
-                <span className="flex-shrink-0 mx-4 text-xs text-gray-400 dark:text-gray-400">
-                  또는
-                </span>
+                <span className="flex-shrink-0 mx-4 text-xs text-gray-400 dark:text-gray-400">또는</span>
                 <div className="flex-grow border-t border-gray-200 dark:border-gray-200"></div>
               </div>
 
