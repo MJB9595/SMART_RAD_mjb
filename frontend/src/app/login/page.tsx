@@ -218,7 +218,7 @@ export default function LoginPage() {
                           if (selectedRole === 'USER') {
                             setEmpNumber(u.employeeNumber);
                           }
-                          setPassword(selectedRole === 'ADMIN' ? "admin1234" : "user1234");
+                          setPassword(selectedRole === 'ADMIN' ? "admin" : "user1234");
                         }}
                         className="flex justify-between items-center p-3 hover:bg-blue-50 border border-transparent hover:border-blue-200 rounded-md text-left transition-all text-sm group bg-white shadow-sm"
                       >
