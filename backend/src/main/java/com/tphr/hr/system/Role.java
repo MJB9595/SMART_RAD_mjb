@@ -43,4 +43,27 @@ public class Role extends BaseEntity {
 			joinColumns = @JoinColumn(name = "role_id"),
 			inverseJoinColumns = @JoinColumn(name = "permission_id"))
 	private Set<Permission> permissions = new HashSet<>();
+
+	private Role(String code, String name, String description) {
+		this.code = code;
+		this.name = name;
+		this.description = description;
+	}
+
+	/** 새 역할 생성 — 코드는 생성 후 변경하지 않는다(권한 검사의 기준이 되므로). */
+	public static Role create(String code, String name, String description) {
+		return new Role(code, name, description);
+	}
+
+	/** 이름·설명 수정. 코드는 바꾸지 않는다. */
+	public void update(String name, String description) {
+		this.name = name;
+		this.description = description;
+	}
+
+	/** 보유 권한 전체 교체. */
+	public void replacePermissions(Set<Permission> newPermissions) {
+		this.permissions.clear();
+		this.permissions.addAll(newPermissions);
+	}
 }
