@@ -100,6 +100,10 @@ public class AttendanceService {
 
 	@Transactional
 	public AttendanceResponse register(AttendanceRequest request) {
+		// 지나간 날의 출퇴근을 나중에 만들어 넣지 못하게 한다 (당일·미래만 허용)
+		if (request.workDate().isBefore(LocalDate.now())) {
+			throw ApiException.badRequest("지난 날짜의 근태는 등록할 수 없습니다. 오늘(" + LocalDate.now() + ") 이후로 선택하세요.");
+		}
 		Employee employee = employeeRepository.findById(request.employeeId())
 				.orElseThrow(() -> ApiException.notFound("사원을 찾을 수 없습니다. id=" + request.employeeId()));
 

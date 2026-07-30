@@ -17,6 +17,11 @@ export default function AttendancePage() {
 	const { notify, confirm: askConfirm } = useFeedback();
 	const { user } = useAuth();
 	const [workDate, setWorkDate] = useState(today());
+	/**
+	 * 조회 날짜가 곧 등록 날짜다. 지난 날짜는 서버가 거부하므로 등록 버튼을 잠근다.
+	 * (조회는 과거도 자유롭게 할 수 있어야 하니 날짜 선택 자체는 막지 않는다)
+	 */
+	const isPastDate = workDate < today();
 	const [attendances, setAttendances] = useState<Attendance[]>([]);
 	const [summary, setSummary] = useState<AttendanceSummary | null>(null);
 	const [loading, setLoading] = useState(true);
@@ -66,6 +71,10 @@ export default function AttendancePage() {
 			notify("대상 교직원을 선택하세요.", "error");
 			return;
 		}
+		if (isPastDate) {
+			notify("지난 날짜의 근태는 등록할 수 없습니다.", "error");
+			return;
+		}
 		const leave = status === "ANNUAL_LEAVE";
 		setSaving(true);
 		try {
@@ -102,7 +111,15 @@ export default function AttendancePage() {
 					<div className="page-title">일일 근태 관리</div>
 					<div className="page-sub">일자별 출퇴근 현황을 등록·조회합니다</div>
 				</div>
-				<button className="btn-primary" onClick={() => setShowForm(true)}>+ 근태 등록</button>
+				<button
+					className="btn-primary"
+					onClick={() => setShowForm(true)}
+					disabled={isPastDate}
+					style={isPastDate ? { opacity: 0.45, cursor: "not-allowed" } : undefined}
+					title={isPastDate ? "지난 날짜의 근태는 등록할 수 없습니다. 오늘 이후 날짜를 선택하세요." : undefined}
+				>
+					+ 근태 등록
+				</button>
 			</div>
 
 			<div className="stat-grid">
