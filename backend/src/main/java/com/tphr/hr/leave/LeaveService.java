@@ -106,13 +106,13 @@ public class LeaveService {
 	/**
 	 * 신청 기간 검증.
 	 *
-	 * <p>지나간 날짜로는 신청할 수 없다 — 역할과 무관하게 전원에게 적용한다.
-	 * 당일은 허용한다(오늘 갑자기 쓰는 경우).
+	 * <p>지나간 날짜로는 신청할 수 없다. 다만 관리자·인사팀은 병가처럼 사후에 등록해야 하는
+	 * 경우가 있어 예외로 둔다. 당일은 누구나 허용한다(오늘 갑자기 쓰는 경우).
 	 */
 	private void validatePeriod(LocalDate startDate, LocalDate endDate) {
 		LocalDate today = LocalDate.now();
-		if (startDate.isBefore(today)) {
-			throw ApiException.badRequest("지난 날짜로는 휴가를 신청할 수 없습니다. 오늘(" + today + ") 이후로 선택하세요.");
+		if (startDate.isBefore(today) && !SecurityUtils.isAdminOrHr()) {
+			throw ApiException.badRequest("지난 날짜로는 휴가를 신청할 수 없습니다. 사후 등록이 필요하면 인사팀에 요청하세요.");
 		}
 		if (endDate.isBefore(startDate)) {
 			throw ApiException.badRequest("종료일은 시작일보다 빠를 수 없습니다.");

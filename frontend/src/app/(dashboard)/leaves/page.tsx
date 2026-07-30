@@ -26,10 +26,12 @@ export default function LeavesPage() {
 	const canApprove = hasPermission(user, PERM.LEAVE_APPROVE) || user?.role === "ADMIN";
 	/**
 	 * 달력에서 오늘 이전 날짜를 고를 수 없게 막는다.
-	 * (서버는 소급 등록을 허용한다 — 병가처럼 사후 처리해야 하는 경우가 있어서다.
-	 *  화면에서만 실수로 과거를 고르는 걸 막는 셈)
+	 * 단 관리자·인사팀은 병가처럼 사후 등록해야 하는 경우가 있어 서버에서도 허용하므로 풀어 준다.
 	 */
+	const canBackdate = user?.role === "ADMIN" || user?.role === "HR";
 	const todayIso = new Date().toLocaleDateString("sv-SE");
+	/** 신청 폼 달력의 하한. 소급 권한이 있으면 제한 없음. */
+	const minDate = canBackdate ? undefined : todayIso;
 	const today = new Date();
 	const [year, setYear] = useState(today.getFullYear().toString());
 	const [month, setMonth] = useState((today.getMonth() + 1).toString().padStart(2, '0'));
@@ -66,7 +68,7 @@ export default function LeavesPage() {
 
 	const handleApplySubmit = async () => {
 		// min 은 달력 선택만 막고 직접 입력은 통과하므로 제출 직전에 한 번 더 본다
-		if (applyForm.startDate && applyForm.startDate < todayIso) {
+		if (!canBackdate && applyForm.startDate && applyForm.startDate < todayIso) {
 			notify("지난 날짜로는 휴가를 신청할 수 없습니다.", "error");
 			return;
 		}
@@ -446,7 +448,7 @@ export default function LeavesPage() {
 									<label className="text-sm font-bold text-slate-700">시작일</label>
 									<input 
 										type="date" 
-										min={todayIso}
+										min={minDate}
 										value={applyForm.startDate} 
 										onChange={(e) => {
 											const startDate = e.target.value;
@@ -464,7 +466,7 @@ export default function LeavesPage() {
 									<label className="text-sm font-bold text-slate-700">종료일</label>
 									<input 
 										type="date" 
-										min={applyForm.startDate || todayIso}
+										min={applyForm.startDate || minDate}
 										value={applyForm.endDate} 
 										onChange={(e) => setApplyForm({...applyForm, endDate: e.target.value})}
 										className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 text-sm font-medium focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors" 

@@ -19,9 +19,11 @@ export default function AttendancePage() {
 	const [workDate, setWorkDate] = useState(today());
 	/**
 	 * 조회 날짜가 곧 등록 날짜다. 지난 날짜는 서버가 거부하므로 등록 버튼을 잠근다.
+	 * 단 관리자·인사팀은 사후 정정을 위해 서버에서도 허용하므로 잠그지 않는다.
 	 * (조회는 과거도 자유롭게 할 수 있어야 하니 날짜 선택 자체는 막지 않는다)
 	 */
-	const isPastDate = workDate < today();
+	const canBackdate = user?.role === "ADMIN" || user?.role === "HR";
+	const isPastDate = workDate < today() && !canBackdate;
 	const [attendances, setAttendances] = useState<Attendance[]>([]);
 	const [summary, setSummary] = useState<AttendanceSummary | null>(null);
 	const [loading, setLoading] = useState(true);

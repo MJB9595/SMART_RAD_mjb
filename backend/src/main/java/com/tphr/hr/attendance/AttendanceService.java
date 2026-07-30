@@ -7,6 +7,7 @@ import com.tphr.hr.attendance.dto.MonthlyAttendanceResponse;
 import com.tphr.hr.common.exception.ApiException;
 import com.tphr.hr.employee.Employee;
 import com.tphr.hr.employee.EmployeeRepository;
+import com.tphr.hr.security.SecurityUtils;
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -100,9 +101,11 @@ public class AttendanceService {
 
 	@Transactional
 	public AttendanceResponse register(AttendanceRequest request) {
-		// 지나간 날의 출퇴근을 나중에 만들어 넣지 못하게 한다 (당일·미래만 허용)
-		if (request.workDate().isBefore(LocalDate.now())) {
-			throw ApiException.badRequest("지난 날짜의 근태는 등록할 수 없습니다. 오늘(" + LocalDate.now() + ") 이후로 선택하세요.");
+		// 지나간 날의 출퇴근을 나중에 만들어 넣지 못하게 한다 (당일·미래만 허용).
+		// 다만 관리자·인사팀은 사후 정정이 필요하므로 예외로 둔다.
+		if (request.workDate().isBefore(LocalDate.now()) && !SecurityUtils.isAdminOrHr()) {
+			throw ApiException.badRequest(
+					"지난 날짜의 근태는 등록할 수 없습니다. 사후 정정이 필요하면 인사팀에 요청하세요.");
 		}
 		Employee employee = employeeRepository.findById(request.employeeId())
 				.orElseThrow(() -> ApiException.notFound("사원을 찾을 수 없습니다. id=" + request.employeeId()));
