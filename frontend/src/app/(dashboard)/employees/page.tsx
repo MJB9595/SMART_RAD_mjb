@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { searchEmployees, unmatchEmployee } from "@/lib/api/employees";
+import { getEmployeeStats, searchEmployees, unmatchEmployee } from "@/lib/api/employees";
 import { listDepartments } from "@/lib/api/departments";
-import { countExpiringCertifications, getRecordSummary } from "@/lib/api/records";
+import { getRecordSummary } from "@/lib/api/records";
 import { getPendingSignups } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/client";
 import type { Employee, EmployeeRecordSummary } from "@/lib/types/employee";
@@ -53,23 +53,14 @@ export default function EmployeesPage() {
 
 	useEffect(() => {
 		listDepartments().then(setDepartments).catch(() => setDepartments([]));
-		Promise.all([
-			searchEmployees({ size: 1 }),
-			searchEmployees({ size: 1, employmentStatus: "EMPLOYED" }),
-			searchEmployees({ size: 1, employmentStatus: "ON_LEAVE" }),
-			countExpiringCertifications(90),
-			getPendingSignups(),
-		])
-			.then(([all, emp, leave, exp, signups]) => {
-				setStats({
-					total: all.totalElements,
-					employed: emp.totalElements,
-					onLeave: leave.totalElements,
-					expiring: exp.count,
-				});
-				setPendingSignupsCount(signups.length);
-			})
-			.catch(console.error);
+		// 요약 카드와 가입 대기 건수는 서로 독립이다. 예전에는 5개 호출을 Promise.all 로 묶어 두어
+		// 권한이 없어 하나라도 403 이면 전체가 reject 되고 카드가 0 인 채로 남았다.
+		getEmployeeStats()
+			.then(setStats)
+			.catch(() => setStats({ total: 0, employed: 0, onLeave: 0, expiring: 0 }));
+		getPendingSignups()
+			.then((signups) => setPendingSignupsCount(signups.length))
+			.catch(() => setPendingSignupsCount(0));
 	}, [reloadKey]);
 
 	// 목록 조회 (필터/페이지 변경 시)

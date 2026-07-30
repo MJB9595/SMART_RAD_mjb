@@ -7,8 +7,9 @@ import {
 	listMonthlyAttendance,
 	type MonthlyAttendance,
 } from "@/lib/api/attendance";
+import { useAuth } from "@/lib/auth/AuthContext";
 
-// Mock Daily Data Interface
+// 격자 한 칸의 화면 표현
 interface DailyData {
 	in?: string;
 	out?: string;
@@ -17,6 +18,7 @@ interface DailyData {
 }
 
 export default function MonthlyAttendancePage() {
+	const { user } = useAuth();
 	const [year, setYear] = useState("2026");
 	const [month, setMonth] = useState("07");
 	const [rows, setRows] = useState<MonthlyAttendance[]>([]);
@@ -80,38 +82,34 @@ export default function MonthlyAttendancePage() {
 		return result;
 	}, [year, month, daysInMonth]);
 
-	// Generate Mock Data per employee to match the UI screenshot
-	const mockDailyData = useMemo(() => {
-		const dataMap: Record<number, Record<number, DailyData>> = {};
-		rows.forEach((emp) => {
-			dataMap[emp.employeeId] = {};
-			for (let d = 1; d <= daysInMonth; d++) {
-				const dayIndex = new Date(Number(year), Number(month) - 1, d).getDay();
-				const isWeekend = dayIndex === 0 || dayIndex === 6;
-				
-				if (isWeekend) {
-					if (Math.random() > 0.95) {
-						dataMap[emp.employeeId][d] = { in: "9:00", out: "18:00", status: "normal" };
-					}
-					continue;
-				}
-
-				const rand = Math.random();
-				if (rand < 0.05) {
-					dataMap[emp.employeeId][d] = { status: "연차" };
-				} else if (rand < 0.1) {
-					dataMap[emp.employeeId][d] = { status: "반차", in: "9:00", out: "13:00" };
-				} else if (rand < 0.15) {
-					dataMap[emp.employeeId][d] = { status: "X" };
-				} else if (rand < 0.25) {
-					dataMap[emp.employeeId][d] = { in: `9:0${Math.floor(Math.random() * 9) + 1}`, out: "18:00", status: "normal", isLate: true };
-				} else {
-					dataMap[emp.employeeId][d] = { in: "9:00", out: "18:00", status: "normal" };
-				}
+	/**
+	 * 서버가 준 실제 근태를 격자 표현으로 변환한다.
+	 * 이전에는 여기서 Math.random() 으로 값을 만들어 냈기 때문에, 화면에 보이던 출퇴근 시각은
+	 * 실제 기록과 무관했고 새로고침할 때마다 바뀌었다.
+	 */
+	const dailyByEmployee = useMemo(() => {
+		const toCell = (d: { status: string; checkInTime: string | null; checkOutTime: string | null }): DailyData => {
+			const hhmm = (t: string | null) => (t ? t.slice(0, 5) : undefined);
+			switch (d.status) {
+				case "ANNUAL_LEAVE":
+					return { status: "연차" };
+				case "ABSENT":
+					return { status: "X" };
+				case "LATE":
+					return { in: hhmm(d.checkInTime), out: hhmm(d.checkOutTime), status: "normal", isLate: true };
+				default:
+					return { in: hhmm(d.checkInTime), out: hhmm(d.checkOutTime), status: "normal" };
 			}
+		};
+		const map: Record<number, Record<number, DailyData>> = {};
+		rows.forEach((emp) => {
+			map[emp.employeeId] = {};
+			Object.entries(emp.daily ?? {}).forEach(([day, detail]) => {
+				map[emp.employeeId][Number(day)] = toCell(detail);
+			});
 		});
-		return dataMap;
-	}, [rows, daysInMonth, year, month]);
+		return map;
+	}, [rows]);
 
 	const getDeptColor = (dept: string) => {
 		if (dept.includes("해외영업")) return "bg-teal-500 text-white";
@@ -191,18 +189,27 @@ export default function MonthlyAttendancePage() {
 							) : rows.length === 0 ? (
 								<tr><td colSpan={days.length + 1} className="p-12 text-center text-slate-400 text-sm font-medium">{year}년 {month}월 근태 기록이 없습니다.</td></tr>
 							) : (
-								rows.map((emp) => (
+								rows.map((emp) => {
+									// 전체를 보는 인사팀·관리자 화면에서 본인 행을 찾기 쉽도록 강조한다
+									const isMine = emp.employeeId === user?.employeeId;
+									const rowBg = selectedEmployee?.employeeId === emp.employeeId
+										? 'bg-indigo-50/50'
+										: isMine ? 'bg-amber-50/60' : '';
+									return (
 									<tr 
 										key={emp.employeeId} 
-										className={`border-b border-slate-200 group cursor-pointer transition-colors ${selectedEmployee?.employeeId === emp.employeeId ? 'bg-indigo-50/50' : ''}`}
+										className={`border-b border-slate-200 group cursor-pointer transition-colors ${rowBg}`}
 										onClick={() => setSelectedEmployee(emp)}
 									>
-										<td className={`sticky left-0 z-20 p-3 border-r border-slate-200 shadow-[1px_0_0_rgb(226,232,240)] align-top transition-colors ${selectedEmployee?.employeeId === emp.employeeId ? 'bg-indigo-50/50' : 'bg-white group-hover:bg-slate-50'}`}>
+										<td className={`sticky left-0 z-20 p-3 border-r border-slate-200 shadow-[1px_0_0_rgb(226,232,240)] align-top transition-colors ${rowBg || 'bg-white group-hover:bg-slate-50'}`}>
 											<div className="text-[11px] text-slate-400 font-medium mb-[2px]">{emp.employeeNumber}</div>
-											<div className="font-bold text-slate-800 text-[13px]">{emp.employeeName}</div>
+											<div className="font-bold text-slate-800 text-[13px]">
+												{emp.employeeName}
+												{isMine && <span className="ml-1.5 text-[10px] font-bold text-amber-700">본인</span>}
+											</div>
 										</td>
 										{days.map((d) => {
-											const dayData = mockDailyData[emp.employeeId]?.[d.date];
+											const dayData = dailyByEmployee[emp.employeeId]?.[d.date];
 											const cellBg = dayData?.status === '연차' || dayData?.status === 'X' ? 'bg-slate-50/70' : 'bg-transparent';
 											
 											return (
@@ -243,7 +250,8 @@ export default function MonthlyAttendancePage() {
 											);
 										})}
 									</tr>
-								))
+								);
+								})
 							)}
 						</tbody>
 					</table>
@@ -341,7 +349,7 @@ export default function MonthlyAttendancePage() {
 								</thead>
 								<tbody className="divide-y divide-slate-100">
 									{days.map((d) => {
-										const dayData = mockDailyData[selectedEmployee.employeeId]?.[d.date];
+										const dayData = dailyByEmployee[selectedEmployee.employeeId]?.[d.date];
 										return (
 											<tr key={d.date} className="hover:bg-slate-50 transition-colors">
 												<td className={`py-4 px-6 font-medium ${d.isSunday ? 'text-red-500' : d.isSaturday ? 'text-blue-500' : 'text-slate-700'}`}>

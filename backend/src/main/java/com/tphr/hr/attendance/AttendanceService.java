@@ -54,6 +54,8 @@ public class AttendanceService {
 
 		Map<Long, Employee> employees = new LinkedHashMap<>();
 		Map<Long, int[]> counts = new LinkedHashMap<>(); // [present, late, absent, leave]
+		// 일자별 상세도 함께 모은다 — 화면 격자가 임의 데이터를 만들지 않도록.
+		Map<Long, Map<Integer, MonthlyAttendanceResponse.DailyAttendance>> daily = new LinkedHashMap<>();
 		for (Attendance a : attendanceRepository
 				.findByWorkDateBetweenAndDeletedFalseOrderByEmployee_EmployeeNumberAscWorkDateAsc(start, end)) {
 			Employee e = a.getEmployee();
@@ -62,6 +64,12 @@ public class AttendanceService {
 			}
 			employees.putIfAbsent(e.getId(), e);
 			int[] c = counts.computeIfAbsent(e.getId(), k -> new int[4]);
+			daily.computeIfAbsent(e.getId(), k -> new LinkedHashMap<>()).put(
+					a.getWorkDate().getDayOfMonth(),
+					new MonthlyAttendanceResponse.DailyAttendance(
+							a.getStatus().name(),
+							a.getCheckInTime() != null ? a.getCheckInTime().toString() : null,
+							a.getCheckOutTime() != null ? a.getCheckOutTime().toString() : null));
 			switch (a.getStatus()) {
 				case PRESENT -> c[0]++;
 				case LATE -> c[1]++;
@@ -74,7 +82,9 @@ public class AttendanceService {
 			int[] c = counts.get(e.getId());
 			int total = c[0] + c[1] + c[2] + c[3];
 			return new MonthlyAttendanceResponse(e.getId(), e.getEmployeeNumber(), e.getName(),
-					e.getDepartment().getName(), c[0], c[1], c[2], c[3], total);
+					e.getDepartment() != null ? e.getDepartment().getName() : null,
+					c[0], c[1], c[2], c[3], total,
+					daily.getOrDefault(e.getId(), Map.of()));
 		}).toList();
 	}
 

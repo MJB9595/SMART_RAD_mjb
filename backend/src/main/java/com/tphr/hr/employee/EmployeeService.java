@@ -6,6 +6,7 @@ import com.tphr.hr.department.Department;
 import com.tphr.hr.department.DepartmentRepository;
 import com.tphr.hr.employee.dto.EmployeeCreateRequest;
 import com.tphr.hr.employee.dto.EmployeeResponse;
+import com.tphr.hr.employee.dto.EmployeeStatsResponse;
 import com.tphr.hr.employee.dto.EmployeeStatusRequest;
 import com.tphr.hr.employee.dto.EmployeeUpdateRequest;
 import com.tphr.hr.employee.dto.PasswordChangeRequest;
@@ -16,7 +17,9 @@ import com.tphr.hr.employmenttype.EmploymentTypeRepository;
 import com.tphr.hr.position.Position;
 import com.tphr.hr.position.PositionCategory;
 import com.tphr.hr.position.PositionRepository;
+import com.tphr.hr.records.CertificationRepository;
 import com.tphr.hr.system.RoleRepository;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -36,6 +39,7 @@ public class EmployeeService {
 	private final EmploymentTypeRepository employmentTypeRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final RoleRepository roleRepository;
+	private final CertificationRepository certificationRepository;
 
 	/**
 	 * 근태·휴가·경조비 등에서 "대상 교직원"으로 고를 수 있는 사람 목록.
@@ -60,6 +64,28 @@ public class EmployeeService {
 		return candidates.stream()
 				.map(e -> SelectableEmployeeResponse.from(e, currentEmployeeId))
 				.toList();
+	}
+
+	/** 상단 요약 카드. 전체를 볼 수 없는 사용자에게는 본인 기준 값만 준다. */
+	public EmployeeStatsResponse getStats(Long currentEmployeeId, boolean canSeeAll) {
+		LocalDate today = LocalDate.now();
+		LocalDate ninetyDaysLater = today.plusDays(90);
+
+		if (!canSeeAll) {
+			Employee me = findActive(currentEmployeeId);
+			return new EmployeeStatsResponse(
+					1,
+					me.getEmploymentStatus() == EmploymentStatus.EMPLOYED ? 1 : 0,
+					me.getEmploymentStatus() == EmploymentStatus.ON_LEAVE ? 1 : 0,
+					certificationRepository.countByEmployee_IdAndDeletedFalseAndExpiryDateBetween(
+							currentEmployeeId, today, ninetyDaysLater));
+		}
+
+		return new EmployeeStatsResponse(
+				employeeRepository.countByDeletedFalse(),
+				employeeRepository.countByEmploymentStatusAndDeletedFalse(EmploymentStatus.EMPLOYED),
+				employeeRepository.countByEmploymentStatusAndDeletedFalse(EmploymentStatus.ON_LEAVE),
+				certificationRepository.countByDeletedFalseAndExpiryDateBetween(today, ninetyDaysLater));
 	}
 
 	public Page<EmployeeResponse> searchEmployees(String keyword, Long departmentId, Long positionId,

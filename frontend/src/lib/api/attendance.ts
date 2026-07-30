@@ -9,6 +9,13 @@ export function getAttendanceSummary(workDate: string): Promise<AttendanceSummar
 	return apiFetch<AttendanceSummary>(`/attendances/summary?workDate=${workDate}`);
 }
 
+/** 격자 한 칸 — 서버가 내려주는 실제 근태 기록. */
+export interface DailyAttendance {
+	status: string;
+	checkInTime: string | null;
+	checkOutTime: string | null;
+}
+
 export interface MonthlyAttendance {
 	employeeId: number;
 	employeeNumber: string;
@@ -19,9 +26,11 @@ export interface MonthlyAttendance {
 	absent: number;
 	leave: number;
 	total: number;
+	/** 일(1~31) → 그 날의 근태. 기록이 없는 날은 키가 없다. */
+	daily: Record<number, DailyAttendance>;
 }
 
-/** 월 근태 현황 — 직원별 월간 집계 (ADMIN). */
+/** 월 근태 현황 — 승인 권한이 없으면 서버가 본인 것만 내려준다. */
 export function listMonthlyAttendance(year: number, month: number): Promise<MonthlyAttendance[]> {
 	return apiFetch<MonthlyAttendance[]>(`/attendances/monthly?year=${year}&month=${month}`);
 }

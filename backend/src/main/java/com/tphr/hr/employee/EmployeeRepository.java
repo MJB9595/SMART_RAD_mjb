@@ -22,6 +22,10 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>, JpaSp
 
 	long countByDepartment_IdAndDeletedFalse(Long departmentId);
 
+	long countByDeletedFalse();
+
+	long countByEmploymentStatusAndDeletedFalse(EmploymentStatus employmentStatus);
+
 	/** 선택 상자용 전체 목록 (재직 여부와 무관하게 활성 계정). */
 	@EntityGraph(attributePaths = {"department", "position"})
 	List<Employee> findByDeletedFalseOrderByNameAsc();

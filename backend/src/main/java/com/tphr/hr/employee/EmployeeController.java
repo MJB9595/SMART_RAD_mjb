@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import com.tphr.hr.employee.dto.EmployeeStatsResponse;
 import com.tphr.hr.employee.dto.SelectableEmployeeResponse;
 import com.tphr.hr.security.CustomUserDetails;
 import java.util.List;
@@ -50,6 +51,15 @@ public class EmployeeController {
 	public List<SelectableEmployeeResponse> getSelectableEmployees(
 			@AuthenticationPrincipal CustomUserDetails userDetails) {
 		return employeeService.getSelectableEmployees(userDetails.getEmployeeId());
+	}
+
+	/** 상단 요약 카드 값. 전체 조회 권한이 없으면 본인 기준 값만 내려간다. */
+	@GetMapping("/stats")
+	@PreAuthorize("isAuthenticated()")
+	public EmployeeStatsResponse getStats(@AuthenticationPrincipal CustomUserDetails userDetails) {
+		boolean canSeeAll = userDetails.getAuthorities().stream()
+				.anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("EMPLOYEE_READ"));
+		return employeeService.getStats(userDetails.getEmployeeId(), canSeeAll);
 	}
 
 	@GetMapping

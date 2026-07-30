@@ -15,6 +15,18 @@ export interface EmployeeSearchParams {
  * 선택 상자용 대상 교직원 목록.
  * 전체 목록(searchEmployees)은 ADMIN·HR 전용이라 일반 직원이 403 을 받아 선택 상자가 비었었다.
  */
+export interface EmployeeStats {
+	total: number;
+	employed: number;
+	onLeave: number;
+	expiring: number;
+}
+
+/** 상단 요약 카드. 전체 조회 권한이 없으면 본인 기준 값이 온다. */
+export function getEmployeeStats(): Promise<EmployeeStats> {
+	return apiFetch<EmployeeStats>("/employees/stats");
+}
+
 export function listSelectableEmployees(): Promise<SelectableEmployee[]> {
 	return apiFetch<SelectableEmployee[]>("/employees/selectable");
 }
