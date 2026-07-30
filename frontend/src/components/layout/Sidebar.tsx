@@ -44,7 +44,8 @@ export function Sidebar() {
 							<div className="nav-sub">
 								{tab.sections
 									.flatMap(section => section.items)
-									.filter(item => !item.requiredPermission || hasPermission(user, item.requiredPermission))
+									.filter(item => (!item.requiredPermission || hasPermission(user, item.requiredPermission))
+										&& (!item.requiredRoles || (user != null && item.requiredRoles.includes(user.role))))
 									.map(item => {
 									const isActive = isNavItemActive(pathname, item.href, tab.sections.flatMap(s => s.items).map(i => i.href));
 									return (

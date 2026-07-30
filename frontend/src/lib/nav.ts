@@ -3,6 +3,13 @@ export interface NavItem {
 	href: string;
 	/** 이 권한을 가진 사용자에게만 보인다. 권한 관리에서 역할에 권한을 주면 곧바로 나타난다. */
 	requiredPermission?: string;
+	/**
+	 * 이 역할에게만 보인다.
+	 *
+	 * <p>백엔드가 권한 코드가 아니라 역할로 막는 화면(수당 관리·정산 자료 등)에 쓴다.
+	 * 권한으로만 걸어 두면 그 권한을 받은 일반 직원에게 메뉴가 보이고 눌렀을 때 403 이 난다.
+	 */
+	requiredRoles?: string[];
 }
 
 export interface NavSection {
@@ -73,8 +80,8 @@ export const topNavTabs: TopNavTab[] = [
 				label: "급여 관리",
 				items: [
 					{ label: "급여 명세서 조회", href: "/payroll" },
-					{ label: "수당 관리", href: "/payroll/allowance", requiredPermission: "PAYROLL_READ" },
-					{ label: "정산 엑셀 다운로드", href: "/payroll/settlement", requiredPermission: "PAYROLL_READ" },
+					{ label: "수당 관리", href: "/payroll/allowance", requiredRoles: ["ADMIN", "HR"] },
+					{ label: "정산 엑셀 다운로드", href: "/payroll/settlement", requiredRoles: ["ADMIN", "HR"] },
 				],
 			},
 		],
