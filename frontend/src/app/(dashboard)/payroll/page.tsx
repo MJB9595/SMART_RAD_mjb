@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react";
 import { exportPayroll, exportPayrolls, listPayrolls } from "@/lib/api/payroll";
 import type { Payroll } from "@/lib/types/payroll";
+import { useFeedback } from "@/components/feedback/FeedbackProvider";
 
 export default function PayrollPage() {
+	const { notify, confirm: askConfirm } = useFeedback();
 	const [payrolls, setPayrolls] = useState<Payroll[]>([]);
 	const [totalElements, setTotalElements] = useState(0);
 	const [loading, setLoading] = useState(true);
@@ -15,7 +17,7 @@ export default function PayrollPage() {
 		setDownloading(kind);
 		task
 			.catch((error) => {
-				alert(error instanceof Error ? error.message : "엑셀 다운로드에 실패했습니다.");
+				notify(error instanceof Error ? error.message : "엑셀 다운로드에 실패했습니다.", "error");
 			})
 			.finally(() => setDownloading(null));
 	}

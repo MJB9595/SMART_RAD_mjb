@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Button, Field, Input } from "@/components/ui";
 import { signup } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/client";
+import { useFeedback } from "@/components/feedback/FeedbackProvider";
 
 // 숫자 카운팅 애니메이션 컴포넌트
 function AnimatedNumber({
@@ -61,6 +62,7 @@ function AnimatedNumber({
 
 // 회원가입 페이지 컴포넌트
 export default function SignupPage() {
+	const { notify, confirm: askConfirm } = useFeedback();
   const router = useRouter();
 
   const [name, setName] = useState<string>("");
@@ -87,7 +89,7 @@ export default function SignupPage() {
 
     try {
       await signup({ name, email, password, school });
-      alert("회원가입 신청이 완료되었습니다. 관리자 승인 후 로그인할 수 있습니다.");
+      notify("회원가입 신청이 완료되었습니다. 관리자 승인 후 로그인할 수 있습니다.", "success");
       router.push("/login");
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "회원가입 중 오류가 발생했습니다.");

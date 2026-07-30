@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui";
 import { exportSettlement, type SettlementFormType } from "@/lib/api/payroll";
+import { useFeedback } from "@/components/feedback/FeedbackProvider";
 
 export default function SettlementPage() {
+	const { notify, confirm: askConfirm } = useFeedback();
 	const [year, setYear] = useState("2026");
 	const [month, setMonth] = useState("07");
 	const [formType, setFormType] = useState("bank");
@@ -14,7 +16,7 @@ export default function SettlementPage() {
 		setDownloading(true);
 		exportSettlement(`${year}${month}`, formType as SettlementFormType)
 			.catch((error) => {
-				alert(error instanceof Error ? error.message : "엑셀 다운로드에 실패했습니다.");
+				notify(error instanceof Error ? error.message : "엑셀 다운로드에 실패했습니다.", "error");
 			})
 			.finally(() => setDownloading(false));
 	}

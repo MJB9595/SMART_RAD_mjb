@@ -23,6 +23,7 @@ import type {
 } from "@/lib/types/employee";
 import type { Department } from "@/lib/types/department";
 import type { EmploymentType, Position } from "@/lib/types/meta";
+import { useFeedback } from "@/components/feedback/FeedbackProvider";
 
 const CATEGORY_LABEL: Record<string, string> = { FACULTY: "교원", STAFF: "직원" };
 const STATUS: Record<string, { cls: string; label: string }> = {
@@ -108,6 +109,7 @@ interface ModalState {
 }
 
 export default function EmployeeDetailPage() {
+	const { notify, confirm: askConfirm } = useFeedback();
 	const params = useParams<{ id: string }>();
 	const router = useRouter();
 	const empId = Number(params.id);
@@ -172,7 +174,7 @@ export default function EmployeeDetailPage() {
 	}
 
 	async function removeRecord(remove: (id: number) => Promise<void>, id: number, reload: () => void) {
-		if (!confirm("삭제하시겠습니까?")) return;
+		if (!(await askConfirm({ title: "기록 삭제", message: "이 기록을 삭제합니다. 되돌릴 수 없습니다.", confirmLabel: "삭제", danger: true }))) return;
 		await remove(id);
 		reload();
 	}

@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui";
 import { listAllowances, createAllowance, type Allowance } from "@/lib/api/allowance";
 import { ApiError } from "@/lib/api/client";
+import { useFeedback } from "@/components/feedback/FeedbackProvider";
 
 export default function AllowancePage() {
+	const { notify, confirm: askConfirm } = useFeedback();
 	const [allowances, setAllowances] = useState<Allowance[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [showForm, setShowForm] = useState(false);
@@ -39,7 +41,7 @@ export default function AllowancePage() {
 			setFixed(true);
 			reload();
 		} catch (err) {
-			alert(err instanceof ApiError ? err.message : "수당 등록에 실패했습니다.");
+			notify(err instanceof ApiError ? err.message : "수당 등록에 실패했습니다.", "error");
 		} finally {
 			setSaving(false);
 		}

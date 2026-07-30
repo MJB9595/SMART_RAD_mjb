@@ -8,8 +8,10 @@ import { listEmploymentTypes, listPositions } from "@/lib/api/meta";
 import { ApiError } from "@/lib/api/client";
 import type { Department } from "@/lib/types/department";
 import type { EmploymentType, Position } from "@/lib/types/meta";
+import { useFeedback } from "@/components/feedback/FeedbackProvider";
 
 export default function SlotCreatePage() {
+	const { notify, confirm: askConfirm } = useFeedback();
 	const router = useRouter();
 
 	const [departments, setDepartments] = useState<Department[]>([]);
@@ -61,7 +63,7 @@ export default function SlotCreatePage() {
 				hireDate: form.hireDate || null,
 				label: form.label || null,
 			});
-			alert("승인 자리가 등록되었습니다. 직원이 회원가입 신청하면 승인 시 이 자리로 매칭할 수 있습니다.");
+			notify("승인 자리가 등록되었습니다. 직원이 회원가입 신청하면 승인 시 이 자리로 매칭할 수 있습니다.", "success");
 			router.push("/employees");
 		} catch (err) {
 			setError(err instanceof ApiError ? err.message : "자리 등록에 실패했습니다.");

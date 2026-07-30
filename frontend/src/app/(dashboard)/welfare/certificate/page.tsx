@@ -14,12 +14,14 @@ import type { Employee } from "@/lib/types/employee";
 import { CertificatePrintModal } from "@/components/CertificatePrintModal";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { canApproveTarget } from "@/lib/auth/permissions";
+import { useFeedback } from "@/components/feedback/FeedbackProvider";
 
 function today() {
 	return new Date().toISOString().slice(0, 10);
 }
 
 export default function CertificatePage() {
+	const { notify, confirm: askConfirm } = useFeedback();
 	const [type, setType] = useState("");
 	const [rows, setRows] = useState<Certificate[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -51,12 +53,12 @@ export default function CertificatePage() {
 
 	/** 발급 처리 — 승인 시 발급완료(ISSUED) 상태가 되어 증명서를 출력할 수 있다. */
 	async function handleIssue(cert: Certificate) {
-		if (!confirm(`${cert.employeeName} 님의 ${cert.certificateType}를 발급 처리하시겠습니까?`)) return;
+		if (!(await askConfirm({ title: "증명서 발급", message: `${cert.employeeName} 님의 ${cert.certificateType}를 발급 처리합니다.`, confirmLabel: "발급" }))) return;
 		try {
 			await approveCertificate(cert.id);
 			reload();
 		} catch (err) {
-			alert(err instanceof ApiError ? err.message : "발급 처리에 실패했습니다.");
+			notify(err instanceof ApiError ? err.message : "발급 처리에 실패했습니다.", "error");
 		}
 	}
 
@@ -68,14 +70,14 @@ export default function CertificatePage() {
 			await rejectCertificate(cert.id, memo || undefined);
 			reload();
 		} catch (err) {
-			alert(err instanceof ApiError ? err.message : "반려 처리에 실패했습니다.");
+			notify(err instanceof ApiError ? err.message : "반려 처리에 실패했습니다.", "error");
 		}
 	}
 
 	async function submit(e: React.FormEvent) {
 		e.preventDefault();
 		if (!form.employeeId) {
-			alert("신청 교직원을 선택하세요.");
+			notify("신청 교직원을 선택하세요.", "error");
 			return;
 		}
 		setSaving(true);
@@ -90,7 +92,7 @@ export default function CertificatePage() {
 			setForm({ employeeId: "", certificateType: "재직증명서", applicationDate: today(), purpose: "" });
 			reload();
 		} catch (err) {
-			alert(err instanceof ApiError ? err.message : "증명서 신청에 실패했습니다.");
+			notify(err instanceof ApiError ? err.message : "증명서 신청에 실패했습니다.", "error");
 		} finally {
 			setSaving(false);
 		}

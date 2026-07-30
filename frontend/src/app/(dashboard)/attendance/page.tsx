@@ -7,12 +7,14 @@ import { ApiError } from "@/lib/api/client";
 import type { Attendance, AttendanceSummary } from "@/lib/types/attendance";
 import type { SelectableEmployee } from "@/lib/types/employee";
 import { useAuth } from "@/lib/auth/AuthContext";
+import { useFeedback } from "@/components/feedback/FeedbackProvider";
 
 function today() {
 	return new Date().toISOString().slice(0, 10);
 }
 
 export default function AttendancePage() {
+	const { notify, confirm: askConfirm } = useFeedback();
 	const { user } = useAuth();
 	const [workDate, setWorkDate] = useState(today());
 	const [attendances, setAttendances] = useState<Attendance[]>([]);
@@ -61,7 +63,7 @@ export default function AttendancePage() {
 	async function submit(e: React.FormEvent) {
 		e.preventDefault();
 		if (!empId) {
-			alert("대상 교직원을 선택하세요.");
+			notify("대상 교직원을 선택하세요.", "error");
 			return;
 		}
 		const leave = status === "ANNUAL_LEAVE";
@@ -79,7 +81,7 @@ export default function AttendancePage() {
 			setStatus("PRESENT");
 			load(workDate);
 		} catch (err) {
-			alert(err instanceof ApiError ? err.message : "근태 등록에 실패했습니다.");
+			notify(err instanceof ApiError ? err.message : "근태 등록에 실패했습니다.", "error");
 		} finally {
 			setSaving(false);
 		}

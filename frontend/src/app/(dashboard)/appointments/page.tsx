@@ -12,6 +12,7 @@ import type { Position } from "@/lib/types/meta";
 import { Button } from "@/components/ui";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { isAdminOrHr, canApproveTarget } from "@/lib/auth/permissions";
+import { useFeedback } from "@/components/feedback/FeedbackProvider";
 
 const TYPE_LABELS: Record<AppointmentType, string> = {
 	HIRE: "임용",
@@ -21,6 +22,7 @@ const TYPE_LABELS: Record<AppointmentType, string> = {
 };
 
 export default function AppointmentsPage() {
+	const { notify, confirm: askConfirm } = useFeedback();
 	const [appointments, setAppointments] = useState<Appointment[]>([]);
 	const [totalElements, setTotalElements] = useState(0);
 	const [loading, setLoading] = useState(true);
@@ -70,12 +72,12 @@ export default function AppointmentsPage() {
 
 	const handleCreateSubmit = async () => {
 		if (!form.employeeId || !form.appointmentDate) {
-			alert("사원과 발령일자는 필수입니다.");
+			notify("사원과 발령일자는 필수입니다.", "error");
 			return;
 		}
 		// 소속·직급 모두 '변함없음'이면 실제로 바뀌는 것이 없다.
 		if (!form.toDepartmentId && !form.toPositionId) {
-			alert("발령 소속 또는 발령 직급 중 최소 하나는 선택해야 합니다.\n(둘 다 '변함없음'이면 변경 사항이 없습니다)");
+			notify("발령 소속 또는 발령 직급 중 최소 하나는 선택해야 합니다.\n(둘 다 '변함없음'이면 변경 사항이 없습니다)", "error");
 			return;
 		}
 		try {
@@ -89,11 +91,11 @@ export default function AppointmentsPage() {
 				appointmentDate: form.appointmentDate,
 				reason: form.reason
 			});
-			alert("발령 등록이 완료되었습니다.");
+			notify("발령 등록이 완료되었습니다.", "success");
 			setIsModalOpen(false);
 			load();
 		} catch (err: any) {
-			alert(err.message || "등록에 실패했습니다.");
+			notify(err.message || "등록에 실패했습니다.", "error");
 		}
 	};
 
@@ -121,7 +123,7 @@ export default function AppointmentsPage() {
 			else await rejectAppointment(id);
 			load();
 		} catch (err: any) {
-			alert("처리에 실패했습니다.");
+			notify("처리에 실패했습니다.", "error");
 		}
 	}
 

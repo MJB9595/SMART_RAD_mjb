@@ -5,6 +5,7 @@ import { getPendingSignups, approveSignup, rejectSignup, type PendingSignup } fr
 import { listOpenSlots } from "@/lib/api/slots";
 import { ApiError } from "@/lib/api/client";
 import type { ApprovalSlot } from "@/lib/types/signup";
+import { useFeedback } from "@/components/feedback/FeedbackProvider";
 
 function slotLabel(s: ApprovalSlot): string {
 	const cat = s.staffCategory === "FACULTY" ? "교원" : "직원";
@@ -13,6 +14,7 @@ function slotLabel(s: ApprovalSlot): string {
 }
 
 export function SignupApprovalModal({ onClose, onApproved }: { onClose: () => void; onApproved?: () => void }) {
+	const { notify, confirm: askConfirm } = useFeedback();
 	const [pending, setPending] = useState<PendingSignup[]>([]);
 	const [slots, setSlots] = useState<ApprovalSlot[]>([]);
 	const [selectedSlot, setSelectedSlot] = useState<Record<number, string>>({});
@@ -38,29 +40,29 @@ export function SignupApprovalModal({ onClose, onApproved }: { onClose: () => vo
 	const handleApprove = async (id: number) => {
 		const slotId = selectedSlot[id];
 		if (!slotId) {
-			alert("매칭할 자리를 먼저 선택하세요. (자리는 '교직원 등록'에서 만들 수 있습니다)");
+			notify("매칭할 자리를 먼저 선택하세요. (자리는 '교직원 등록'에서 만들 수 있습니다)", "error");
 			return;
 		}
-		if (!confirm("선택한 자리로 이 교직원의 가입을 승인하시겠습니까? 승인 시 로그인 가능한 계정이 생성됩니다.")) return;
+		if (!(await askConfirm({ title: "가입 승인", message: "선택한 자리로 이 교직원의 가입을 승인합니다.\n승인 시 로그인 가능한 계정이 생성됩니다.", confirmLabel: "승인" }))) return;
 		try {
 			await approveSignup(id, Number(slotId));
 			setPending((prev) => prev.filter((p) => p.id !== id));
 			reloadSlots(); // 매칭된 자리는 목록에서 빠짐
 			onApproved?.(); // 승인 즉시 교직원 목록 새로고침
-			alert("승인되었습니다. 해당 교직원이 로그인할 수 있습니다.");
+			notify("승인되었습니다. 해당 교직원이 로그인할 수 있습니다.", "success");
 		} catch (err) {
-			alert(err instanceof ApiError ? err.message : "승인 처리에 실패했습니다.");
+			notify(err instanceof ApiError ? err.message : "승인 처리에 실패했습니다.", "error");
 		}
 	};
 
 	const handleReject = async (id: number) => {
-		if (!confirm("해당 교직원의 가입을 거절하시겠습니까?")) return;
+		if (!(await askConfirm({ title: "가입 거절", message: "해당 교직원의 가입 신청을 거절합니다.", confirmLabel: "거절", danger: true }))) return;
 		try {
 			await rejectSignup(id);
 			setPending((prev) => prev.filter((p) => p.id !== id));
-			alert("거절되었습니다.");
+			notify("거절되었습니다.", "success");
 		} catch (err) {
-			alert(err instanceof ApiError ? err.message : "거절 처리에 실패했습니다.");
+			notify(err instanceof ApiError ? err.message : "거절 처리에 실패했습니다.", "error");
 		}
 	};
 

@@ -9,6 +9,7 @@ import {
 } from "@/lib/api/attendance";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { DetailSideCard } from "@/components/DetailSideCard";
+import { useFeedback } from "@/components/feedback/FeedbackProvider";
 
 // 격자 한 칸의 화면 표현
 interface DailyData {
@@ -19,6 +20,7 @@ interface DailyData {
 }
 
 export default function MonthlyAttendancePage() {
+	const { notify, confirm: askConfirm } = useFeedback();
 	const { user } = useAuth();
 	// 기본값을 고정해 두면 해가 바뀌었을 때 빈 화면이 뜬다 — 오늘 기준으로 연다
 	const todayRef = new Date();
@@ -36,7 +38,7 @@ export default function MonthlyAttendancePage() {
 		setDownloading(true);
 		exportMonthlyAttendance(Number(year), Number(month))
 			.catch((error) => {
-				alert(error instanceof Error ? error.message : "엑셀 다운로드에 실패했습니다.");
+				notify(error instanceof Error ? error.message : "엑셀 다운로드에 실패했습니다.", "error");
 			})
 			.finally(() => setDownloading(false));
 	}

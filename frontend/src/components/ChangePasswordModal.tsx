@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { changeOwnPassword } from "@/lib/api/employees";
 import { ApiError } from "@/lib/api/client";
+import { useFeedback } from "@/components/feedback/FeedbackProvider";
 
 function EyeToggle({ shown, onToggle }: { shown: boolean; onToggle: () => void }) {
 	return (
@@ -20,6 +21,7 @@ function EyeToggle({ shown, onToggle }: { shown: boolean; onToggle: () => void }
 }
 
 export function ChangePasswordModal({ onClose }: { onClose: () => void }) {
+	const { notify, confirm: askConfirm } = useFeedback();
 	const [current, setCurrent] = useState("");
 	const [next, setNext] = useState("");
 	const [confirm, setConfirm] = useState("");
@@ -43,7 +45,7 @@ export function ChangePasswordModal({ onClose }: { onClose: () => void }) {
 		setSaving(true);
 		try {
 			await changeOwnPassword(current, next);
-			alert("비밀번호가 변경되었습니다.");
+			notify("비밀번호가 변경되었습니다.", "success");
 			onClose();
 		} catch (err) {
 			setError(err instanceof ApiError ? err.message : "비밀번호 변경에 실패했습니다.");

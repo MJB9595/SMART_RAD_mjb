@@ -6,8 +6,10 @@ import { listLeavePolicies, createLeavePolicy, type LeavePolicy } from "@/lib/ap
 import { listPositions } from "@/lib/api/meta";
 import type { Position } from "@/lib/types/meta";
 import { ApiError } from "@/lib/api/client";
+import { useFeedback } from "@/components/feedback/FeedbackProvider";
 
 export default function LeavePolicyPage() {
+	const { notify, confirm: askConfirm } = useFeedback();
 	const [policies, setPolicies] = useState<LeavePolicy[]>([]);
 	const [positions, setPositions] = useState<Position[]>([]);
 	const [posName, setPosName] = useState<Record<number, string>>({});
@@ -41,7 +43,7 @@ export default function LeavePolicyPage() {
 	async function submit(e: React.FormEvent) {
 		e.preventDefault();
 		if (!positionId) {
-			alert("적용 직급을 선택하세요.");
+			notify("적용 직급을 선택하세요.", "error");
 			return;
 		}
 		setSaving(true);
@@ -61,7 +63,7 @@ export default function LeavePolicyPage() {
 			setNote("");
 			reload();
 		} catch (err) {
-			alert(err instanceof ApiError ? err.message : "휴가 정책 등록에 실패했습니다.");
+			notify(err instanceof ApiError ? err.message : "휴가 정책 등록에 실패했습니다.", "error");
 		} finally {
 			setSaving(false);
 		}

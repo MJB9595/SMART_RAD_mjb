@@ -7,12 +7,14 @@ import { ApiError } from "@/lib/api/client";
 import type { SelectableEmployee } from "@/lib/types/employee";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { canApproveTarget } from "@/lib/auth/permissions";
+import { useFeedback } from "@/components/feedback/FeedbackProvider";
 
 function today() {
 	return new Date().toISOString().slice(0, 10);
 }
 
 export default function EventSupportPage() {
+	const { notify, confirm: askConfirm } = useFeedback();
 	const [type, setType] = useState("");
 	const [rows, setRows] = useState<EventSupport[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -61,7 +63,7 @@ export default function EventSupportPage() {
 	async function submit(e: React.FormEvent) {
 		e.preventDefault();
 		if (!form.employeeId || !form.targetName.trim() || !form.requestedAmount) {
-			alert("교직원·대상자·신청금액을 입력하세요.");
+			notify("교직원·대상자·신청금액을 입력하세요.", "error");
 			return;
 		}
 		setSaving(true);
@@ -80,7 +82,7 @@ export default function EventSupportPage() {
 			setForm({ employeeId: "", eventType: "결혼", familyRelation: "본인", targetName: "", applicationDate: today(), eventDate: today(), requestedAmount: "", eventLocation: "" });
 			reload();
 		} catch (err) {
-			alert(err instanceof ApiError ? err.message : "경조비 신청에 실패했습니다.");
+			notify(err instanceof ApiError ? err.message : "경조비 신청에 실패했습니다.", "error");
 		} finally {
 			setSaving(false);
 		}
@@ -94,22 +96,22 @@ export default function EventSupportPage() {
 	};
 
 	async function handleApprove(d: EventSupport) {
-		if (!confirm(`${d.targetName}님의 ${d.eventType} 경조비를 승인하시겠습니까?`)) return;
+		if (!(await askConfirm({ title: "경조비 승인", message: `${d.targetName}님의 ${d.eventType} 경조비를 승인합니다.`, confirmLabel: "승인" }))) return;
 		try {
 			await approveEventSupport(d.id);
 			reload();
 		} catch (err) {
-			alert(err instanceof ApiError ? err.message : "승인 처리에 실패했습니다.");
+			notify(err instanceof ApiError ? err.message : "승인 처리에 실패했습니다.", "error");
 		}
 	}
 
 	async function handleReject(d: EventSupport) {
-		if (!confirm(`${d.targetName}님의 ${d.eventType} 경조비를 반려하시겠습니까?`)) return;
+		if (!(await askConfirm({ title: "경조비 반려", message: `${d.targetName}님의 ${d.eventType} 경조비를 반려합니다.`, confirmLabel: "반려", danger: true }))) return;
 		try {
 			await rejectEventSupport(d.id);
 			reload();
 		} catch (err) {
-			alert(err instanceof ApiError ? err.message : "반려 처리에 실패했습니다.");
+			notify(err instanceof ApiError ? err.message : "반려 처리에 실패했습니다.", "error");
 		}
 	}
 

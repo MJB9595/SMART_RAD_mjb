@@ -11,6 +11,7 @@ import { DetailSideCard } from "@/components/DetailSideCard";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { hasPermission, PERM } from "@/lib/auth/permissions";
 import type { LeaveRequest, LeaveBalance } from "@/lib/types/leave";
+import { useFeedback } from "@/components/feedback/FeedbackProvider";
 
 interface EmployeeLeaveData {
 	id: number;
@@ -19,6 +20,7 @@ interface EmployeeLeaveData {
 }
 
 export default function LeavesPage() {
+	const { notify, confirm: askConfirm } = useFeedback();
 	const { user } = useAuth();
 	// 승인 버튼은 실제 승인 권한이 있을 때만 — 없으면 눌러도 403 이다
 	const canApprove = hasPermission(user, PERM.LEAVE_APPROVE) || user?.role === "ADMIN";
@@ -66,11 +68,11 @@ export default function LeavesPage() {
 				days: Number(applyForm.days),
 				reason: applyForm.reason
 			});
-			alert("휴가 신청이 완료되었습니다.");
+			notify("휴가 신청이 완료되었습니다.", "success");
 			setIsApplyModalOpen(false);
 			load(); // Refresh list!
 		} catch (err) {
-			alert(err instanceof ApiError ? err.message : "신청에 실패했습니다.");
+			notify(err instanceof ApiError ? err.message : "신청에 실패했습니다.", "error");
 		}
 	};
 
@@ -101,7 +103,7 @@ export default function LeavesPage() {
 			else await rejectLeave(id);
 			load(); // Reload after decision
 		} catch (err) {
-			alert(err instanceof ApiError ? err.message : "처리에 실패했습니다.");
+			notify(err instanceof ApiError ? err.message : "처리에 실패했습니다.", "error");
 		}
 	}
 

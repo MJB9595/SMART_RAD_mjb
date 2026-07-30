@@ -12,6 +12,7 @@ import type { Department } from "@/lib/types/department";
 import { SignupApprovalModal } from "@/components/SignupApprovalModal";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { hasPermission, PERM } from "@/lib/auth/permissions";
+import { useFeedback } from "@/components/feedback/FeedbackProvider";
 
 const PAGE_SIZE = 10;
 
@@ -22,6 +23,7 @@ const STATUS_PILL: Record<string, { cls: string; label: string }> = {
 };
 
 export default function EmployeesPage() {
+	const { notify, confirm: askConfirm } = useFeedback();
 	const router = useRouter();
 
 	// 필터
@@ -103,23 +105,24 @@ export default function EmployeesPage() {
 	}, [selected]);
 
 	async function handleUnmatch(emp: Employee) {
-		if (
-			!confirm(
-				`'${emp.name}'(${emp.email}) 계정의 매치를 해제하시겠습니까?\n\n` +
-					"이 계정은 삭제되고, 회원가입 신청이 승인 대기큐로 되돌아갑니다. 매칭했던 자리도 다시 열립니다.\n" +
-					"(잘못된 매칭을 바로잡을 때 사용하세요.)",
-			)
-		) {
-			return;
-		}
+		const ok = await askConfirm({
+			title: "매치 해제",
+			message:
+				`'${emp.name}'(${emp.email}) 계정의 매치를 해제합니다.\n\n` +
+				"이 계정은 삭제되고, 회원가입 신청이 승인 대기큐로 되돌아갑니다. 매칭했던 자리도 다시 열립니다.\n" +
+				"(잘못된 매칭을 바로잡을 때 사용하세요.)",
+			confirmLabel: "매치 해제",
+			danger: true,
+		});
+		if (!ok) return;
 		try {
 			await unmatchEmployee(emp.id);
 			setSelected(null);
 			setSummary(null);
 			setReloadKey((k) => k + 1);
-			alert("매치를 해제했습니다. 해당 신청이 승인 대기큐로 복귀했고 자리가 다시 열렸습니다.");
+			notify("매치를 해제했습니다. 해당 신청이 승인 대기큐로 복귀했고 자리가 다시 열렸습니다.", "success");
 		} catch (err) {
-			alert(err instanceof ApiError ? err.message : "매치 해제에 실패했습니다.");
+			notify(err instanceof ApiError ? err.message : "매치 해제에 실패했습니다.", "error");
 		}
 	}
 
