@@ -7,7 +7,9 @@ import { listSelectableEmployees } from "@/lib/api/employees";
 import type { SelectableEmployee } from "@/lib/types/employee";
 import { ApiError } from "@/lib/api/client";
 import { StatusBadge } from "@/components/StatusBadge";
+import { DetailSideCard } from "@/components/DetailSideCard";
 import { useAuth } from "@/lib/auth/AuthContext";
+import { hasPermission, PERM } from "@/lib/auth/permissions";
 import type { LeaveRequest, LeaveBalance } from "@/lib/types/leave";
 
 interface EmployeeLeaveData {
@@ -18,6 +20,8 @@ interface EmployeeLeaveData {
 
 export default function LeavesPage() {
 	const { user } = useAuth();
+	// 승인 버튼은 실제 승인 권한이 있을 때만 — 없으면 눌러도 403 이다
+	const canApprove = hasPermission(user, PERM.LEAVE_APPROVE) || user?.role === "ADMIN";
 	const today = new Date();
 	const [year, setYear] = useState(today.getFullYear().toString());
 	const [month, setMonth] = useState((today.getMonth() + 1).toString().padStart(2, '0'));
@@ -26,6 +30,7 @@ export default function LeavesPage() {
 	const [selectedEmployee, setSelectedEmployee] = useState<EmployeeLeaveData | null>(null);
 	const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 	const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+	const [statusFilter, setStatusFilter] = useState("");
 
 	// Application form state
 	const [employeeList, setEmployeeList] = useState<SelectableEmployee[]>([]);
@@ -104,8 +109,10 @@ export default function LeavesPage() {
 	const currentMonthRequests = useMemo(() => {
 		const monthStart = `${year}-${month.padStart(2, '0')}-01`;
 		const monthEnd = `${year}-${month.padStart(2, '0')}-31`;
-		return items.filter(req => req.startDate <= monthEnd && req.endDate >= monthStart);
-	}, [items, year, month]);
+		return items.filter(req =>
+			req.startDate <= monthEnd && req.endDate >= monthStart
+			&& (!statusFilter || req.approvalStatus === statusFilter));
+	}, [items, year, month, statusFilter]);
 
 	/**
 	 * 행은 휴가 기록이 아니라 '볼 수 있는 명단' 기준으로 만든다.
@@ -220,13 +227,15 @@ export default function LeavesPage() {
 					</div>
 					
 					<div className="flex flex-wrap items-center gap-2 sm:ml-auto">
-						<select className="h-[34px] min-w-[100px] text-sm font-medium bg-slate-50 border border-slate-300 rounded px-2 outline-none text-slate-700">
-							<option>전체 부서</option>
-						</select>
-						<select className="h-[34px] min-w-[100px] text-sm font-medium bg-slate-50 border border-slate-300 rounded px-2 outline-none text-slate-700">
-							<option>승인 상태</option>
-							<option>대기중</option>
-							<option>승인완료</option>
+						<select
+							value={statusFilter}
+							onChange={(e) => setStatusFilter(e.target.value)}
+							className="h-[34px] min-w-[100px] text-sm font-medium bg-slate-50 border border-slate-300 rounded px-2 outline-none text-slate-700"
+						>
+							<option value="">승인 상태 전체</option>
+							<option value="PENDING">대기중</option>
+							<option value="APPROVED">승인완료</option>
+							<option value="REJECTED">반려</option>
 						</select>
 					</div>
 				</div>
@@ -308,109 +317,67 @@ export default function LeavesPage() {
 				</div>
 			</div>
 
-			{/* Sidebar Detail Card */}
+			{/* 우측 상세 — 월 근태 화면과 같은 카드를 쓴다 */}
 			{selectedEmployee ? (
-				<div className="w-[380px] shrink-0 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-200 p-8 flex flex-col relative overflow-hidden animate-in slide-in-from-right-4 duration-300 h-full">
-					<div className="text-sm font-bold text-indigo-900 mb-8 tracking-tight">휴가 관리 내역</div>
-					
-					{/* Avatar Profile */}
-					<div className="flex items-center gap-4 mb-6 pb-6 border-b border-slate-100">
-						<div className="relative">
-							<div className="absolute inset-0 bg-indigo-500 rounded-2xl blur opacity-30 animate-pulse"></div>
-							<div className="relative w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#1e3a8a] to-indigo-500 text-white flex items-center justify-center text-xl font-black shadow-md shadow-indigo-200/50 border border-white/20">
-								{selectedEmployee.name.slice(0, 1)}
-							</div>
+				<DetailSideCard
+					eyebrow="휴가 관리 내역"
+					name={selectedEmployee.name}
+					subtitle="휴가 신청 현황 상세"
+					badge={selectedEmployee.id === user?.employeeId
+						? <span className="text-[10px] font-bold text-amber-700">본인</span>
+						: undefined}
+					stats={[
+						{ label: "총 휴가일수", value: `${selectedEmployee.requests.reduce((sum, r) => sum + r.days, 0)}일`, tone: "primary" },
+						{ label: "승인완료", value: `${selectedEmployee.requests.filter(r => r.approvalStatus === 'APPROVED').length}건` },
+						{ label: "대기중", value: `${selectedEmployee.requests.filter(r => r.approvalStatus === 'PENDING').length}건`,
+						  tone: selectedEmployee.requests.some(r => r.approvalStatus === 'PENDING') ? "warn" : "default" },
+					]}
+					footer={selectedEmployee.requests.some(r => r.approvalStatus === 'PENDING') && canApprove ? (
+						<div className="flex gap-2">
+							<button
+								onClick={() => selectedEmployee.requests.filter(r => r.approvalStatus === 'PENDING').forEach(req => decide(req.id, "approve"))}
+								className="flex-1 rounded-xl bg-[#1e3a8a] px-4 py-3.5 text-[13px] font-bold text-white hover:bg-indigo-900 transition-colors shadow-sm"
+							>
+								{selectedEmployee.requests.filter(r => r.approvalStatus === 'PENDING').length > 1 ? '일괄 승인' : '승인 처리'}
+							</button>
+							<button
+								onClick={() => selectedEmployee.requests.filter(r => r.approvalStatus === 'PENDING').forEach(req => decide(req.id, "reject"))}
+								className="flex-1 rounded-xl border border-[#ef4444] bg-white px-4 py-3.5 text-[13px] font-bold text-[#ef4444] hover:bg-red-50 transition-colors shadow-sm"
+							>
+								{selectedEmployee.requests.filter(r => r.approvalStatus === 'PENDING').length > 1 ? '일괄 반려' : '반려'}
+							</button>
 						</div>
-						<div>
-							<div className="text-xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-								{selectedEmployee.name}
-							</div>
-							<div className="text-slate-400 font-medium text-sm mt-0.5">휴가 신청 현황 상세</div>
-						</div>
-					</div>
-
-					{/* Monthly Summary */}
-					<div className="bg-gradient-to-br from-indigo-50/80 to-white rounded-2xl p-5 border border-indigo-100/50 shadow-sm relative overflow-hidden mb-6 shrink-0">
-						<div className="absolute -right-4 -bottom-4 w-24 h-24 bg-indigo-100/40 rounded-full blur-xl pointer-events-none"></div>
-						
-						<div className="text-xs font-bold text-indigo-900/50 mb-4 uppercase tracking-wider flex items-center gap-2">
-							<svg className="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
-							이번 달 휴가 요약
-						</div>
-						<div className="grid grid-cols-3 gap-2 relative z-10">
-							<div className="flex flex-col gap-1">
-								<div className="text-[10px] text-slate-500 font-bold">총 휴가일수</div>
-								<div className="text-xl font-black text-indigo-700 tracking-tight">
-									{selectedEmployee.requests.reduce((sum, r) => sum + r.days, 0)}<span className="text-xs font-bold text-indigo-400/80 ml-0.5">일</span>
-								</div>
-							</div>
-							<div className="flex flex-col gap-1">
-								<div className="text-[10px] text-slate-500 font-bold">승인완료</div>
-								<div className="text-xl font-black text-slate-700 tracking-tight">
-									{selectedEmployee.requests.filter(r => r.approvalStatus === 'APPROVED').length}<span className="text-xs font-bold text-slate-400/80 ml-0.5">건</span>
-								</div>
-							</div>
-							<div className="flex flex-col gap-1">
-								<div className="text-[10px] text-slate-500 font-bold">대기중</div>
-								<div className="text-xl font-black text-amber-600 tracking-tight">
-									{selectedEmployee.requests.filter(r => r.approvalStatus === 'PENDING').length}<span className="text-xs font-bold text-amber-400/80 ml-0.5">건</span>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					{/* List of leave requests */}
-					<div className="flex-1 overflow-y-auto space-y-4 pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-thumb]:rounded-full">
-						{selectedEmployee.requests.map(req => (
-							<div key={req.id} className="bg-white border border-slate-200/80 shadow-[0_2px_10px_rgb(0,0,0,0.02)] rounded-xl p-4 flex flex-col gap-3 hover:border-indigo-200/60 transition-colors">
-								<div className="flex justify-between items-start">
-									<div className="flex flex-col gap-1">
-										<div className="flex items-center gap-2">
-											<span className={`px-2 py-0.5 rounded text-[11px] font-bold ${req.approvalStatus === 'PENDING' ? 'bg-amber-100 text-amber-700' : req.approvalStatus === 'APPROVED' ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-200 text-slate-600'}`}>
+					) : undefined}
+				>
+					{selectedEmployee.requests.length === 0 ? (
+						<div className="text-center text-[13px] text-slate-400 py-10">이 달에 신청한 휴가가 없습니다.</div>
+					) : (
+						<div className="space-y-4">
+							{selectedEmployee.requests.map(req => (
+								<div key={req.id} className="bg-white border border-slate-200/80 shadow-[0_2px_10px_rgb(0,0,0,0.02)] rounded-xl p-4 flex flex-col gap-3">
+									<div className="flex items-center justify-between gap-2">
+										<div className="flex items-center gap-2 min-w-0">
+											<span className={`px-2 py-0.5 rounded text-[11px] font-bold shrink-0 ${getLeaveColor(req.leaveTypeName, req.approvalStatus)}`}>
 												{req.leaveTypeName}
 											</span>
-											<span className="text-xs text-slate-400 font-mono">{req.documentNumber}</span>
+											<span className="text-[11px] font-mono text-slate-400 truncate">{req.documentNumber}</span>
 										</div>
-										<span className="text-sm font-bold text-slate-800 mt-1">{req.startDate} ~ {req.endDate} <span className="text-slate-500 font-medium text-xs ml-1">({req.days}일)</span></span>
+										<StatusBadge status={req.approvalStatus} />
 									</div>
-									<StatusBadge status={req.approvalStatus} />
+									<div className="text-[13px] font-bold text-slate-800">
+										{req.startDate} ~ {req.endDate} <span className="text-slate-400 font-medium">({req.days}일)</span>
+									</div>
+									{req.reason && (
+										<div className="text-[12px] text-slate-500 bg-slate-50 rounded-lg px-3 py-2">사유: {req.reason}</div>
+									)}
+									{req.approverName && (
+										<div className="text-[11px] text-slate-400 text-right">결재자: {req.approverName}</div>
+									)}
 								</div>
-								
-								{req.reason && (
-									<div className="text-xs text-slate-500 bg-white p-2 rounded border border-slate-100 line-clamp-2">
-										사유: {req.reason}
-									</div>
-								)}
-
-								{req.approvalStatus !== "PENDING" && req.approverName && (
-									<div className="text-[11px] text-slate-400 text-right mt-1">
-										결재자: {req.approverName}
-									</div>
-								)}
-							</div>
-						))}
-					</div>
-
-					{/* Action Buttons Footer */}
-					{selectedEmployee.requests.filter(r => r.approvalStatus === 'PENDING').length > 0 && (
-						<div className="mt-auto pt-6 border-t border-slate-100 shrink-0">
-							<div className="flex gap-2">
-								<button
-									onClick={() => selectedEmployee.requests.filter(r => r.approvalStatus === 'PENDING').forEach(req => decide(req.id, "approve"))}
-									className="flex-1 rounded-xl bg-[#1e3a8a] px-4 py-3.5 text-[13px] font-bold text-white hover:bg-indigo-800 transition-colors shadow-md shadow-indigo-200/50"
-								>
-									{selectedEmployee.requests.filter(r => r.approvalStatus === 'PENDING').length > 1 ? '일괄 승인 처리' : '승인 처리'}
-								</button>
-								<button
-									onClick={() => selectedEmployee.requests.filter(r => r.approvalStatus === 'PENDING').forEach(req => decide(req.id, "reject"))}
-									className="flex-1 rounded-xl border border-[#ef4444] bg-white px-4 py-3.5 text-[13px] font-bold text-[#ef4444] hover:bg-red-50 transition-colors shadow-sm"
-								>
-									{selectedEmployee.requests.filter(r => r.approvalStatus === 'PENDING').length > 1 ? '일괄 반려' : '반려'}
-								</button>
-							</div>
+							))}
 						</div>
 					)}
-				</div>
+				</DetailSideCard>
 			) : (
 				<div className="w-[380px] shrink-0 bg-slate-50/50 rounded-2xl border border-slate-200 p-8 flex flex-col items-center justify-center text-center h-full">
 					<div className="w-16 h-16 rounded-full bg-white shadow-sm flex items-center justify-center mb-5 border border-slate-100">

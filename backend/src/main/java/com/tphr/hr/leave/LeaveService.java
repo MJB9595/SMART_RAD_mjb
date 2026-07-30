@@ -44,6 +44,8 @@ public class LeaveService {
 
 	@Transactional
 	public LeaveRequestResponse createLeaveRequest(LeaveRequestCreate request) {
+		// 요청 본문의 employeeId 를 그대로 믿으면 남의 이름으로 휴가를 낼 수 있다.
+		SecurityUtils.checkCanSubmitFor(request.employeeId(), "LEAVE_APPROVE");
 		Employee employee = findEmployee(request.employeeId());
 		LeaveType leaveType = leaveTypeRepository.findByIdAndDeletedFalse(request.leaveTypeId())
 				.orElseThrow(() -> ApiException.notFound("휴가유형을 찾을 수 없습니다. id=" + request.leaveTypeId()));
@@ -89,8 +91,12 @@ public class LeaveService {
 		return LeaveRequestResponse.from(leaveRequest);
 	}
 
+	/** 승인 권한이 없으면 본인 잔여일수만 보인다. */
 	public List<LeaveBalanceResponse> getLeaveBalances(int year) {
+		boolean canSeeAll = SecurityUtils.canActForOthers("LEAVE_APPROVE");
+		Long me = SecurityUtils.getCurrentEmployeeId();
 		return leaveBalanceRepository.findByYearAndDeletedFalseOrderByEmployee_EmployeeNumberAsc(year).stream()
+				.filter(b -> canSeeAll || b.getEmployee().getId().equals(me))
 				.map(LeaveBalanceResponse::from)
 				.toList();
 	}

@@ -2,6 +2,7 @@ package com.tphr.hr.welfare.service;
 
 import com.tphr.hr.common.util.DocumentNumberGenerator;
 import com.tphr.hr.employee.Employee;
+import com.tphr.hr.security.SecurityUtils;
 import com.tphr.hr.employee.EmployeeRepository;
 import com.tphr.hr.welfare.dto.EmployeeCertificateIssueDto;
 import com.tphr.hr.welfare.dto.EmployeeEventSupportDto;
@@ -32,6 +33,8 @@ public class WelfareService {
 
     @Transactional
     public EmployeeEventSupportDto.Response createEventSupport(EmployeeEventSupportDto.Request req) {
+        // 요청 본문의 employeeId 를 그대로 믿으면 남의 이름으로 경조비를 신청할 수 있다.
+        SecurityUtils.checkCanSubmitFor(req.getEmployeeId(), SecurityUtils.isAdminOrHr());
         Employee emp = employeeRepository.findById(req.getEmployeeId())
                 .orElseThrow(() -> new IllegalArgumentException("Employee not found"));
         String documentNumber = isBlank(req.getDocumentNumber())
@@ -54,8 +57,17 @@ public class WelfareService {
         return toEventSupportDto(saved);
     }
 
+    /**
+     * 경조비 신청 목록.
+     *
+     * <p>전에는 findAll() 이라 로그인만 하면 전 직원의 경조사(대상자·가족관계)가 그대로 보였다.
+     * 승인 권한이 없으면 본인 신청만 돌려준다.
+     */
     public List<EmployeeEventSupportDto.Response> getAllEventSupports() {
+        boolean canSeeAll = SecurityUtils.isAdminOrHr();
+        Long me = SecurityUtils.getCurrentEmployeeId();
         return eventSupportRepository.findAll().stream()
+                .filter(e -> canSeeAll || e.getEmployee().getId().equals(me))
                 .map(this::toEventSupportDto)
                 .collect(Collectors.toList());
     }
@@ -69,6 +81,7 @@ public class WelfareService {
 
     @Transactional
     public EmployeeCertificateIssueDto.Response createCertificateIssue(EmployeeCertificateIssueDto.Request req) {
+        SecurityUtils.checkCanSubmitFor(req.getEmployeeId(), SecurityUtils.isAdminOrHr());
         Employee emp = employeeRepository.findById(req.getEmployeeId())
                 .orElseThrow(() -> new IllegalArgumentException("Employee not found"));
         String documentNumber = isBlank(req.getDocumentNumber())
@@ -84,8 +97,12 @@ public class WelfareService {
         return toCertificateIssueDto(saved);
     }
 
+    /** 증명서 신청 목록 — 승인 권한이 없으면 본인 신청만 (신청 사유가 개인정보다). */
     public List<EmployeeCertificateIssueDto.Response> getAllCertificateIssues() {
+        boolean canSeeAll = SecurityUtils.isAdminOrHr();
+        Long me = SecurityUtils.getCurrentEmployeeId();
         return certificateIssueRepository.findAll().stream()
+                .filter(c -> canSeeAll || c.getEmployee().getId().equals(me))
                 .map(this::toCertificateIssueDto)
                 .collect(Collectors.toList());
     }
