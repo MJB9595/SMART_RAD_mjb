@@ -55,7 +55,7 @@ export default function LeavesPage() {
 				if (me) setApplyForm((f) => (f.employeeId ? f : { ...f, employeeId: String(me.id) }));
 			})
 			.catch(() => setEmployeeList([]));
-		listLeaveTypes().then(setLeaveTypes).catch(console.error);
+		listLeaveTypes().then(setLeaveTypes).catch(() => notify("휴가 유형을 불러오지 못했습니다.", "error"));
 	}, [user]);
 
 	const handleApplySubmit = async () => {
@@ -87,9 +87,7 @@ export default function LeavesPage() {
 					setSelectedEmployee({ ...selectedEmployee, requests: updated });
 				}
 			})
-			.catch((err) => {
-				console.error("휴가 내역 로드 실패", err);
-			})
+			.catch(() => notify("휴가 내역을 불러오지 못했습니다.", "error"))
 			.finally(() => setLoading(false));
 	}, [selectedEmployee]);
 

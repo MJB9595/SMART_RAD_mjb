@@ -39,7 +39,7 @@ export default function AttendancePage() {
 				setSummary(summaryData);
 				setSelectedRecord(list.length > 0 ? list[0] : null);
 			})
-			.catch(console.error)
+			.catch(() => notify("근태 내역을 불러오지 못했습니다.", "error"))
 			.finally(() => setLoading(false));
 	}
 

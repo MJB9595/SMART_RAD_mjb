@@ -48,9 +48,12 @@ export default function AppointmentsPage() {
 	});
 
 	useEffect(() => {
-		searchEmployees({ size: 1000 }).then(p => setEmployees(p.content)).catch(console.error);
-		listDepartments().then(setDepartments).catch(console.error);
-		listPositions().then(setPositions).catch(console.error);
+		// 하나라도 실패하면 발령 등록 폼의 선택지가 비어 등록이 불가능하므로 한 번 묶어 알린다
+		Promise.all([
+			searchEmployees({ size: 1000 }).then(p => setEmployees(p.content)),
+			listDepartments().then(setDepartments),
+			listPositions().then(setPositions),
+		]).catch(() => notify("교직원·조직·직급 목록을 불러오지 못했습니다. 발령 등록이 제한됩니다.", "error"));
 	}, []);
 
 	// 현재 선택된 직원 (발령 전 소속·직급 표시용)
@@ -109,7 +112,7 @@ export default function AppointmentsPage() {
 					setSelectedAppt(page.content[0]);
 				}
 			})
-			.catch(console.error)
+			.catch(() => notify("발령 목록을 불러오지 못했습니다.", "error"))
 			.finally(() => setLoading(false));
 	}
 
@@ -186,10 +189,6 @@ export default function AppointmentsPage() {
 				<div className="card">
 					<div className="card-head">
 						<div className="card-title">발령 목록</div>
-						<div className="head-actions">
-							<button className="btn-ghost">필터</button>
-							<button className="btn-ghost">내보내기</button>
-						</div>
 					</div>
 					<table>
 						<thead>

@@ -140,15 +140,20 @@ export default function EmployeeDetailPage() {
 	useEffect(() => {
 		if (!empId) return;
 		reloadEmployee();
-		listDepartments().then(setDepartments).catch(() => {});
-		listPositions().then(setPositions).catch(() => {});
-		listEmploymentTypes().then(setEmploymentTypes).catch(() => {});
-		getEducations(empId).then(setEducations).catch(() => {});
-		getCareers(empId).then(setCareers).catch(() => {});
-		getCertifications(empId).then(setCertifications).catch(() => {});
-		getFamilies(empId).then(setFamilies).catch(() => {});
-		getMilitaries(empId).then(setMilitaries).catch(() => {});
-		getLanguages(empId).then(setLanguages).catch(() => {});
+		Promise.all([
+			listDepartments().then(setDepartments),
+			listPositions().then(setPositions),
+			listEmploymentTypes().then(setEmploymentTypes),
+		]).catch(() => notify("조직·직급·임용구분 목록을 불러오지 못했습니다.", "error"));
+		// 인사기록 6종 — 실패를 삼키면 탭이 빈 것인지 못 불러온 것인지 구분되지 않는다
+		Promise.all([
+			getEducations(empId).then(setEducations),
+			getCareers(empId).then(setCareers),
+			getCertifications(empId).then(setCertifications),
+			getFamilies(empId).then(setFamilies),
+			getMilitaries(empId).then(setMilitaries),
+			getLanguages(empId).then(setLanguages),
+		]).catch(() => notify("인사기록을 불러오지 못했습니다.", "error"));
 	}, [empId, reloadEmployee]);
 
 	// 공통: 기록 등록/수정 모달 열기

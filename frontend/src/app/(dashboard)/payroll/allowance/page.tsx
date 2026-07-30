@@ -69,14 +69,13 @@ export default function AllowancePage() {
 								<th>수당명</th>
 								<th style={{textAlign:"center"}}>과세 여부</th>
 								<th style={{textAlign:"center"}}>지급 형태</th>
-								<th style={{textAlign:"right"}}>관리</th>
 							</tr>
 						</thead>
 						<tbody>
 							{loading ? (
-								<tr className="empty-row"><td colSpan={5}>데이터를 불러오는 중입니다...</td></tr>
+								<tr className="empty-row"><td colSpan={4}>데이터를 불러오는 중입니다...</td></tr>
 							) : allowances.length === 0 ? (
-								<tr className="empty-row"><td colSpan={5}>등록된 수당 내역이 없습니다.</td></tr>
+								<tr className="empty-row"><td colSpan={4}>등록된 수당 내역이 없습니다.</td></tr>
 							) : (
 								allowances.map((a) => (
 									<tr key={a.id}>
@@ -95,9 +94,6 @@ export default function AllowancePage() {
 											) : (
 												<span className="pill green">변동 지급</span>
 											)}
-										</td>
-										<td style={{textAlign:"right"}}>
-											<button className="btn-sm">수정</button>
 										</td>
 									</tr>
 								))

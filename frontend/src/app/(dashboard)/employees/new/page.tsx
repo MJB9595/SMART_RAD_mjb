@@ -31,9 +31,12 @@ export default function SlotCreatePage() {
 	const [saving, setSaving] = useState(false);
 
 	useEffect(() => {
-		listDepartments().then(setDepartments).catch(() => {});
-		listPositions().then(setPositions).catch(() => {});
-		listEmploymentTypes().then(setEmploymentTypes).catch(() => {});
+		// 실패하면 선택지가 비어 자리 등록이 불가능하므로 조용히 넘기지 않는다
+		Promise.all([
+			listDepartments().then(setDepartments),
+			listPositions().then(setPositions),
+			listEmploymentTypes().then(setEmploymentTypes),
+		]).catch(() => notify("조직·직급·임용구분 목록을 불러오지 못했습니다.", "error"));
 	}, []);
 
 	function set<K extends keyof typeof form>(key: K, value: string) {

@@ -32,7 +32,7 @@ export default function PayrollPage() {
 					setSelectedPayroll(page.content[0]);
 				}
 			})
-			.catch(console.error)
+			.catch(() => notify("급여 대장을 불러오지 못했습니다.", "error"))
 			.finally(() => setLoading(false));
 	}
 
@@ -87,9 +87,6 @@ export default function PayrollPage() {
 				<div className="card">
 					<div className="card-head">
 						<div className="card-title">급여 대장 목록</div>
-						<div className="head-actions">
-							<button className="btn-sm">필터</button>
-						</div>
 					</div>
 					<div className="flex-1 overflow-auto">
 						<table>

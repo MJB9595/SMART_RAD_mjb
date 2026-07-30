@@ -6,8 +6,10 @@ import { listDepartments } from "@/lib/api/departments";
 import { searchEmployees } from "@/lib/api/employees";
 import type { Department } from "@/lib/types/department";
 import type { Employee } from "@/lib/types/employee";
+import { useFeedback } from "@/components/feedback/FeedbackProvider";
 
 export default function HeadcountPage() {
+	const { notify } = useFeedback();
 	const [headcounts, setHeadcounts] = useState<HeadcountDto[]>([]);
 	const [departments, setDepartments] = useState<Department[]>([]);
 	const [error, setError] = useState<string | null>(null);
@@ -26,6 +28,7 @@ export default function HeadcountPage() {
 				setDepartments(depts);
 			})
 			.catch((err) => {
+				notify("통계를 불러오지 못했습니다.", "error");
 				console.error("Dashboard API Error:", err);
 				setError(err?.message || "대시보드를 불러오지 못했습니다.");
 			})
@@ -41,7 +44,7 @@ export default function HeadcountPage() {
 				.then((res) => {
 					setDeptEmployees(res.content);
 				})
-				.catch(console.error)
+				.catch(() => notify("부서 인원을 불러오지 못했습니다.", "error"))
 				.finally(() => setLoadingModal(false));
 		}
 	}, [selectedDept]);
