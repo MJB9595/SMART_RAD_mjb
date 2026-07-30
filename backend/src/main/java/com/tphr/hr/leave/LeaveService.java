@@ -106,14 +106,10 @@ public class LeaveService {
 	/**
 	 * 신청 기간 검증.
 	 *
-	 * <p>지난 날짜로는 신청할 수 없다 — 이미 지나간 날에 대해 사후에 휴가를 만들어 내면
-	 * 근태 기록과 어긋난다. 당일은 허용한다(오늘 갑자기 쓰는 경우).
+	 * <p>지난 날짜도 허용한다 — 병가처럼 사후에 등록해야 하는 경우가 있어서다.
+	 * 순서만 맞으면 된다.
 	 */
 	private void validatePeriod(LocalDate startDate, LocalDate endDate) {
-		LocalDate today = LocalDate.now();
-		if (startDate.isBefore(today)) {
-			throw ApiException.badRequest("지난 날짜로는 휴가를 신청할 수 없습니다. 오늘(" + today + ") 이후로 선택하세요.");
-		}
 		if (endDate.isBefore(startDate)) {
 			throw ApiException.badRequest("종료일은 시작일보다 빠를 수 없습니다.");
 		}
