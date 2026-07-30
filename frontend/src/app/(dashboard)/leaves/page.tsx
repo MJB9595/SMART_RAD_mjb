@@ -107,21 +107,46 @@ export default function LeavesPage() {
 		return items.filter(req => req.startDate <= monthEnd && req.endDate >= monthStart);
 	}, [items, year, month]);
 
+	/**
+	 * 행은 휴가 기록이 아니라 '볼 수 있는 명단' 기준으로 만든다.
+	 * 기록으로만 만들면 그 달에 휴가를 안 쓴 사람은 행 자체가 없어져, 본인 행조차 보이지 않았다.
+	 */
 	const employees = useMemo(() => {
-		const map = new Map<number, EmployeeLeaveData>();
+		const byEmployee = new Map<number, LeaveRequest[]>();
 		currentMonthRequests.forEach(req => {
-			if (!map.has(req.employeeId)) {
-				map.set(req.employeeId, { id: req.employeeId, name: req.employeeName, requests: [] });
-			}
-			map.get(req.employeeId)!.requests.push(req);
+			if (!byEmployee.has(req.employeeId)) byEmployee.set(req.employeeId, []);
+			byEmployee.get(req.employeeId)!.push(req);
 		});
-		return Array.from(map.values());
-	}, [currentMonthRequests]);
 
-	// Initialize selected employee
+		if (employeeList.length > 0) {
+			return employeeList.map(e => ({
+				id: e.id,
+				name: e.name,
+				requests: byEmployee.get(e.id) ?? [],
+			}));
+		}
+		// 명단을 아직 못 받았으면 기록에서라도 행을 만든다
+		return Array.from(byEmployee.entries()).map(([id, requests]) => ({
+			id,
+			name: requests[0]?.employeeName ?? String(id),
+			requests,
+		}));
+	}, [currentMonthRequests, employeeList]);
+
+	// 상세 카드는 기본으로 본인을 띄운다 (없으면 첫 행)
 	useEffect(() => {
 		if (employees.length > 0 && !selectedEmployee) {
-			setSelectedEmployee(employees[0]);
+			setSelectedEmployee(employees.find(e => e.id === user?.employeeId) ?? employees[0]);
+		}
+	}, [employees, selectedEmployee, user]);
+
+	// 선택한 사람의 상세는 목록이 갱신되면 같이 갱신한다.
+	// (예전에는 선택 당시의 객체를 그대로 들고 있어, 명단이 나중에 도착하면 요약이 0 인 채로 남았다)
+	useEffect(() => {
+		if (!selectedEmployee) return;
+		const fresh = employees.find(e => e.id === selectedEmployee.id);
+		if (fresh && fresh !== selectedEmployee) {
+			setSelectedEmployee(fresh);
 		}
 	}, [employees, selectedEmployee]);
 

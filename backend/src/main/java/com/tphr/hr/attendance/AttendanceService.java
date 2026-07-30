@@ -52,19 +52,29 @@ public class AttendanceService {
 		LocalDate start = LocalDate.of(year, month, 1);
 		LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
 
+		// 기록이 있는 사람만 모으면 그 달에 기록이 없는 직원은 행 자체가 사라진다.
+		// 볼 수 있는 명단 전체를 먼저 깔아 두고 그 위에 기록을 얹는다.
 		Map<Long, Employee> employees = new LinkedHashMap<>();
 		Map<Long, int[]> counts = new LinkedHashMap<>(); // [present, late, absent, leave]
-		// 일자별 상세도 함께 모은다 — 화면 격자가 임의 데이터를 만들지 않도록.
 		Map<Long, Map<Integer, MonthlyAttendanceResponse.DailyAttendance>> daily = new LinkedHashMap<>();
+
+		List<Employee> roster = canSeeAll
+				? employeeRepository.findByDeletedFalseOrderByNameAsc()
+				: employeeRepository.findByIdAndDeletedFalse(currentEmployeeId).map(List::of).orElse(List.of());
+		for (Employee e : roster) {
+			employees.put(e.getId(), e);
+			counts.put(e.getId(), new int[4]);
+			daily.put(e.getId(), new LinkedHashMap<>());
+		}
+
 		for (Attendance a : attendanceRepository
 				.findByWorkDateBetweenAndDeletedFalseOrderByEmployee_EmployeeNumberAscWorkDateAsc(start, end)) {
 			Employee e = a.getEmployee();
-			if (!canSeeAll && !e.getId().equals(currentEmployeeId)) {
-				continue;
+			if (!employees.containsKey(e.getId())) {
+				continue; // 볼 수 없는 사람의 기록
 			}
-			employees.putIfAbsent(e.getId(), e);
-			int[] c = counts.computeIfAbsent(e.getId(), k -> new int[4]);
-			daily.computeIfAbsent(e.getId(), k -> new LinkedHashMap<>()).put(
+			int[] c = counts.get(e.getId());
+			daily.get(e.getId()).put(
 					a.getWorkDate().getDayOfMonth(),
 					new MonthlyAttendanceResponse.DailyAttendance(
 							a.getStatus().name(),
