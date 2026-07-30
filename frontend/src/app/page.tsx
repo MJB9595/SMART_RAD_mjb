@@ -11,6 +11,7 @@ import { Clock, Banknote } from "lucide-react";
 export default function LandingPage() {
 	return (
 		<div className="flex min-h-screen flex-col bg-white">
+			<style dangerouslySetInnerHTML={{ __html: `html { font-size: 21.5px !important; }` }} />
 
 			<LandingHeader />
 			<main className="flex-1 overflow-hidden">
