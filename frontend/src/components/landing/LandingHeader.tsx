@@ -41,8 +41,8 @@ export function LandingHeader() {
 				onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
 				className="flex items-center gap-3 text-left focus:outline-none"
 			>
-				{/* Empty Icon Placeholder */}
-				<div className="h-10 w-10 rounded-xl bg-slate-900 shadow-sm flex-shrink-0" />
+				{/* Site Logo */}
+				<img src="/images/logo.png" alt="TSM Logo" className="h-10 w-10 object-contain flex-shrink-0" />
 				{/* Site Title */}
 				<div className="flex flex-col justify-center -space-y-1">
 					<span className="text-2xl font-extrabold tracking-wider text-slate-900 leading-none">TSM</span>

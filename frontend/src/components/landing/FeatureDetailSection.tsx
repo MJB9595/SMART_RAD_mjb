@@ -19,7 +19,7 @@ export function FeatureDetailSection({ badgeText, badgeIcon, title, description,
 			{/* Removed the messy blur gradients and replaced with a clean crisp subtle pattern if needed, or just clean background */}
 			<div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:40px_40px]"></div>
 
-			<div className="relative mx-auto max-w-[1400px] px-8 md:px-16 z-10">
+			<div className="relative mx-auto w-full px-8 md:px-16 lg:px-24 z-10">
 				<div className={`grid grid-cols-1 lg:grid-cols-2 gap-16 items-center ${reverse ? 'lg:[&>div:first-child]:order-last' : ''}`}>
 					
 					{/* Text Content */}

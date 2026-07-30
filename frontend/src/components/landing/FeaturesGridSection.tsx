@@ -4,7 +4,7 @@ import Link from "next/link";
 export function FeaturesGridSection() {
 	return (
 		<section className="min-h-screen flex flex-col justify-center py-24 bg-slate-50 border-b border-slate-100">
-			<div className="mx-auto max-w-[1400px] px-8 md:px-16">
+			<div className="mx-auto w-full px-8 md:px-16 lg:px-24">
 				<div className="text-center max-w-3xl mx-auto mb-20">
 					<div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-sm font-semibold text-blue-700 mb-6">
 						ALL-IN-ONE HR

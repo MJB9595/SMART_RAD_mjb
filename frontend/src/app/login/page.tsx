@@ -161,9 +161,7 @@ export default function LoginPage() {
       <div className="flex w-full flex-col lg:w-1/2 bg-white text-gray-900 dark:text-gray-900 relative">
         <header className="flex items-center px-8 py-6">
           <Link href="/" className="flex items-center gap-2 font-bold text-xl tracking-tighter text-gray-900 dark:text-gray-900">
-            <div className="bg-slate-900 text-white px-2 py-1 rounded text-sm">
-              S
-            </div>
+            <img src="/images/logo.png" alt="TSM Logo" className="h-8 w-8 object-contain" />
             <span>TSM</span>
           </Link>
         </header>

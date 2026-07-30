@@ -3,7 +3,7 @@ import { ShieldCheck, Lock, KeyRound, ScrollText } from "lucide-react";
 export function SecuritySection() {
 	return (
 		<section id="security" className="bg-slate-900 min-h-screen flex flex-col justify-center py-24 pb-32">
-			<div className="mx-auto max-w-[1600px] px-8 md:px-16 lg:px-24">
+			<div className="mx-auto w-full px-8 md:px-16 lg:px-24">
 				<div className="text-center max-w-5xl mx-auto mb-20">
 					<div className="badge-dark mb-8 px-4 py-1.5 text-base">
 						Security & Compliance

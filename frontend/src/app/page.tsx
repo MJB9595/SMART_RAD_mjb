@@ -11,6 +11,7 @@ import { Clock, Banknote } from "lucide-react";
 export default function LandingPage() {
 	return (
 		<div className="flex min-h-screen flex-col bg-white">
+
 			<LandingHeader />
 			<main className="flex-1 overflow-hidden">
 				<FadeInSection direction="up">

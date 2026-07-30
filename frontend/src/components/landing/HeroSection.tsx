@@ -3,11 +3,11 @@ import Link from "next/link";
 
 export function HeroSection() {
 	return (
-		<section className="relative overflow-hidden bg-white min-h-[90vh] flex flex-col justify-center py-24 border-b border-slate-100">
+		<section className="relative overflow-hidden bg-white min-h-screen flex flex-col justify-center py-24 border-b border-slate-100">
 			{/* Modern subtle grid background instead of generic blobs */}
 			<div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
 			
-			<div className="relative mx-auto max-w-[1600px] px-8 md:px-16 lg:px-24">
+			<div className="relative mx-auto w-full px-8 md:px-16 lg:px-24">
 				<div className="grid grid-cols-1 gap-16 lg:grid-cols-2 lg:gap-32 xl:gap-48 items-center">
 					{/* Left: Copy */}
 					<div className="max-w-3xl mx-auto text-center lg:text-left flex flex-col items-center lg:items-start">
@@ -58,7 +58,7 @@ export function HeroSection() {
 
 					{/* Right: Realistic UI Mockup */}
 					<div className="relative mx-auto w-full max-w-xl lg:max-w-none hidden lg:block">
-						<div className="relative rounded-2xl bg-white shadow-[0_20px_40px_rgb(0,0,0,0.06)] ring-1 ring-slate-100 flex flex-col h-[600px] overflow-hidden">
+						<div className="relative rounded-2xl bg-white shadow-[0_20px_40px_rgb(0,0,0,0.06)] ring-1 ring-slate-100 flex flex-col h-[720px] overflow-hidden">
 							{/* Browser Header */}
 							<div className="flex items-center gap-4 border-b border-slate-100 bg-white px-4 py-3">
 								<div className="flex gap-1.5">
@@ -78,8 +78,15 @@ export function HeroSection() {
 								{/* Left Sidebar */}
 								<div className="w-48 border-r border-slate-200 bg-white flex flex-col py-6 px-3 gap-1">
 									<div className="px-3 mb-4 font-bold text-slate-900 flex items-center gap-2">
-										<div className="w-6 h-6 rounded bg-blue-600"></div>
-										SMART RAD
+										<div className="w-6 h-6 rounded-md bg-[#1F3A8F] flex items-center justify-center flex-shrink-0">
+											<svg viewBox="0 0 24 24" fill="none" className="w-3.5 h-3.5">
+												<rect x="3" y="3" width="8" height="8" rx="2" fill="#fff" fillOpacity="0.95" />
+												<rect x="13" y="3" width="8" height="8" rx="2" fill="#fff" fillOpacity="0.6" />
+												<rect x="3" y="13" width="8" height="8" rx="2" fill="#fff" fillOpacity="0.6" />
+												<rect x="13" y="13" width="8" height="8" rx="2" fill="#fff" fillOpacity="0.95" />
+											</svg>
+										</div>
+										TSM
 									</div>
 									
 									<div className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-blue-50 text-blue-700 font-medium text-sm">
