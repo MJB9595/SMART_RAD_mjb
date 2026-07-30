@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import { listAuditLogs } from "@/lib/api/system";
 import { ApiError } from "@/lib/api/client";
 import type { AuditLog } from "@/lib/types/system";
-import { ScrollText } from "lucide-react";
 
 const ACTION_LABEL: Record<string, string> = {
 	CREATE: "생성",
@@ -59,10 +58,7 @@ export default function AuditPage() {
 		<>
 			<div className="title-row">
 				<div>
-					<div className="page-title flex items-center gap-2">
-						<ScrollText className="w-6 h-6 text-indigo-600" />
-						감사로그 조회
-					</div>
+					<div className="page-title">감사로그 조회</div>
 					<div className="page-sub">권한 변경·승인 등 주요 업무 행위의 이력을 최신순으로 조회합니다.</div>
 				</div>
 			</div>

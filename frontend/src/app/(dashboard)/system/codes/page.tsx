@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { listCommonCodes, createCommonCode, updateCommonCode, deleteCommonCode } from "@/lib/api/system";
 import { ApiError } from "@/lib/api/client";
 import type { CommonCode } from "@/lib/types/system";
-import { Layers, Plus, Pencil, Trash2, XCircle } from "lucide-react";
+import { Plus, Pencil, Trash2, XCircle } from "lucide-react";
 
 type FormState = { id: number | null; groupCode: string; code: string; name: string; sortOrder: string; parentCode: string };
 const EMPTY_FORM: FormState = { id: null, groupCode: "", code: "", name: "", sortOrder: "1", parentCode: "" };
@@ -92,10 +92,7 @@ export default function CodesPage() {
 		<>
 			<div className="title-row">
 				<div>
-					<div className="page-title flex items-center gap-2">
-						<Layers className="w-6 h-6 text-indigo-600" />
-						공통 코드 관리
-					</div>
+					<div className="page-title">공통 코드 관리</div>
 					<div className="page-sub">휴가유형·발령유형 등 시스템 공통 코드를 관리합니다.</div>
 				</div>
 				<button className="btn-primary" onClick={openCreate}>

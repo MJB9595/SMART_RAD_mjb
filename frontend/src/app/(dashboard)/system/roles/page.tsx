@@ -11,7 +11,7 @@ import {
 } from "@/lib/api/system";
 import { ApiError } from "@/lib/api/client";
 import type { PermissionInfo, RoleInfo } from "@/lib/types/system";
-import { Shield, ShieldCheck, Users, User, CheckCircle2, XCircle, Key, Activity, Wallet, FileText, Settings, Clock, Plus, Trash2, Pencil } from "lucide-react";
+import { Shield, ShieldCheck, Users, User, CheckCircle2, XCircle, Activity, Wallet, FileText, Settings, Clock, Plus, Trash2, Pencil } from "lucide-react";
 
 /** 최고 관리자 역할은 잠금(백엔드와 동일 규칙) — 수정·삭제·비활성 불가 */
 const PROTECTED_ROLE_CODE = "ROLE_ADMIN";
@@ -196,10 +196,7 @@ export default function RolesPage() {
 		<>
 			<div className="title-row">
 				<div>
-					<div className="page-title flex items-center gap-2">
-						<Key className="w-6 h-6 text-indigo-600" />
-						권한 관리 (RBAC)
-					</div>
+					<div className="page-title">권한 관리 (RBAC)</div>
 					<div className="page-sub">역할을 만들고 권한을 부여합니다. 좌측에서 역할을 선택하면 상세 권한이 표시됩니다.</div>
 				</div>
 				<button className="btn-primary" onClick={openCreate}>
@@ -282,7 +279,6 @@ export default function RolesPage() {
 							<>
 								<div className="card-head">
 									<div className="flex items-center gap-2 min-w-0">
-										<div className={getRoleTextColor(selectedRole.code)}>{getRoleIcon(selectedRole.code, "w-5 h-5")}</div>
 										<div className="card-title truncate">{selectedRole.name}</div>
 										<span className="pill gray font-mono">{selectedRole.code}</span>
 										{isProtected(selectedRole.code) && <span className="pill amber">보호됨</span>}
