@@ -24,6 +24,8 @@ export default function LeavesPage() {
 	const { user } = useAuth();
 	// 승인 버튼은 실제 승인 권한이 있을 때만 — 없으면 눌러도 403 이다
 	const canApprove = hasPermission(user, PERM.LEAVE_APPROVE) || user?.role === "ADMIN";
+	/** 지난 날짜로는 신청할 수 없다(백엔드와 동일 규칙). 달력에서 아예 못 고르게 막는다. */
+	const todayIso = new Date().toLocaleDateString("sv-SE");
 	const today = new Date();
 	const [year, setYear] = useState(today.getFullYear().toString());
 	const [month, setMonth] = useState((today.getMonth() + 1).toString().padStart(2, '0'));
@@ -431,8 +433,17 @@ export default function LeavesPage() {
 									<label className="text-sm font-bold text-slate-700">시작일</label>
 									<input 
 										type="date" 
+										min={todayIso}
 										value={applyForm.startDate} 
-										onChange={(e) => setApplyForm({...applyForm, startDate: e.target.value})}
+										onChange={(e) => {
+											const startDate = e.target.value;
+											// 시작일을 뒤로 옮기면 종료일이 앞서게 되므로 같이 밀어 준다
+											setApplyForm((f) => ({
+												...f,
+												startDate,
+												endDate: f.endDate && f.endDate < startDate ? startDate : f.endDate,
+											}));
+										}}
 										className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 text-sm font-medium focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors" 
 									/>
 								</div>
@@ -440,6 +451,7 @@ export default function LeavesPage() {
 									<label className="text-sm font-bold text-slate-700">종료일</label>
 									<input 
 										type="date" 
+										min={applyForm.startDate || todayIso}
 										value={applyForm.endDate} 
 										onChange={(e) => setApplyForm({...applyForm, endDate: e.target.value})}
 										className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 text-sm font-medium focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors" 

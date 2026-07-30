@@ -8,6 +8,7 @@ import com.tphr.hr.leave.dto.LeaveBalanceResponse;
 import com.tphr.hr.leave.dto.LeaveRequestCreate;
 import com.tphr.hr.leave.dto.LeaveRequestResponse;
 import com.tphr.hr.security.SecurityUtils;
+import java.time.LocalDate;
 import com.tphr.hr.system.AuditLogService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +47,7 @@ public class LeaveService {
 	public LeaveRequestResponse createLeaveRequest(LeaveRequestCreate request) {
 		// 요청 본문의 employeeId 를 그대로 믿으면 남의 이름으로 휴가를 낼 수 있다.
 		SecurityUtils.checkCanSubmitFor(request.employeeId(), "LEAVE_APPROVE");
+		validatePeriod(request.startDate(), request.endDate());
 		Employee employee = findEmployee(request.employeeId());
 		LeaveType leaveType = leaveTypeRepository.findByIdAndDeletedFalse(request.leaveTypeId())
 				.orElseThrow(() -> ApiException.notFound("휴가유형을 찾을 수 없습니다. id=" + request.leaveTypeId()));
@@ -99,6 +101,22 @@ public class LeaveService {
 				.filter(b -> canSeeAll || b.getEmployee().getId().equals(me))
 				.map(LeaveBalanceResponse::from)
 				.toList();
+	}
+
+	/**
+	 * 신청 기간 검증.
+	 *
+	 * <p>지난 날짜로는 신청할 수 없다 — 이미 지나간 날에 대해 사후에 휴가를 만들어 내면
+	 * 근태 기록과 어긋난다. 당일은 허용한다(오늘 갑자기 쓰는 경우).
+	 */
+	private void validatePeriod(LocalDate startDate, LocalDate endDate) {
+		LocalDate today = LocalDate.now();
+		if (startDate.isBefore(today)) {
+			throw ApiException.badRequest("지난 날짜로는 휴가를 신청할 수 없습니다. 오늘(" + today + ") 이후로 선택하세요.");
+		}
+		if (endDate.isBefore(startDate)) {
+			throw ApiException.badRequest("종료일은 시작일보다 빠를 수 없습니다.");
+		}
 	}
 
 	private LeaveRequest findActive(Long id) {
