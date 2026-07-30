@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { topNavTabs, findActiveTab, isNavItemActive } from "@/lib/nav";
 import { useAuth } from "@/lib/auth/AuthContext";
+import { hasPermission } from "@/lib/auth/permissions";
 
 export function Sidebar() {
 	const pathname = usePathname();
@@ -30,7 +31,7 @@ export function Sidebar() {
 			<div className="nav-label">HR MODULES</div>
 			
 			{topNavTabs
-				.filter(tab => !tab.allowedRoles || (user && tab.allowedRoles.includes(user.role)))
+				.filter(tab => !tab.requiredPermission || hasPermission(user, tab.requiredPermission))
 				.map((tab) => {
 				const isTabActive = tab.key === activeTab.key;
 				return (
@@ -43,7 +44,7 @@ export function Sidebar() {
 							<div className="nav-sub">
 								{tab.sections
 									.flatMap(section => section.items)
-									.filter(item => !item.allowedRoles || (user && item.allowedRoles.includes(user.role)))
+									.filter(item => !item.requiredPermission || hasPermission(user, item.requiredPermission))
 									.map(item => {
 									const isActive = isNavItemActive(pathname, item.href, tab.sections.flatMap(s => s.items).map(i => i.href));
 									return (

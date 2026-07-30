@@ -34,9 +34,12 @@ public class LeaveService {
 		return leaveTypeRepository.findByDeletedFalseOrderByIdAsc();
 	}
 
-	public Page<LeaveRequestResponse> getLeaveRequests(Pageable pageable) {
-		return leaveRequestRepository.findByDeletedFalseOrderByCreatedAtDesc(pageable)
-				.map(LeaveRequestResponse::from);
+	/** 승인 권한이 없으면 본인 신청만 보인다 — 화면이 아니라 서버에서 자른다. */
+	public Page<LeaveRequestResponse> getLeaveRequests(Pageable pageable, Long currentEmployeeId, boolean canSeeAll) {
+		Page<LeaveRequest> page = canSeeAll
+				? leaveRequestRepository.findByDeletedFalseOrderByCreatedAtDesc(pageable)
+				: leaveRequestRepository.findByEmployee_IdAndDeletedFalseOrderByCreatedAtDesc(currentEmployeeId, pageable);
+		return page.map(LeaveRequestResponse::from);
 	}
 
 	@Transactional

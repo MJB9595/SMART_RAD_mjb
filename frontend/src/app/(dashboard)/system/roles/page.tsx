@@ -62,6 +62,9 @@ export default function RolesPage() {
 	/** 실패 사유는 네이티브 alert 대신 화면 상단 배너로 — 관리자가 원인을 읽고 바로 고칠 수 있어야 한다. */
 	const [notice, setNotice] = useState<string | null>(null);
 	const [pendingDelete, setPendingDelete] = useState<RoleInfo | null>(null);
+	/** 아직 서버에 보내지 않은 비활성/삭제 예약. roleId → 예약 내용. */
+	const [pending, setPending] = useState<Record<number, { active?: boolean; remove?: boolean }>>({});
+	const [applying, setApplying] = useState(false);
 
 	const messageOf = (err: unknown, fallback: string) => (err instanceof ApiError ? err.message : fallback);
 
@@ -128,28 +131,66 @@ export default function RolesPage() {
 		}
 	}
 
-	async function handleToggleActive(role: RoleInfo) {
+	/** 비활성/삭제는 즉시 반영하지 않고 여기 쌓아 두었다가 '적용'을 눌러야 서버에 보낸다. */
+	function stageToggleActive(role: RoleInfo) {
 		setNotice(null);
-		try {
-			await setRoleActive(role.id, !role.active);
-			await reload(role.id);
-		} catch (err) {
-			setNotice(messageOf(err, "상태 변경에 실패했습니다."));
-		}
+		setPending((prev) => {
+			const next = { ...prev };
+			const op = { ...(next[role.id] ?? {}) };
+			const current = op.active ?? role.active;
+			op.active = !current;
+			// 원래 상태로 되돌아왔고 삭제 예약도 없으면 변경 목록에서 빼 준다
+			if (op.active === role.active && !op.remove) {
+				delete next[role.id];
+			} else {
+				next[role.id] = op;
+			}
+			return next;
+		});
 	}
 
-	async function handleDelete(role: RoleInfo) {
+	function stageDelete(role: RoleInfo) {
 		setPendingDelete(null);
 		setNotice(null);
-		try {
-			await deleteRole(role.id);
-			await reload(null);
-		} catch (err) {
-			setNotice(messageOf(err, "삭제에 실패했습니다."));
+		setPending((prev) => ({ ...prev, [role.id]: { ...(prev[role.id] ?? {}), remove: true } }));
+	}
+
+	function revertPending() {
+		setPending({});
+		setNotice(null);
+	}
+
+	/** 쌓아 둔 변경을 한 번에 반영. 하나라도 실패하면 사유를 보여주고 나머지는 그대로 둔다. */
+	async function applyPending() {
+		setApplying(true);
+		setNotice(null);
+		const failures: string[] = [];
+		for (const [id, op] of Object.entries(pending)) {
+			const role = roles.find((r) => r.id === Number(id));
+			if (!role) continue;
+			try {
+				if (op.remove) {
+					await deleteRole(role.id);
+				} else if (op.active !== undefined) {
+					await setRoleActive(role.id, op.active);
+				}
+			} catch (err) {
+				failures.push(`${role.name}: ${messageOf(err, "적용 실패")}`);
+			}
+		}
+		setPending({});
+		await reload(null);
+		setApplying(false);
+		if (failures.length > 0) {
+			setNotice(failures.join(" / "));
 		}
 	}
 
 	const isProtected = (code: string) => code === PROTECTED_ROLE_CODE;
+	const pendingCount = Object.keys(pending).length;
+	/** 화면에 보여 줄 활성 상태 — 쌓아 둔 변경이 있으면 그걸 우선한다. */
+	const shownActive = (role: RoleInfo) => pending[role.id]?.active ?? role.active;
+	const isStagedRemove = (role: RoleInfo) => !!pending[role.id]?.remove;
 
 	return (
 		<>
@@ -215,7 +256,14 @@ export default function RolesPage() {
 											<div className={`p-2 rounded-lg bg-white border border-slate-100 ${getRoleTextColor(r.code)}`}>
 												{getRoleIcon(r.code, "w-5 h-5")}
 											</div>
-											<span className={`pill ${r.active ? "blue" : "gray"}`}>{r.active ? "활성" : "비활성"}</span>
+											{isStagedRemove(r) ? (
+												<span className="pill red">삭제 예정</span>
+											) : (
+												<span className={`pill ${shownActive(r) ? "blue" : "gray"}`}>
+													{shownActive(r) ? "활성" : "비활성"}
+													{pending[r.id] ? " 예정" : ""}
+												</span>
+											)}
 										</div>
 										<div className="font-extrabold text-slate-900 text-[15px]">{r.name}</div>
 										<div className="text-[11.5px] font-mono text-slate-400 mb-1">{r.code}</div>
@@ -244,11 +292,13 @@ export default function RolesPage() {
 											style={isProtected(selectedRole.code) ? { opacity: 0.4, cursor: "not-allowed" } : undefined}>
 											<Pencil className="w-3.5 h-3.5" /> 수정
 										</button>
-										<button className="btn-ghost" onClick={() => handleToggleActive(selectedRole)} disabled={isProtected(selectedRole.code)}
-											style={isProtected(selectedRole.code) ? { opacity: 0.4, cursor: "not-allowed" } : undefined}>
-											{selectedRole.active ? "비활성화" : "활성화"}
+										<button className="btn-ghost" onClick={() => stageToggleActive(selectedRole)}
+											disabled={isProtected(selectedRole.code) || isStagedRemove(selectedRole)}
+											style={isProtected(selectedRole.code) || isStagedRemove(selectedRole) ? { opacity: 0.4, cursor: "not-allowed" } : undefined}>
+											{shownActive(selectedRole) ? "비활성화" : "활성화"}
 										</button>
-										<button className="btn-ghost" onClick={() => setPendingDelete(selectedRole)} disabled={isProtected(selectedRole.code)}
+										<button className="btn-ghost" onClick={() => setPendingDelete(selectedRole)}
+											disabled={isProtected(selectedRole.code) || isStagedRemove(selectedRole)}
 											style={isProtected(selectedRole.code) ? { opacity: 0.4, cursor: "not-allowed" } : { color: "#DC2626", borderColor: "#FECACA" }}>
 											<Trash2 className="w-3.5 h-3.5" /> 삭제
 										</button>
@@ -312,6 +362,28 @@ export default function RolesPage() {
 				</div>
 			)}
 
+			{/* 변경 예약 바 — 비활성/삭제는 여기서 '적용'을 눌러야 서버에 반영된다 */}
+			{pendingCount > 0 && (
+				<div
+					style={{
+						position: "fixed", right: "32px", bottom: "24px", zIndex: 50,
+						display: "flex", alignItems: "center", gap: "14px",
+						background: "#fff", border: "1px solid #E5E8EE", borderRadius: "14px",
+						padding: "12px 16px", boxShadow: "0 8px 24px rgba(15,23,42,0.12)",
+					}}
+				>
+					<span className="text-[13px] font-semibold text-slate-700">
+						적용 대기 <span className="text-indigo-600 font-extrabold">{pendingCount}</span>건
+					</span>
+					<button type="button" className="btn-ghost" onClick={revertPending} disabled={applying}>
+						되돌리기
+					</button>
+					<button type="button" className="btn-primary" onClick={applyPending} disabled={applying}>
+						{applying ? "적용 중..." : "적용"}
+					</button>
+				</div>
+			)}
+
 			{/* 삭제 확인 */}
 			{pendingDelete && (
 				<div className="modal-overlay">
@@ -322,13 +394,13 @@ export default function RolesPage() {
 						</div>
 						<div className="modal-body">
 							<p className="text-[13.5px] text-slate-700 leading-relaxed">
-								<b>{pendingDelete.name}</b> (<span className="font-mono">{pendingDelete.code}</span>) 역할을 삭제합니다.
-								<br />이 역할을 사용 중인 교직원이 있으면 삭제되지 않습니다.
+								<b>{pendingDelete.name}</b> (<span className="font-mono">{pendingDelete.code}</span>) 역할을 삭제 예정으로 표시합니다.
+								<br />오른쪽 아래 <b>적용</b>을 눌러야 실제로 삭제되며, 사용 중인 교직원이 있으면 적용 시 거부됩니다.
 							</p>
 							<div className="modal-foot" style={{ marginTop: "20px" }}>
 								<button type="button" onClick={() => setPendingDelete(null)} className="btn-ghost">취소</button>
-								<button type="button" onClick={() => handleDelete(pendingDelete)} className="btn-primary" style={{ background: "#DC2626" }}>
-									삭제
+								<button type="button" onClick={() => stageDelete(pendingDelete)} className="btn-primary" style={{ background: "#DC2626" }}>
+									삭제 예정으로 표시
 								</button>
 							</div>
 						</div>

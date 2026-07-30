@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { listEventSupports, createEventSupport, approveEventSupport, rejectEventSupport, type EventSupport } from "@/lib/api/welfare";
-import { searchEmployees } from "@/lib/api/employees";
+import { listSelectableEmployees } from "@/lib/api/employees";
 import { ApiError } from "@/lib/api/client";
-import type { Employee } from "@/lib/types/employee";
+import type { SelectableEmployee } from "@/lib/types/employee";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { canApproveTarget } from "@/lib/auth/permissions";
 
@@ -20,7 +20,7 @@ export default function EventSupportPage() {
 	const { user } = useAuth();
 
 	// 신청 폼
-	const [employees, setEmployees] = useState<Employee[]>([]);
+	const [employees, setEmployees] = useState<SelectableEmployee[]>([]);
 	const [showForm, setShowForm] = useState(false);
 	const [form, setForm] = useState({
 		employeeId: "",
@@ -41,7 +41,15 @@ export default function EventSupportPage() {
 
 	useEffect(() => {
 		reload();
-		searchEmployees({ size: 200 }).then((res) => setEmployees(res.content)).catch(() => setEmployees([]));
+		// 고를 수 있는 범위는 서버가 역할에 따라 정한다 (관리자 전체 / 인사팀 관리자 제외 / 일반 본인만)
+		listSelectableEmployees()
+			.then((list) => {
+				setEmployees(list);
+				// 본인이 후보에 있으면 미리 선택해 둔다 — 일반 직원은 어차피 본인뿐이다
+				const me = list.find((e) => e.self);
+				if (me) setForm((f) => (f.employeeId ? f : { ...f, employeeId: String(me.id) }));
+			})
+			.catch(() => setEmployees([]));
 	}, []);
 
 	const filtered = type ? rows.filter((d) => d.eventType === type) : rows;
@@ -193,7 +201,11 @@ export default function EventSupportPage() {
 										<label>신청 교직원 <span className="req">*</span></label>
 										<select value={form.employeeId} onChange={(e) => set("employeeId", e.target.value)} required>
 											<option value="">교직원 선택</option>
-											{employees.map((emp) => (<option key={emp.id} value={emp.id}>{emp.name} ({emp.employeeNumber})</option>))}
+											{employees.map((emp) => (
+											<option key={emp.id} value={emp.id}>
+												{emp.self ? `${emp.name} (본인)` : emp.name} · {emp.departmentName ?? "-"} {emp.positionName ?? ""}
+											</option>
+										))}
 										</select>
 									</div>
 									<div className="form-field">

@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/appointments")
 @RequiredArgsConstructor
-@PreAuthorize("@permissionService.isAdminOrHr(authentication)")
+@PreAuthorize("hasRole('ADMIN') or hasAuthority('APPOINTMENT_APPROVE')")
 public class AppointmentController {
 
 	private final AppointmentService appointmentService;
@@ -41,19 +41,19 @@ public class AppointmentController {
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	@PreAuthorize("@permissionService.isAdminOrHr(authentication)")
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('APPOINTMENT_APPROVE')")
 	public AppointmentResponse createAppointment(@Valid @RequestBody AppointmentRequest request) {
 		return appointmentService.createAppointment(request);
 	}
 
 	@PatchMapping("/{id}/approve")
-	@PreAuthorize("@permissionService.isAdminOrHr(authentication)")
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('APPOINTMENT_APPROVE')")
 	public AppointmentResponse approve(@PathVariable Long id) {
 		return appointmentService.approve(id);
 	}
 
 	@PatchMapping("/{id}/reject")
-	@PreAuthorize("@permissionService.isAdminOrHr(authentication)")
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('APPOINTMENT_APPROVE')")
 	public AppointmentResponse reject(@PathVariable Long id) {
 		return appointmentService.reject(id);
 	}

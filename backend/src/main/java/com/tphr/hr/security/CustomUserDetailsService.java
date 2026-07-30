@@ -13,11 +13,12 @@ import org.springframework.stereotype.Service;
 public class CustomUserDetailsService implements UserDetailsService {
 
 	private final EmployeeRepository employeeRepository;
+	private final AccessProfileService accessProfileService;
 
 	@Override
 	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 		Employee employee = employeeRepository.findByEmailAndDeletedFalse(email)
 				.orElseThrow(() -> new UsernameNotFoundException("사원을 찾을 수 없습니다: " + email));
-		return new CustomUserDetails(employee);
+		return new CustomUserDetails(employee, accessProfileService.resolve(employee));
 	}
 }

@@ -3,8 +3,8 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui";
 import { listLeaveRequests, approveLeave, rejectLeave, createLeaveRequest, listLeaveTypes, type LeaveTypeModel } from "@/lib/api/leaves";
-import { searchEmployees } from "@/lib/api/employees";
-import type { Employee } from "@/lib/types/employee";
+import { listSelectableEmployees } from "@/lib/api/employees";
+import type { SelectableEmployee } from "@/lib/types/employee";
 import { ApiError } from "@/lib/api/client";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useAuth } from "@/lib/auth/AuthContext";
@@ -28,7 +28,7 @@ export default function LeavesPage() {
 	const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
 
 	// Application form state
-	const [employeeList, setEmployeeList] = useState<Employee[]>([]);
+	const [employeeList, setEmployeeList] = useState<SelectableEmployee[]>([]);
 	const [leaveTypes, setLeaveTypes] = useState<LeaveTypeModel[]>([]);
 	const [applyForm, setApplyForm] = useState({
 		employeeId: "",
@@ -40,11 +40,14 @@ export default function LeavesPage() {
 	});
 
 	useEffect(() => {
-		if (user?.role === "ADMIN") {
-			searchEmployees({ size: 100 }).then(res => setEmployeeList(res.content)).catch(console.error);
-		} else if (user) {
-			setEmployeeList([user as unknown as Employee]);
-		}
+		if (!user) return;
+		listSelectableEmployees()
+			.then((list) => {
+				setEmployeeList(list);
+				const me = list.find((e) => e.self);
+				if (me) setApplyForm((f) => (f.employeeId ? f : { ...f, employeeId: String(me.id) }));
+			})
+			.catch(() => setEmployeeList([]));
 		listLeaveTypes().then(setLeaveTypes).catch(console.error);
 	}, [user]);
 
@@ -229,14 +232,21 @@ export default function LeavesPage() {
 							) : employees.length === 0 ? (
 								<tr><td colSpan={days.length + 1} className="p-12 text-center text-slate-400 text-sm font-medium">{year}년 {month}월 휴가 기록이 없습니다.</td></tr>
 							) : (
-								employees.map((emp) => (
+								employees.map((emp) => {
+									// 전체를 보는 인사팀·관리자 화면에서 본인 행을 찾기 쉽도록 강조한다
+									const isMine = emp.id === user?.employeeId;
+									const rowBg = selectedEmployee?.id === emp.id ? 'bg-indigo-50/50' : isMine ? 'bg-amber-50/60' : '';
+									return (
 									<tr 
 										key={emp.id} 
-										className={`border-b border-slate-200 group cursor-pointer transition-colors ${selectedEmployee?.id === emp.id ? 'bg-indigo-50/50' : ''}`}
+										className={`border-b border-slate-200 group cursor-pointer transition-colors ${rowBg}`}
 										onClick={() => setSelectedEmployee(emp)}
 									>
-										<td className={`sticky left-0 z-20 p-3 border-r border-slate-200 shadow-[1px_0_0_rgb(226,232,240)] align-middle transition-colors ${selectedEmployee?.id === emp.id ? 'bg-indigo-50/50' : 'bg-white group-hover:bg-slate-50'}`}>
-											<div className="font-bold text-slate-800 text-[13px]">{emp.name}</div>
+										<td className={`sticky left-0 z-20 p-3 border-r border-slate-200 shadow-[1px_0_0_rgb(226,232,240)] align-middle transition-colors ${rowBg || 'bg-white group-hover:bg-slate-50'}`}>
+											<div className="font-bold text-slate-800 text-[13px]">
+												{emp.name}
+												{isMine && <span className="ml-1.5 text-[10px] font-bold text-amber-700">본인</span>}
+											</div>
 										</td>
 										{days.map((d) => {
 											const leave = emp.requests.find(r => r.startDate <= d.fullDate && r.endDate >= d.fullDate);
@@ -265,7 +275,8 @@ export default function LeavesPage() {
 											);
 										})}
 									</tr>
-								))
+								);
+								})
 							)}
 						</tbody>
 					</table>
@@ -404,7 +415,9 @@ export default function LeavesPage() {
 								>
 									<option value="">직원을 선택하세요</option>
 									{employeeList.map(emp => (
-										<option key={emp.id} value={emp.id}>{emp.name}</option>
+										<option key={emp.id} value={emp.id}>
+											{emp.self ? `${emp.name} (본인)` : emp.name} · {emp.departmentName ?? "-"} {emp.positionName ?? ""}
+										</option>
 									))}
 								</select>
 							</div>

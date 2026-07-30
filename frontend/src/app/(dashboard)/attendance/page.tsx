@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { listAttendances, getAttendanceSummary, createAttendance } from "@/lib/api/attendance";
-import { searchEmployees } from "@/lib/api/employees";
+import { listSelectableEmployees } from "@/lib/api/employees";
 import { ApiError } from "@/lib/api/client";
 import type { Attendance, AttendanceSummary } from "@/lib/types/attendance";
-import type { Employee } from "@/lib/types/employee";
+import type { SelectableEmployee } from "@/lib/types/employee";
 import { useAuth } from "@/lib/auth/AuthContext";
 
 function today() {
@@ -21,7 +21,7 @@ export default function AttendancePage() {
 	const [selectedRecord, setSelectedRecord] = useState<Attendance | null>(null);
 
 	// 등록 폼
-	const [employees, setEmployees] = useState<Employee[]>([]);
+	const [employees, setEmployees] = useState<SelectableEmployee[]>([]);
 	const [showForm, setShowForm] = useState(false);
 	const [empId, setEmpId] = useState("");
 	const [status, setStatus] = useState("PRESENT");
@@ -46,13 +46,16 @@ export default function AttendancePage() {
 	}, [workDate]);
 
 	useEffect(() => {
-		if (user?.role === "ADMIN") {
-			searchEmployees({ size: 200 })
-				.then((res) => setEmployees(res.content))
-				.catch(() => setEmployees([]));
-		} else if (user) {
-			setEmployees([user as unknown as Employee]);
-		}
+		if (!user) return;
+		// 이전에는 AuthUser 를 Employee 로 캐스팅해 넣어서 option 의 value 가 undefined 였다.
+		// 이제 서버가 역할별 범위를 정해 주는 목록을 그대로 쓴다.
+		listSelectableEmployees()
+			.then((list) => {
+				setEmployees(list);
+				const me = list.find((e) => e.self);
+				if (me) setEmpId((prev) => prev || String(me.id));
+			})
+			.catch(() => setEmployees([]));
 	}, [user]);
 
 	async function submit(e: React.FormEvent) {
@@ -142,13 +145,20 @@ export default function AttendancePage() {
 							) : attendances.length === 0 ? (
 								<tr className="empty-row"><td colSpan={4}>{workDate} 근태 기록이 없습니다.</td></tr>
 							) : (
-								attendances.map((a) => (
-									<tr key={a.id} onClick={() => setSelectedRecord(a)} style={{ cursor: "pointer" }}>
+								attendances.map((a) => {
+									// 전체를 보는 인사팀·관리자 화면에서 본인 행을 찾기 쉽도록 강조한다
+									const isMine = a.employeeId === user?.employeeId;
+									return (
+									<tr key={a.id} onClick={() => setSelectedRecord(a)}
+										style={{ cursor: "pointer", background: isMine ? "#EEF2FF" : undefined }}>
 										<td>
 											<div className="cell-person">
 												<div className="avatar-sm">{a.employeeName.slice(0, 1)}</div>
 												<div>
-													<div className="p-name">{a.employeeName}</div>
+													<div className="p-name">
+														{a.employeeName}
+														{isMine && <span className="pill blue" style={{ marginLeft: "6px" }}>본인</span>}
+													</div>
 													<div className="p-sub mono">{a.employeeNumber}</div>
 												</div>
 											</div>
@@ -157,7 +167,8 @@ export default function AttendancePage() {
 										<td className="mono">{a.checkInTime ?? "-"}</td>
 										<td className="mono">{a.checkOutTime ?? "-"}</td>
 									</tr>
-								))
+									);
+								})
 							)}
 						</tbody>
 					</table>
@@ -207,7 +218,9 @@ export default function AttendancePage() {
 								<select value={empId} onChange={(e) => setEmpId(e.target.value)} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none" required>
 									<option value="">교직원 선택</option>
 									{employees.map((emp) => (
-										<option key={emp.id} value={emp.id}>{emp.name} ({emp.employeeNumber})</option>
+										<option key={emp.id} value={emp.id}>
+											{emp.self ? `${emp.name} (본인)` : emp.name} · {emp.departmentName ?? "-"} {emp.positionName ?? ""}
+										</option>
 									))}
 								</select>
 							</div>

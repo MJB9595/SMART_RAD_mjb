@@ -6,6 +6,7 @@ import com.tphr.hr.employee.EmployeeRepository;
 import com.tphr.hr.oauth.EmployeeOAuth;
 import com.tphr.hr.oauth.EmployeeOAuthRepository;
 import com.tphr.hr.oauth.OAuthProvider;
+import com.tphr.hr.system.RoleRepository;
 import com.tphr.hr.signup.dto.SignupCreateRequest;
 import com.tphr.hr.signup.dto.SignupResponse;
 import java.time.LocalDate;
@@ -26,6 +27,7 @@ public class SignupService {
 	private final EmployeeRepository employeeRepository;
 	private final EmployeeOAuthRepository employeeOAuthRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final RoleRepository roleRepository;
 
 	/** 회원가입 신청 (공개). 이미 가입된 이메일이거나 대기 중인 신청이 있으면 거절. */
 	@Transactional
@@ -80,7 +82,9 @@ public class SignupService {
 				.role(slot.getRole())
 				.hireDate(slot.getHireDate() != null ? slot.getHireDate() : LocalDate.now())
 				.build();
-		employeeRepository.save(employee);
+		employeeRepository.saveAndFlush(employee);
+		// 승인으로 만들어진 계정도 RBAC 매핑을 함께 만든다 — 없으면 권한 관리에서 조정할 수 없다.
+		roleRepository.assignRoleByCode(employee.getId(), "ROLE_" + employee.getRole().name());
 
 		slot.fill(employee.getId());
 		signup.approve(processorId);

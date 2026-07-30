@@ -9,12 +9,15 @@ import com.tphr.hr.employee.dto.EmployeeResponse;
 import com.tphr.hr.employee.dto.EmployeeStatusRequest;
 import com.tphr.hr.employee.dto.EmployeeUpdateRequest;
 import com.tphr.hr.employee.dto.PasswordChangeRequest;
+import com.tphr.hr.employee.dto.SelectableEmployeeResponse;
 import com.tphr.hr.employee.dto.SelfPasswordChangeRequest;
 import com.tphr.hr.employmenttype.EmploymentType;
 import com.tphr.hr.employmenttype.EmploymentTypeRepository;
 import com.tphr.hr.position.Position;
 import com.tphr.hr.position.PositionCategory;
 import com.tphr.hr.position.PositionRepository;
+import com.tphr.hr.system.RoleRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +35,32 @@ public class EmployeeService {
 	private final PositionRepository positionRepository;
 	private final EmploymentTypeRepository employmentTypeRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final RoleRepository roleRepository;
+
+	/**
+	 * 근태·휴가·경조비 등에서 "대상 교직원"으로 고를 수 있는 사람 목록.
+	 *
+	 * <p>범위는 역할에 따라 서버가 정한다.
+	 * <ul>
+	 *   <li>ADMIN — 전원</li>
+	 *   <li>HR — 관리자 계정을 제외한 전원</li>
+	 *   <li>그 외 — 본인만</li>
+	 * </ul>
+	 */
+	public List<SelectableEmployeeResponse> getSelectableEmployees(Long currentEmployeeId) {
+		Employee me = employeeRepository.findByIdAndDeletedFalse(currentEmployeeId)
+				.orElseThrow(() -> ApiException.notFound("교직원을 찾을 수 없습니다. id=" + currentEmployeeId));
+
+		List<Employee> candidates = switch (me.getRole()) {
+			case ADMIN -> employeeRepository.findByDeletedFalseOrderByNameAsc();
+			case HR -> employeeRepository.findByDeletedFalseAndRoleNotOrderByNameAsc(EmployeeRole.ADMIN);
+			default -> List.of(me);
+		};
+
+		return candidates.stream()
+				.map(e -> SelectableEmployeeResponse.from(e, currentEmployeeId))
+				.toList();
+	}
 
 	public Page<EmployeeResponse> searchEmployees(String keyword, Long departmentId, Long positionId,
 			StaffCategory staffCategory, EmploymentStatus employmentStatus, Pageable pageable) {
@@ -76,7 +105,9 @@ public class EmployeeService {
 				.address(request.address())
 				.emergencyContact(request.emergencyContact())
 				.build();
-		return EmployeeResponse.from(employeeRepository.save(employee));
+		employeeRepository.saveAndFlush(employee);
+		roleRepository.assignRoleByCode(employee.getId(), "ROLE_" + employee.getRole().name());
+		return EmployeeResponse.from(employee);
 	}
 
 	@Transactional

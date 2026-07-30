@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/payrolls")
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-@PreAuthorize("hasAnyRole('ADMIN', 'HR')")
+@PreAuthorize("hasRole('ADMIN') or hasAuthority('PAYROLL_READ')")
 public class PayrollController {
 
 	private final PayrollRepository payrollRepository;

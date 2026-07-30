@@ -42,68 +42,68 @@ public class SystemController {
 
 	@PostMapping("/common-codes")
 	@ResponseStatus(HttpStatus.CREATED)
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('SYSTEM_MANAGE')")
 	public CommonCodeResponse createCommonCode(@Valid @RequestBody CommonCodeRequest request) {
 		return systemService.createCommonCode(request);
 	}
 
 	@PutMapping("/common-codes/{id}")
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('SYSTEM_MANAGE')")
 	public CommonCodeResponse updateCommonCode(@PathVariable Long id, @Valid @RequestBody CommonCodeRequest request) {
 		return systemService.updateCommonCode(id, request);
 	}
 
 	@DeleteMapping("/common-codes/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('SYSTEM_MANAGE')")
 	public void deleteCommonCode(@PathVariable Long id) {
 		systemService.deleteCommonCode(id);
 	}
 
 	// ===== 권한 관리 (RBAC) =====
 	@GetMapping("/roles")
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('SYSTEM_MANAGE')")
 	public List<RoleResponse> getRoles() {
 		return systemService.getRoles();
 	}
 
 	/** 역할에 부여할 수 있는 전체 권한 목록 (권한 편집 화면용). */
 	@GetMapping("/permissions")
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('SYSTEM_MANAGE')")
 	public List<PermissionResponse> getPermissions() {
 		return systemService.getPermissions();
 	}
 
 	@PostMapping("/roles")
 	@ResponseStatus(HttpStatus.CREATED)
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('SYSTEM_MANAGE')")
 	public RoleResponse createRole(@Valid @RequestBody RoleRequest request) {
 		return systemService.createRole(request);
 	}
 
 	@PutMapping("/roles/{id}")
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('SYSTEM_MANAGE')")
 	public RoleResponse updateRole(@PathVariable Long id, @Valid @RequestBody RoleRequest request) {
 		return systemService.updateRole(id, request);
 	}
 
 	/** 역할 활성/비활성 전환. */
 	@PatchMapping("/roles/{id}/active")
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('SYSTEM_MANAGE')")
 	public RoleResponse setRoleActive(@PathVariable Long id, @RequestParam boolean active) {
 		return systemService.setRoleActive(id, active);
 	}
 
 	@DeleteMapping("/roles/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('SYSTEM_MANAGE')")
 	public void deleteRole(@PathVariable Long id) {
 		systemService.deleteRole(id);
 	}
 
 	// ===== 감사로그 조회 =====
 	@GetMapping("/audit-logs")
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('SYSTEM_MANAGE')")
 	public Page<AuditLogResponse> getAuditLogs(
 			@PageableDefault(size = 30) Pageable pageable) {
 		return auditLogService.getAuditLogs(pageable);

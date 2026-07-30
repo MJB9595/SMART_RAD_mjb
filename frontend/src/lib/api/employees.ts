@@ -1,5 +1,5 @@
 import { apiFetch } from "@/lib/api/client";
-import type { Employee, Page } from "@/lib/types/employee";
+import type { Employee, Page, SelectableEmployee } from "@/lib/types/employee";
 
 export interface EmployeeSearchParams {
 	keyword?: string;
@@ -9,6 +9,14 @@ export interface EmployeeSearchParams {
 	employmentStatus?: string;
 	page?: number;
 	size?: number;
+}
+
+/**
+ * 선택 상자용 대상 교직원 목록.
+ * 전체 목록(searchEmployees)은 ADMIN·HR 전용이라 일반 직원이 403 을 받아 선택 상자가 비었었다.
+ */
+export function listSelectableEmployees(): Promise<SelectableEmployee[]> {
+	return apiFetch<SelectableEmployee[]>("/employees/selectable");
 }
 
 export function searchEmployees(params: EmployeeSearchParams = {}): Promise<Page<Employee>> {

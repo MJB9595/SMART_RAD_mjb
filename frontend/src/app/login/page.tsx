@@ -10,13 +10,13 @@ import type { AuthUser } from "@/lib/types/auth";
 import { Button, Field, Input } from "@/components/ui";
 
 const HARDCODED_DEMO_USERS: AuthUser[] = [
-  { employeeId: 1, employeeNumber: "ADM001", name: "관리자", email: "admin", role: "ADMIN", positionLevel: null, departmentId: null, departmentName: null },
-  { employeeId: 2, employeeNumber: "FAC001", name: "김정교", email: "prof.kim@tphr.com", role: "EMPLOYEE", positionLevel: 1, departmentId: 6, departmentName: "컴퓨터공학과" },
-  { employeeId: 3, employeeNumber: "FAC002", name: "이부교", email: "assoc.lee@tphr.com", role: "EMPLOYEE", positionLevel: 2, departmentId: 6, departmentName: "컴퓨터공학과" },
-  { employeeId: 4, employeeNumber: "FAC003", name: "박강사", email: "lect.park@tphr.com", role: "EMPLOYEE", positionLevel: 4, departmentId: 7, departmentName: "전자공학과" },
-  { employeeId: 5, employeeNumber: "FAC004", name: "최조교수", email: "assist.choi@tphr.com", role: "EMPLOYEE", positionLevel: 3, departmentId: 9, departmentName: "국어국문학과" },
-  { employeeId: 6, employeeNumber: "STA001", name: "정직원", email: "staff.jung@tphr.com", role: "HR", positionLevel: 7, departmentId: 3, departmentName: "인사팀" },
-  { employeeId: 7, employeeNumber: "STA002", name: "한주임", email: "staff.han@tphr.com", role: "EMPLOYEE", positionLevel: 8, departmentId: 2, departmentName: "총무처" }
+  { employeeId: 1, employeeNumber: "ADM001", name: "관리자", email: "admin", role: "ADMIN", positionLevel: null, departmentId: null, departmentName: null, permissions: [] },
+  { employeeId: 2, employeeNumber: "FAC001", name: "김정교", email: "prof.kim@tphr.com", role: "EMPLOYEE", positionLevel: 1, departmentId: 6, departmentName: "컴퓨터공학과", permissions: [] },
+  { employeeId: 3, employeeNumber: "FAC002", name: "이부교", email: "assoc.lee@tphr.com", role: "EMPLOYEE", positionLevel: 2, departmentId: 6, departmentName: "컴퓨터공학과", permissions: [] },
+  { employeeId: 4, employeeNumber: "FAC003", name: "박강사", email: "lect.park@tphr.com", role: "EMPLOYEE", positionLevel: 4, departmentId: 7, departmentName: "전자공학과", permissions: [] },
+  { employeeId: 5, employeeNumber: "FAC004", name: "최조교수", email: "assist.choi@tphr.com", role: "EMPLOYEE", positionLevel: 3, departmentId: 9, departmentName: "국어국문학과", permissions: [] },
+  { employeeId: 6, employeeNumber: "STA001", name: "정직원", email: "staff.jung@tphr.com", role: "HR", positionLevel: 7, departmentId: 3, departmentName: "인사팀", permissions: [] },
+  { employeeId: 7, employeeNumber: "STA002", name: "한주임", email: "staff.han@tphr.com", role: "EMPLOYEE", positionLevel: 8, departmentId: 2, departmentName: "총무처", permissions: [] }
 ];
 
 // 숫자 카운팅 애니메이션 컴포넌트

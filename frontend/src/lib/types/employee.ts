@@ -2,6 +2,20 @@ export type EmployeeRole = "ADMIN" | "HR" | "EMPLOYEE";
 export type EmploymentStatus = "EMPLOYED" | "ON_LEAVE" | "RESIGNED";
 export type StaffCategory = "FACULTY" | "STAFF";
 
+/**
+ * 근태·휴가·경조비에서 "대상 교직원"으로 고를 수 있는 사람.
+ * 범위(전체 / 관리자 제외 전체 / 본인만)는 서버가 역할에 따라 정한다.
+ */
+export interface SelectableEmployee {
+	id: number;
+	employeeNumber: string;
+	name: string;
+	departmentName: string | null;
+	positionName: string | null;
+	/** 로그인한 본인 여부 — 기본 선택·하이라이트에 쓴다. */
+	self: boolean;
+}
+
 export interface Employee {
 	id: number;
 	employeeNumber: string;

@@ -11,7 +11,7 @@ import type { Employee, EmployeeRecordSummary } from "@/lib/types/employee";
 import type { Department } from "@/lib/types/department";
 import { SignupApprovalModal } from "@/components/SignupApprovalModal";
 import { useAuth } from "@/lib/auth/AuthContext";
-import { isAdminOrHr } from "@/lib/auth/permissions";
+import { hasPermission, PERM } from "@/lib/auth/permissions";
 
 const PAGE_SIZE = 10;
 
@@ -151,7 +151,10 @@ export default function EmployeesPage() {
 	const s = summary && selected && summary.employeeId === selected.id ? summary : null;
 
 	const { user } = useAuth();
-	const isAdmin = isAdminOrHr(user);
+	// 등록·수정 버튼은 역할 이름이 아니라 실제 부여된 EMPLOYEE_WRITE 권한으로 판단한다.
+	const canWrite = hasPermission(user, PERM.EMPLOYEE_WRITE);
+	// 매치 해제는 되돌리기 어려운 조작이라 백엔드도 ADMIN 전용 — 화면도 같은 기준으로 맞춘다.
+	const isAdmin = user?.role === "ADMIN";
 
 	return (
 		<>
@@ -164,7 +167,7 @@ export default function EmployeesPage() {
 					<div className="page-sub">교직원 인사기록카드를 조회·등록하고 학력·경력·자격 이력을 관리합니다</div>
 				</div>
 				<div className="flex gap-2">
-					{isAdmin && (
+					{canWrite && (
 						<>
 							<button className="btn-outline text-blue-600 border-blue-600 hover:bg-blue-50 relative px-4" onClick={() => setShowApprovalModal(true)}>
 								교직원 가입 승인

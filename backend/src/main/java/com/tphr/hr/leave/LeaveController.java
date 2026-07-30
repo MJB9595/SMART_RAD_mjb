@@ -13,7 +13,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import com.tphr.hr.security.CustomUserDetails;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,11 +38,15 @@ public class LeaveController {
 		return leaveService.getLeaveTypes().stream().map(LeaveTypeResponse::from).toList();
 	}
 
+	/** 목록은 로그인 사용자면 볼 수 있고, 승인 권한이 없으면 본인 신청만 나온다. */
 	@GetMapping
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("isAuthenticated()")
 	public Page<LeaveRequestResponse> getLeaveRequests(
-			@PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-		return leaveService.getLeaveRequests(pageable);
+			@PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+			@AuthenticationPrincipal CustomUserDetails userDetails) {
+		boolean canSeeAll = userDetails.getAuthorities().stream()
+				.anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("LEAVE_APPROVE"));
+		return leaveService.getLeaveRequests(pageable, userDetails.getEmployeeId(), canSeeAll);
 	}
 
 	@PostMapping
@@ -50,13 +56,13 @@ public class LeaveController {
 	}
 
 	@PatchMapping("/{id}/approve")
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('LEAVE_APPROVE')")
 	public LeaveRequestResponse approve(@PathVariable Long id) {
 		return leaveService.approve(id);
 	}
 
 	@PatchMapping("/{id}/reject")
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('LEAVE_APPROVE')")
 	public LeaveRequestResponse reject(@PathVariable Long id) {
 		return leaveService.reject(id);
 	}

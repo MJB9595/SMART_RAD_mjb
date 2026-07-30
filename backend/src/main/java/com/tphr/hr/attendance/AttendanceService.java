@@ -23,8 +23,15 @@ public class AttendanceService {
 	private final AttendanceRepository attendanceRepository;
 	private final EmployeeRepository employeeRepository;
 
-	public List<AttendanceResponse> getAttendancesByDate(LocalDate workDate) {
+	/**
+	 * 일일 근태 목록.
+	 *
+	 * <p>전체를 볼 수 있는 사람(관리자·인사팀)이 아니면 본인 기록만 돌려준다.
+	 * 화면에서 감추는 것으로는 API 를 직접 부르면 남의 근태가 그대로 보이므로 서버에서 자른다.
+	 */
+	public List<AttendanceResponse> getAttendancesByDate(LocalDate workDate, Long currentEmployeeId, boolean canSeeAll) {
 		return attendanceRepository.findByWorkDateAndDeletedFalseOrderByEmployee_EmployeeNumberAsc(workDate).stream()
+				.filter(a -> canSeeAll || a.getEmployee().getId().equals(currentEmployeeId))
 				.map(AttendanceResponse::from)
 				.toList();
 	}
@@ -40,7 +47,8 @@ public class AttendanceService {
 	}
 
 	/** 월 근태 현황 — 직원별 출근/지각/결근/연차 일수 집계. */
-	public List<MonthlyAttendanceResponse> getMonthlyAttendance(int year, int month) {
+	public List<MonthlyAttendanceResponse> getMonthlyAttendance(int year, int month, Long currentEmployeeId,
+			boolean canSeeAll) {
 		LocalDate start = LocalDate.of(year, month, 1);
 		LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
 
@@ -49,6 +57,9 @@ public class AttendanceService {
 		for (Attendance a : attendanceRepository
 				.findByWorkDateBetweenAndDeletedFalseOrderByEmployee_EmployeeNumberAscWorkDateAsc(start, end)) {
 			Employee e = a.getEmployee();
+			if (!canSeeAll && !e.getId().equals(currentEmployeeId)) {
+				continue;
+			}
 			employees.putIfAbsent(e.getId(), e);
 			int[] c = counts.computeIfAbsent(e.getId(), k -> new int[4]);
 			switch (a.getStatus()) {

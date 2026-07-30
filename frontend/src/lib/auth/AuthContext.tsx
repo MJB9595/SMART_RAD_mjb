@@ -62,6 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 			positionLevel: response.positionLevel,
 			departmentId: response.departmentId,
 			departmentName: response.departmentName,
+			permissions: response.permissions ?? [],
 		});
 	}
 
