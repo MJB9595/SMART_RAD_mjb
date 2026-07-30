@@ -14,7 +14,7 @@ function today() {
 }
 
 export default function EventSupportPage() {
-	const { notify, confirm: askConfirm } = useFeedback();
+	const { notify, confirm: askConfirm, prompt: askPrompt } = useFeedback();
 	const [type, setType] = useState("");
 	const [rows, setRows] = useState<EventSupport[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -106,9 +106,17 @@ export default function EventSupportPage() {
 	}
 
 	async function handleReject(d: EventSupport) {
-		if (!(await askConfirm({ title: "경조비 반려", message: `${d.targetName}님의 ${d.eventType} 경조비를 반려합니다.`, confirmLabel: "반려", danger: true }))) return;
+		const memo = await askPrompt({
+			title: "경조비 반려",
+			message: `${d.targetName}님의 ${d.eventType} 경조비를 반려합니다.`,
+			label: "반려 사유 (선택)",
+			placeholder: "예: 증빙 서류 미제출",
+			confirmLabel: "반려",
+			danger: true,
+		});
+		if (memo === null) return;
 		try {
-			await rejectEventSupport(d.id);
+			await rejectEventSupport(d.id, memo || undefined);
 			reload();
 		} catch (err) {
 			notify(err instanceof ApiError ? err.message : "반려 처리에 실패했습니다.", "error");

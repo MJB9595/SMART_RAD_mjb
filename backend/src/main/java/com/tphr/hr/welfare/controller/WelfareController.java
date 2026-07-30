@@ -37,6 +37,14 @@ public class WelfareController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/event-support/{id}/reject")
+    @PreAuthorize("@permissionService.canApproveEventSupport(authentication, #id)")
+    public ResponseEntity<Void> rejectEventSupport(@PathVariable Long id,
+            @RequestParam(required = false) String memo) {
+        welfareService.rejectEventSupport(id, SecurityUtils.getCurrentEmployeeId(), memo);
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/certificate")
     public ResponseEntity<EmployeeCertificateIssueDto.Response> createCertificate(@Valid @RequestBody EmployeeCertificateIssueDto.Request req) {
         return ResponseEntity.ok(welfareService.createCertificateIssue(req));

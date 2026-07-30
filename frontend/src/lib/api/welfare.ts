@@ -69,9 +69,10 @@ export function approveEventSupport(id: number): Promise<void> {
 	return apiFetch<void>(`/welfare/event-support/${id}/approve`, { method: "POST" });
 }
 
-/** 경조비 신청 반려 */
-export function rejectEventSupport(id: number): Promise<void> {
-	return apiFetch<void>(`/welfare/event-support/${id}/reject`, { method: "POST" });
+/** 경조비 신청 반려 (사유 선택). */
+export function rejectEventSupport(id: number, memo?: string): Promise<void> {
+	const qs = memo ? `?memo=${encodeURIComponent(memo)}` : "";
+	return apiFetch<void>(`/welfare/event-support/${id}/reject${qs}`, { method: "POST" });
 }
 
 export interface CertificateCreateBody {

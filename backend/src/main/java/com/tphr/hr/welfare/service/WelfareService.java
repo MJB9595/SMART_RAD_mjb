@@ -1,6 +1,7 @@
 package com.tphr.hr.welfare.service;
 
 import com.tphr.hr.common.util.DocumentNumberGenerator;
+import com.tphr.hr.common.exception.ApiException;
 import com.tphr.hr.employee.Employee;
 import com.tphr.hr.security.SecurityUtils;
 import com.tphr.hr.employee.EmployeeRepository;
@@ -74,9 +75,24 @@ public class WelfareService {
 
     @Transactional
     public void approveEventSupport(Long id, Long approverId) {
-        EmployeeEventSupport entity = eventSupportRepository.findById(id).orElseThrow();
+        EmployeeEventSupport entity = eventSupportRepository.findById(id)
+                .orElseThrow(() -> ApiException.notFound("경조비 신청을 찾을 수 없습니다. id=" + id));
         Employee approver = employeeRepository.findById(approverId).orElseThrow();
         entity.approve(approver);
+    }
+
+    /**
+     * 경조비 반려 (사유 메모).
+     *
+     * <p>엔티티에는 reject() 가 있었지만 서비스·컨트롤러가 없어, 화면의 반려 버튼이
+     * 존재하지 않는 경로를 호출하고 404 를 받고 있었다.
+     */
+    @Transactional
+    public void rejectEventSupport(Long id, Long approverId, String memo) {
+        EmployeeEventSupport entity = eventSupportRepository.findById(id)
+                .orElseThrow(() -> ApiException.notFound("경조비 신청을 찾을 수 없습니다. id=" + id));
+        Employee approver = employeeRepository.findById(approverId).orElseThrow();
+        entity.reject(approver, memo);
     }
 
     @Transactional

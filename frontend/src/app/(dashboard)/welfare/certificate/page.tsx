@@ -21,7 +21,7 @@ function today() {
 }
 
 export default function CertificatePage() {
-	const { notify, confirm: askConfirm } = useFeedback();
+	const { notify, confirm: askConfirm, prompt: askPrompt } = useFeedback();
 	const [type, setType] = useState("");
 	const [rows, setRows] = useState<Certificate[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -64,7 +64,14 @@ export default function CertificatePage() {
 
 	/** 발급 반려 */
 	async function handleReject(cert: Certificate) {
-		const memo = prompt("반려 사유를 입력하세요 (선택)");
+		const memo = await askPrompt({
+			title: "증명서 반려",
+			message: `${cert.employeeName} 님의 ${cert.certificateType} 발급을 반려합니다.`,
+			label: "반려 사유 (선택)",
+			placeholder: "예: 제출 서류 미비",
+			confirmLabel: "반려",
+			danger: true,
+		});
 		if (memo === null) return;
 		try {
 			await rejectCertificate(cert.id, memo || undefined);

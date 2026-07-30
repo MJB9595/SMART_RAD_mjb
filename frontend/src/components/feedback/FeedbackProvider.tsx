@@ -20,9 +20,22 @@ interface ConfirmOptions {
 	danger?: boolean;
 }
 
+interface PromptOptions {
+	title: string;
+	message?: ReactNode;
+	label?: string;
+	placeholder?: string;
+	confirmLabel?: string;
+	danger?: boolean;
+	/** 비우고 확인해도 되는지. 기본은 허용(선택 입력). */
+	required?: boolean;
+}
+
 interface FeedbackValue {
 	notify: (message: string, tone?: Tone) => void;
 	confirm: (options: ConfirmOptions) => Promise<boolean>;
+	/** 사유 등 짧은 문장을 받는다. 취소하면 null. */
+	prompt: (options: PromptOptions) => Promise<string | null>;
 }
 
 const FeedbackContext = createContext<FeedbackValue | null>(null);
@@ -50,6 +63,8 @@ const TONE_BADGE: Record<Tone, string> = {
 export function FeedbackProvider({ children }: { children: ReactNode }) {
 	const [toasts, setToasts] = useState<Toast[]>([]);
 	const [pending, setPending] = useState<(ConfirmOptions & { resolve: (ok: boolean) => void }) | null>(null);
+	const [asking, setAsking] = useState<(PromptOptions & { resolve: (v: string | null) => void }) | null>(null);
+	const [draft, setDraft] = useState("");
 	const seq = useRef(0);
 
 	const notify = useCallback((message: string, tone: Tone = "error") => {
@@ -65,13 +80,27 @@ export function FeedbackProvider({ children }: { children: ReactNode }) {
 		[],
 	);
 
+	const prompt = useCallback(
+		(options: PromptOptions) =>
+			new Promise<string | null>((resolve) => {
+				setDraft("");
+				setAsking({ ...options, resolve });
+			}),
+		[],
+	);
+
+	function settleAsk(value: string | null) {
+		asking?.resolve(value);
+		setAsking(null);
+	}
+
 	function settle(ok: boolean) {
 		pending?.resolve(ok);
 		setPending(null);
 	}
 
 	return (
-		<FeedbackContext.Provider value={{ notify, confirm }}>
+		<FeedbackContext.Provider value={{ notify, confirm, prompt }}>
 			{children}
 
 			{/* 토스트 */}
@@ -97,6 +126,48 @@ export function FeedbackProvider({ children }: { children: ReactNode }) {
 					</div>
 				))}
 			</div>
+
+			{/* 입력 창 (사유 등) */}
+			{asking && (
+				<div className="modal-overlay">
+					<div className="modal" style={{ maxWidth: "440px" }}>
+						<div className="modal-head">
+							<div className="modal-title">{asking.title}</div>
+							<button type="button" onClick={() => settleAsk(null)} className="modal-x">&times;</button>
+						</div>
+						<div className="modal-body">
+							{asking.message && (
+								<div className="text-[13.5px] text-slate-700 leading-relaxed whitespace-pre-line mb-3">{asking.message}</div>
+							)}
+							<div className="form-field">
+								{asking.label && <label>{asking.label}</label>}
+								<input
+									autoFocus
+									value={draft}
+									onChange={(e) => setDraft(e.target.value)}
+									onKeyDown={(e) => {
+										if (e.key === "Enter" && (!asking.required || draft.trim())) settleAsk(draft.trim());
+										if (e.key === "Escape") settleAsk(null);
+									}}
+									placeholder={asking.placeholder}
+								/>
+							</div>
+							<div className="modal-foot" style={{ marginTop: "20px" }}>
+								<button type="button" onClick={() => settleAsk(null)} className="btn-ghost">취소</button>
+								<button
+									type="button"
+									onClick={() => settleAsk(draft.trim())}
+									disabled={asking.required ? !draft.trim() : false}
+									className="btn-primary"
+									style={asking.danger ? { background: "#DC2626" } : undefined}
+								>
+									{asking.confirmLabel ?? "확인"}
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			)}
 
 			{/* 확인 창 */}
 			{pending && (
