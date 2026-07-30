@@ -12,6 +12,16 @@ export function listPayrolls(params?: Record<string, string>): Promise<Page<Payr
 	}));
 }
 
+export interface PayrollFilterOptions {
+	yearMonths: string[];
+	statuses: string[];
+}
+
+/** 필터 선택지 — 실제 데이터에서 뽑은 급여월·상태 목록. */
+export function getPayrollFilterOptions(): Promise<PayrollFilterOptions> {
+	return apiFetch<PayrollFilterOptions>("/payrolls/filter-options");
+}
+
 /** 전체 급여대장 엑셀 다운로드 (ADMIN). */
 export function exportPayrolls(): Promise<void> {
 	return apiDownload("/payrolls/export", "급여대장.xlsx");

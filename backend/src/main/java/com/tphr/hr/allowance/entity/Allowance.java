@@ -37,4 +37,16 @@ public class Allowance extends DeletableEntity {
         this.fixed = fixed;
         this.active = true;
     }
+
+    /** 수당명·과세여부·지급형태 수정. */
+    public void update(String name, boolean taxable, boolean fixed) {
+        this.name = name;
+        this.taxable = taxable;
+        this.fixed = fixed;
+    }
+
+    /** 비활성 수당은 신규 지급 설정에서 고를 수 없게 한다(기존 지급 이력은 유지). */
+    public void changeActive(boolean active) {
+        this.active = active;
+    }
 }

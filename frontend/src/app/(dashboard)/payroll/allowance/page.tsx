@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui";
-import { listAllowances, createAllowance, type Allowance } from "@/lib/api/allowance";
+import { listAllowances, createAllowance, updateAllowance, setAllowanceActive, deleteAllowance, type Allowance } from "@/lib/api/allowance";
 import { ApiError } from "@/lib/api/client";
 import { useFeedback } from "@/components/feedback/FeedbackProvider";
 
@@ -16,6 +16,8 @@ export default function AllowancePage() {
 	const [taxable, setTaxable] = useState(true);
 	const [fixed, setFixed] = useState(true);
 	const [saving, setSaving] = useState(false);
+	/** 수정 중인 수당. null 이면 신규 등록. */
+	const [editing, setEditing] = useState<Allowance | null>(null);
 
 	function reload() {
 		setLoading(true);
@@ -29,21 +31,65 @@ export default function AllowancePage() {
 		reload();
 	}, []);
 
+	function openCreate() {
+		setEditing(null);
+		setName("");
+		setTaxable(true);
+		setFixed(true);
+		setShowForm(true);
+	}
+
+	function openEdit(a: Allowance) {
+		setEditing(a);
+		setName(a.name);
+		setTaxable(a.taxable);
+		setFixed(a.fixed);
+		setShowForm(true);
+	}
+
 	async function submit(e: React.FormEvent) {
 		e.preventDefault();
 		if (!name.trim()) return;
 		setSaving(true);
 		try {
-			await createAllowance({ name: name.trim(), taxable, fixed });
+			const body = { name: name.trim(), taxable, fixed };
+			if (editing) {
+				await updateAllowance(editing.id, body);
+			} else {
+				await createAllowance(body);
+			}
 			setShowForm(false);
-			setName("");
-			setTaxable(true);
-			setFixed(true);
+			setEditing(null);
 			reload();
 		} catch (err) {
-			notify(err instanceof ApiError ? err.message : "수당 등록에 실패했습니다.", "error");
+			notify(err instanceof ApiError ? err.message : "수당 저장에 실패했습니다.", "error");
 		} finally {
 			setSaving(false);
+		}
+	}
+
+	async function toggleActive(a: Allowance) {
+		try {
+			await setAllowanceActive(a.id, !a.active);
+			reload();
+		} catch (err) {
+			notify(err instanceof ApiError ? err.message : "상태 변경에 실패했습니다.", "error");
+		}
+	}
+
+	async function remove(a: Allowance) {
+		const ok = await askConfirm({
+			title: "수당 삭제",
+			message: `'${a.name}' 수당을 삭제합니다.\n지급받는 교직원이 있으면 삭제되지 않습니다.`,
+			confirmLabel: "삭제",
+			danger: true,
+		});
+		if (!ok) return;
+		try {
+			await deleteAllowance(a.id);
+			reload();
+		} catch (err) {
+			notify(err instanceof ApiError ? err.message : "삭제에 실패했습니다.", "error");
 		}
 	}
 
@@ -54,7 +100,7 @@ export default function AllowancePage() {
 					<div className="page-title">수당 관리</div>
 					<div className="page-sub">급여에 적용되는 고정 및 변동 수당 항목을 손쉽게 설정하세요</div>
 				</div>
-				<button onClick={() => setShowForm(true)} className="btn-primary">+ 신규 수당 등록</button>
+				<button onClick={openCreate} className="btn-primary">+ 신규 수당 등록</button>
 			</div>
 
 			<div className="card">
@@ -69,13 +115,15 @@ export default function AllowancePage() {
 								<th>수당명</th>
 								<th style={{textAlign:"center"}}>과세 여부</th>
 								<th style={{textAlign:"center"}}>지급 형태</th>
+								<th style={{textAlign:"center"}}>사용 여부</th>
+								<th style={{textAlign:"right"}}>관리</th>
 							</tr>
 						</thead>
 						<tbody>
 							{loading ? (
-								<tr className="empty-row"><td colSpan={4}>데이터를 불러오는 중입니다...</td></tr>
+								<tr className="empty-row"><td colSpan={6}>데이터를 불러오는 중입니다...</td></tr>
 							) : allowances.length === 0 ? (
-								<tr className="empty-row"><td colSpan={4}>등록된 수당 내역이 없습니다.</td></tr>
+								<tr className="empty-row"><td colSpan={6}>등록된 수당 내역이 없습니다.</td></tr>
 							) : (
 								allowances.map((a) => (
 									<tr key={a.id}>
@@ -95,6 +143,20 @@ export default function AllowancePage() {
 												<span className="pill green">변동 지급</span>
 											)}
 										</td>
+										<td style={{textAlign:"center"}}>
+											<span className={`pill ${a.active ? "blue" : "gray"}`}>{a.active ? "사용" : "미사용"}</span>
+										</td>
+										<td>
+											<div className="row-actions" style={{justifyContent:"flex-end"}}>
+												<button className="btn-ghost" onClick={() => openEdit(a)}>수정</button>
+												<button className="btn-ghost" onClick={() => toggleActive(a)}>
+													{a.active ? "미사용" : "사용"}
+												</button>
+												<button className="btn-ghost" style={{color:"#DC2626", borderColor:"#FECACA"}} onClick={() => remove(a)}>
+													삭제
+												</button>
+											</div>
+										</td>
 									</tr>
 								))
 							)}
@@ -107,7 +169,7 @@ export default function AllowancePage() {
 				<div className="modal-overlay">
 					<div className="modal">
 						<div className="modal-head">
-							<div className="modal-title">신규 수당 등록</div>
+							<div className="modal-title">{editing ? "수당 수정" : "신규 수당 등록"}</div>
 							<button type="button" onClick={() => setShowForm(false)} className="modal-x">&times;</button>
 						</div>
 						<div className="modal-body">
@@ -143,7 +205,7 @@ export default function AllowancePage() {
 								<div className="modal-foot" style={{marginTop:"24px", padding:"0", borderTop:"none"}}>
 									<button type="button" onClick={() => setShowForm(false)} className="btn-ghost">취소</button>
 									<button type="submit" disabled={saving} className="btn-primary">
-										{saving ? "처리 중..." : "등록 완료"}
+										{saving ? "처리 중..." : editing ? "변경 저장" : "등록 완료"}
 									</button>
 								</div>
 							</form>

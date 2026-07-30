@@ -25,11 +25,42 @@ public class PayrollController {
 	private final PayrollRepository payrollRepository;
 	private final PayrollExcelService payrollExcelService;
 
+	/**
+	 * 급여 대장 목록.
+	 *
+	 * <p>화면에 필터 버튼만 있고 조건이 없어 전체만 볼 수 있었다. 급여월·상태·이름/사번으로 좁힌다.
+	 * 조건은 모두 선택이며, 주지 않으면 예전처럼 전체가 나온다.
+	 *
+	 * @param yearMonth 급여월 (예: 2026-07)
+	 * @param status    지급 상태 코드
+	 * @param keyword   교직원 이름 또는 사번 일부
+	 */
 	@GetMapping
-	public List<PayrollResponse> getPayrolls() {
+	public List<PayrollResponse> getPayrolls(
+			@RequestParam(required = false) String yearMonth,
+			@RequestParam(required = false) String status,
+			@RequestParam(required = false) String keyword) {
+		String needle = keyword == null ? null : keyword.trim().toLowerCase();
 		return payrollRepository.findByDeletedFalseOrderByPayrollYearMonthDescEmployee_EmployeeNumberAsc().stream()
+				.filter(p -> yearMonth == null || yearMonth.isBlank() || yearMonth.equals(p.getPayrollYearMonth()))
+				.filter(p -> status == null || status.isBlank() || status.equals(p.getPayrollStatusCode()))
+				.filter(p -> needle == null || needle.isBlank()
+						|| p.getEmployee().getName().toLowerCase().contains(needle)
+						|| p.getEmployee().getEmployeeNumber().toLowerCase().contains(needle))
 				.map(PayrollResponse::from)
 				.toList();
+	}
+
+	/** 필터 선택지 — 화면이 임의로 목록을 만들지 않도록 실제 데이터에서 뽑아 준다. */
+	@GetMapping("/filter-options")
+	public PayrollFilterOptions getFilterOptions() {
+		List<Payroll> all = payrollRepository.findByDeletedFalseOrderByPayrollYearMonthDescEmployee_EmployeeNumberAsc();
+		return new PayrollFilterOptions(
+				all.stream().map(Payroll::getPayrollYearMonth).distinct().sorted(java.util.Comparator.reverseOrder()).toList(),
+				all.stream().map(Payroll::getPayrollStatusCode).distinct().sorted().toList());
+	}
+
+	public record PayrollFilterOptions(List<String> yearMonths, List<String> statuses) {
 	}
 
 	@GetMapping("/export")

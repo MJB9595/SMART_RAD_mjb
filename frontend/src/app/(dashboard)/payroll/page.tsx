@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { exportPayroll, exportPayrolls, listPayrolls } from "@/lib/api/payroll";
+import { exportPayroll, exportPayrolls, getPayrollFilterOptions, listPayrolls, type PayrollFilterOptions } from "@/lib/api/payroll";
 import type { Payroll } from "@/lib/types/payroll";
 import { useFeedback } from "@/components/feedback/FeedbackProvider";
 
@@ -12,6 +12,11 @@ export default function PayrollPage() {
 	const [loading, setLoading] = useState(true);
 	const [selectedPayroll, setSelectedPayroll] = useState<Payroll | null>(null);
 	const [downloading, setDownloading] = useState<"all" | "one" | null>(null);
+	// 필터 — 선택지는 실제 데이터에서 받아 온다(화면이 임의 목록을 만들지 않도록)
+	const [yearMonth, setYearMonth] = useState("");
+	const [status, setStatus] = useState("");
+	const [keyword, setKeyword] = useState("");
+	const [options, setOptions] = useState<PayrollFilterOptions>({ yearMonths: [], statuses: [] });
 
 	function runExport(kind: "all" | "one", task: Promise<void>) {
 		setDownloading(kind);
@@ -24,13 +29,16 @@ export default function PayrollPage() {
 
 	function load() {
 		setLoading(true);
-		listPayrolls()
+		const params: Record<string, string> = {};
+		if (yearMonth) params.yearMonth = yearMonth;
+		if (status) params.status = status;
+		if (keyword.trim()) params.keyword = keyword.trim();
+		listPayrolls(params)
 			.then((page) => {
 				setPayrolls(page.content);
 				setTotalElements(page.totalElements);
-				if (page.content.length > 0) {
-					setSelectedPayroll(page.content[0]);
-				}
+				// 필터 결과에 없는 대상이 상세에 남아 있으면 목록과 어긋나므로 맞춰 준다
+				setSelectedPayroll(page.content.length > 0 ? page.content[0] : null);
 			})
 			.catch(() => notify("급여 대장을 불러오지 못했습니다.", "error"))
 			.finally(() => setLoading(false));
@@ -38,12 +46,21 @@ export default function PayrollPage() {
 
 	useEffect(() => {
 		load();
+	}, [yearMonth, status]);
+
+	useEffect(() => {
+		getPayrollFilterOptions().then(setOptions).catch(() => setOptions({ yearMonths: [], statuses: [] }));
 	}, []);
 
+
+	/** 급여 상태 코드는 백엔드 기준 DRAFT/CONFIRMED/PAID 다. 화면이 쓰던 COMPLETED/PENDING/ERROR 는 존재하지 않는 값이라 늘 빗나갔다. */
+	const statusLabel = (code?: string) =>
+		code === "DRAFT" ? "작성중" : code === "CONFIRMED" ? "확정" : code === "PAID" ? "지급완료" : (code ?? "-");
+
 	const getStatusPill = (status?: string) => {
-		if (status === "COMPLETED") return <span className="pill green">정산완료</span>;
-		if (status === "PENDING") return <span className="pill amber">정산대기</span>;
-		if (status === "ERROR") return <span className="pill red">오류</span>;
+		if (status === "PAID") return <span className="pill green">지급완료</span>;
+		if (status === "CONFIRMED") return <span className="pill blue">확정</span>;
+		if (status === "DRAFT") return <span className="pill amber">작성중</span>;
 		return <span className="pill gray">{status || "대기"}</span>;
 	};
 
@@ -70,16 +87,16 @@ export default function PayrollPage() {
 					<div className="stat-value">{totalElements}<span>명</span></div>
 				</div>
 				<div className="stat-card">
-					<div className="stat-top"><span className="stat-label">정산 완료</span></div>
-					<div className="stat-value">{payrolls.filter(p => p.payrollStatusCode === "COMPLETED").length}<span>건</span></div>
+					<div className="stat-top"><span className="stat-label">지급완료</span></div>
+					<div className="stat-value">{payrolls.filter(p => p.payrollStatusCode === "PAID").length}<span>건</span></div>
 				</div>
 				<div className="stat-card">
-					<div className="stat-top"><span className="stat-label">정산 대기</span></div>
-					<div className="stat-value">{payrolls.filter(p => p.payrollStatusCode !== "COMPLETED" && p.payrollStatusCode !== "ERROR").length}<span>건</span></div>
+					<div className="stat-top"><span className="stat-label">확정</span></div>
+					<div className="stat-value">{payrolls.filter(p => p.payrollStatusCode === "CONFIRMED").length}<span>건</span></div>
 				</div>
 				<div className="stat-card">
-					<div className="stat-top"><span className="stat-label">정산 오류</span><span className="badge down">주의</span></div>
-					<div className="stat-value">{payrolls.filter(p => p.payrollStatusCode === "ERROR").length}<span>건</span></div>
+					<div className="stat-top"><span className="stat-label">작성중</span></div>
+					<div className="stat-value">{payrolls.filter(p => p.payrollStatusCode === "DRAFT").length}<span>건</span></div>
 				</div>
 			</div>
 
@@ -87,6 +104,38 @@ export default function PayrollPage() {
 				<div className="card">
 					<div className="card-head">
 						<div className="card-title">급여 대장 목록</div>
+						<span className="foot-info">{totalElements}건</span>
+					</div>
+					<div className="filter-bar">
+						<select value={yearMonth} onChange={(e) => setYearMonth(e.target.value)} className="filter-select">
+							<option value="">전체 급여월</option>
+							{options.yearMonths.map((ym) => (
+								<option key={ym} value={ym}>{ym}</option>
+							))}
+						</select>
+						<select value={status} onChange={(e) => setStatus(e.target.value)} className="filter-select">
+							<option value="">전체 상태</option>
+							{options.statuses.map((st) => (
+								<option key={st} value={st}>{statusLabel(st)}</option>
+							))}
+						</select>
+						<input
+							value={keyword}
+							onChange={(e) => setKeyword(e.target.value)}
+							onKeyDown={(e) => { if (e.key === "Enter") load(); }}
+							placeholder="이름 또는 사번"
+							className="filter-input"
+						/>
+						<button type="button" className="btn-ghost" onClick={() => load()}>검색</button>
+						{(yearMonth || status || keyword) && (
+							<button
+								type="button"
+								className="filter-reset"
+								onClick={() => { setYearMonth(""); setStatus(""); setKeyword(""); }}
+							>
+								초기화
+							</button>
+						)}
 					</div>
 					<div className="flex-1 overflow-auto">
 						<table>

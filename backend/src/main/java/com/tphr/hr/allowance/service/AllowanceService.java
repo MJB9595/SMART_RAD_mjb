@@ -7,6 +7,7 @@ import com.tphr.hr.allowance.entity.EmployeeAllowance;
 import com.tphr.hr.allowance.repository.AllowanceRepository;
 import com.tphr.hr.allowance.repository.EmployeeAllowanceRepository;
 import com.tphr.hr.employee.Employee;
+import com.tphr.hr.common.exception.ApiException;
 import com.tphr.hr.employee.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -35,7 +36,36 @@ public class AllowanceService {
     }
 
     public List<AllowanceDto.Response> getAllAllowances() {
-        return allowanceRepository.findAll().stream().map(this::toDto).collect(Collectors.toList());
+        return allowanceRepository.findByDeletedFalseOrderByIdAsc().stream().map(this::toDto).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public AllowanceDto.Response updateAllowance(Long id, AllowanceDto.Request req) {
+        Allowance entity = findActive(id);
+        entity.update(req.getName(), req.isTaxable(), req.isFixed());
+        return toDto(entity);
+    }
+
+    /** 비활성 수당은 신규 지급 설정에서 제외된다. 이미 지급된 이력은 건드리지 않는다. */
+    @Transactional
+    public AllowanceDto.Response setAllowanceActive(Long id, boolean active) {
+        Allowance entity = findActive(id);
+        entity.changeActive(active);
+        return toDto(entity);
+    }
+
+    @Transactional
+    public void deleteAllowance(Long id) {
+        Allowance entity = findActive(id);
+        if (employeeAllowanceRepository.existsByAllowance_IdAndDeletedFalse(id)) {
+            throw ApiException.conflict("이 수당을 지급받는 교직원이 있어 삭제할 수 없습니다. 비활성 처리를 사용하세요.");
+        }
+        entity.delete();
+    }
+
+    private Allowance findActive(Long id) {
+        return allowanceRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> ApiException.notFound("수당을 찾을 수 없습니다. id=" + id));
     }
 
     @Transactional
