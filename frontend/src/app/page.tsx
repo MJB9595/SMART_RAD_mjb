@@ -6,12 +6,13 @@ import { FeatureDetailSection } from "@/components/landing/FeatureDetailSection"
 import { SecuritySection } from "@/components/landing/SecuritySection";
 import { ScrollToTopButton } from "@/components/landing/ScrollToTopButton";
 import { FadeInSection } from "@/components/landing/FadeInSection";
+import { UiScale } from "@/components/UiScale";
 import { Clock, Banknote } from "lucide-react";
 
 export default function LandingPage() {
 	return (
 		<div className="flex min-h-screen flex-col bg-white">
-			<style dangerouslySetInnerHTML={{ __html: `html { font-size: 21.5px !important; }` }} />
+			<UiScale />
 
 			<LandingHeader />
 			<main className="flex-1 overflow-hidden">
