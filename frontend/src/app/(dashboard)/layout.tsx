@@ -22,6 +22,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
 	return (
 		<div className="app">
+			<style dangerouslySetInnerHTML={{ __html: `html { font-size: 21.5px !important; }` }} />
 			<Sidebar />
 			<div className="main">
 				<TopNav

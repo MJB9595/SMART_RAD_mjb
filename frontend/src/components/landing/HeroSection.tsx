@@ -8,7 +8,7 @@ export function HeroSection() {
 			<div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
 			
 			<div className="relative mx-auto w-full px-8 md:px-16 lg:px-24">
-				<div className="grid grid-cols-1 gap-16 lg:grid-cols-2 lg:gap-32 xl:gap-48 items-center">
+				<div className="grid grid-cols-1 gap-16 lg:grid-cols-2 lg:gap-12 xl:gap-16 items-center">
 					{/* Left: Copy */}
 					<div className="max-w-3xl mx-auto text-center lg:text-left flex flex-col items-center lg:items-start">
 						<div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-1.5 text-sm font-semibold text-slate-700 mb-8 shadow-sm">
@@ -58,7 +58,7 @@ export function HeroSection() {
 
 					{/* Right: Realistic UI Mockup */}
 					<div className="relative mx-auto w-full max-w-xl lg:max-w-none hidden lg:block">
-						<div className="relative rounded-2xl bg-white shadow-[0_20px_40px_rgb(0,0,0,0.06)] ring-1 ring-slate-100 flex flex-col h-[720px] overflow-hidden">
+						<div className="relative rounded-2xl bg-white shadow-[0_20px_40px_rgb(0,0,0,0.06)] ring-1 ring-slate-100 flex flex-col h-[45rem] overflow-hidden">
 							{/* Browser Header */}
 							<div className="flex items-center gap-4 border-b border-slate-100 bg-white px-4 py-3">
 								<div className="flex gap-1.5">
