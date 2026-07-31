@@ -5,9 +5,8 @@
   --foreground: #171717;
 }
 
-html {
-  font-size: 21.5px;
-}
+/* 확대 배율(root font-size)은 화면 폭에 따라 UiScale 컴포넌트가 준다.
+   여기서 전역으로 걸면 로그인·회원가입 화면까지 확대돼 통계 숫자가 잘린다. */
 
 @theme inline {
   --color-background: var(--background);

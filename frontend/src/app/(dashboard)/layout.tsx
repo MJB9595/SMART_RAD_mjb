@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { TopNav } from "@/components/layout/TopNav";
 import { Sidebar } from "@/components/layout/Sidebar";
+import { UiScale } from "@/components/UiScale";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
 	const { user, loading, logout } = useAuth();
@@ -22,7 +23,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
 	return (
 		<div className="app">
-			<style dangerouslySetInnerHTML={{ __html: `html { font-size: 21.5px !important; }` }} />
+			<UiScale />
 			<Sidebar />
 			<div className="main">
 				<TopNav
