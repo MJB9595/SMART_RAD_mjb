@@ -53,11 +53,11 @@ export default function AppointmentHistoryPage() {
 				</div>
 			</div>
 
-			<div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
-				<div style={{ width: '260px' }}>
+			<div className="flex flex-col sm:flex-row gap-3 mb-6">
+				<div className="w-full sm:w-[260px]">
 					<Input placeholder="이름 또는 사번 검색" value={keyword} onChange={(e) => setKeyword(e.target.value)} />
 				</div>
-				<div style={{ width: '180px' }}>
+				<div className="w-full sm:w-[180px]">
 					<Select value={type} onChange={(e) => setType(e.target.value)}>
 						<option value="">발령구분 전체</option>
 						<option value="HIRE">임용</option>
@@ -82,50 +82,95 @@ export default function AppointmentHistoryPage() {
 					) : filtered.length === 0 ? (
 						<div className="p-8 text-center text-sm text-slate-400 font-bold">발령 이력이 없습니다.</div>
 					) : (
-						<table>
-							<thead>
-								<tr>
-									<th>발령번호</th>
-									<th>대상자</th>
-									<th>발령구분</th>
-									<th>이전 소속/직급</th>
-									<th>이후 소속/직급</th>
-									<th>발령일</th>
-									<th>상태</th>
-								</tr>
-							</thead>
-							<tbody>
+						<div className="overflow-x-auto">
+							<table className="w-full whitespace-nowrap min-w-[600px] hidden lg:table">
+								<thead>
+									<tr>
+										<th>발령번호</th>
+										<th>대상자</th>
+										<th>발령구분</th>
+										<th>이전 소속/직급</th>
+										<th>이후 소속/직급</th>
+										<th>발령일</th>
+										<th>상태</th>
+									</tr>
+								</thead>
+								<tbody>
+									{filtered.map((a) => (
+										<tr key={a.id} className="hover:bg-slate-50 transition-colors">
+											<td className="font-mono text-xs">{a.documentNumber}</td>
+											<td>
+												<div className="cell-person">
+													<div className="avatar-sm">{a.employeeName.slice(0, 1)}</div>
+													<div>
+														<div className="p-name">{a.employeeName}</div>
+														<div className="p-sub">{a.employeeNumber}</div>
+													</div>
+												</div>
+											</td>
+											<td>
+												<span className={`pill ${a.appointmentType === 'HIRE' ? 'amber' : a.appointmentType === 'TRANSFER' ? 'blue' : 'green'}`}>
+													{TYPE_LABELS[a.appointmentType]}
+												</span>
+											</td>
+											<td>
+												<div className="font-bold text-slate-700">{a.fromDepartmentName ?? "-"}</div>
+												<div className="text-xs text-slate-400">{a.fromPositionName ?? "-"}</div>
+											</td>
+											<td>
+												<div className="font-bold text-slate-700">{a.toDepartmentName ?? "-"}</div>
+												<div className="text-xs text-slate-400">{a.toPositionName ?? "-"}</div>
+											</td>
+											<td className="font-mono text-[13px]">{a.appointmentDate}</td>
+											<td><StatusBadge status={a.approvalStatus} /></td>
+										</tr>
+									))}
+								</tbody>
+							</table>
+
+							{/* Mobile Card View */}
+							<div className="lg:hidden flex flex-col gap-3 p-4 bg-slate-50/50">
 								{filtered.map((a) => (
-									<tr key={a.id} className="hover:bg-slate-50 transition-colors">
-										<td className="font-mono text-xs">{a.documentNumber}</td>
-										<td>
-											<div className="cell-person">
-												<div className="avatar-sm">{a.employeeName.slice(0, 1)}</div>
+									<div key={a.id} className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col gap-3">
+										<div className="flex justify-between items-start border-b border-slate-100 pb-3">
+											<div className="flex items-center gap-3">
+												<div className="avatar-sm flex-shrink-0">{a.employeeName.slice(0, 1)}</div>
 												<div>
-													<div className="p-name">{a.employeeName}</div>
-													<div className="p-sub">{a.employeeNumber}</div>
+													<div className="font-bold text-slate-900">{a.employeeName}</div>
+													<div className="text-xs text-slate-500 mt-0.5">{a.employeeNumber}</div>
 												</div>
 											</div>
-										</td>
-										<td>
-											<span className={`pill ${a.appointmentType === 'HIRE' ? 'amber' : a.appointmentType === 'TRANSFER' ? 'blue' : 'green'}`}>
-												{TYPE_LABELS[a.appointmentType]}
-											</span>
-										</td>
-										<td>
-											<div className="font-bold text-slate-700">{a.fromDepartmentName ?? "-"}</div>
-											<div className="text-xs text-slate-400">{a.fromPositionName ?? "-"}</div>
-										</td>
-										<td>
-											<div className="font-bold text-slate-700">{a.toDepartmentName ?? "-"}</div>
-											<div className="text-xs text-slate-400">{a.toPositionName ?? "-"}</div>
-										</td>
-										<td className="font-mono text-[13px]">{a.appointmentDate}</td>
-										<td><StatusBadge status={a.approvalStatus} /></td>
-									</tr>
+											<div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+												<div className="scale-90 origin-top-right"><StatusBadge status={a.approvalStatus} /></div>
+												<div className="scale-90 origin-top-right">
+													<span className={`pill ${a.appointmentType === 'HIRE' ? 'amber' : a.appointmentType === 'TRANSFER' ? 'blue' : 'green'}`}>
+														{TYPE_LABELS[a.appointmentType]}
+													</span>
+												</div>
+											</div>
+										</div>
+										<div className="flex flex-col gap-2 pt-1 pb-2 border-b border-slate-100">
+											<div className="flex items-center justify-between">
+												<span className="text-xs text-slate-400 font-medium w-16">발령 전</span>
+												<span className="text-sm text-slate-700 font-medium text-right">{a.fromDepartmentName || "-"} {a.fromPositionName || "-"}</span>
+											</div>
+											<div className="flex items-center justify-between">
+												<span className="text-xs text-slate-400 font-medium w-16">발령 후</span>
+												<span className="text-sm text-slate-700 font-medium text-right">{a.toDepartmentName || "-"} {a.toPositionName || "-"}</span>
+											</div>
+										</div>
+										<div className="flex justify-between items-center text-sm pt-1">
+											<span className="text-slate-500 font-medium">발령번호</span>
+											<span className="font-mono text-slate-700">{a.documentNumber}</span>
+										</div>
+										<div className="flex justify-between items-center text-sm pb-1">
+											<span className="text-slate-500 font-medium">발령일</span>
+											<span className="font-mono text-slate-700">{a.appointmentDate}</span>
+										</div>
+									</div>
 								))}
-							</tbody>
-						</table>
+							</div>
+						</div>
 					)}
 				</div>
 			</div>

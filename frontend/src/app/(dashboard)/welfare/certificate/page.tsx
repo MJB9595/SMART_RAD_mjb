@@ -115,22 +115,24 @@ export default function CertificatePage() {
 				<button onClick={() => setShowForm(true)} className="btn-primary">+ 신규 증명서 발급</button>
 			</div>
 
-			<div className="filter-bar" style={{background: "#fff", borderRadius: "14px", border: "1px solid #EEF0F3", marginBottom: "20px"}}>
-				<span style={{fontSize: "13px", fontWeight: 700, color: "#374151"}}>증명서 종류</span>
-				<select value={type} onChange={(e) => setType(e.target.value)} className="filter-select">
-					<option value="">모든 증명서 내역</option>
-					<option value="재직증명서">재직증명서</option>
-					<option value="경력증명서">경력증명서</option>
-					<option value="원천징수영수증">원천징수영수증</option>
-				</select>
-				<div style={{marginLeft: "auto", fontSize: "12.5px", color: "#8A94A6"}}>
-					조회된 내역 <span style={{fontWeight: 800, color: "#1F3A8F"}}>{filtered.length}</span>건
+			<div className="bg-white rounded-2xl border border-slate-100 mb-5 p-4 flex flex-col sm:flex-row sm:items-center gap-4">
+				<div className="flex items-center gap-3 w-full sm:w-auto">
+					<span className="text-[13px] font-bold text-slate-700 whitespace-nowrap">증명서 구분 검색</span>
+					<select value={type} onChange={(e) => setType(e.target.value)} className="filter-select flex-1 sm:flex-none">
+						<option value="">모든 증명서 내역</option>
+						<option value="재직증명서">재직증명서</option>
+						<option value="경력증명서">경력증명서</option>
+						<option value="원천징수영수증">원천징수영수증</option>
+					</select>
+				</div>
+				<div className="text-[12.5px] text-slate-400 sm:ml-auto text-right sm:text-left">
+					조회된 내역 <span className="font-extrabold text-indigo-700">{filtered.length}</span>건
 				</div>
 			</div>
 
 			<div className="card">
 				<div className="overflow-x-auto">
-					<table>
+					<table className="w-full whitespace-nowrap min-w-[600px] hidden lg:table">
 						<thead>
 							<tr>
 								<th>신청번호</th>
@@ -184,6 +186,61 @@ export default function CertificatePage() {
 							)}
 						</tbody>
 					</table>
+
+					{/* Mobile Card View */}
+					<div className="lg:hidden flex flex-col gap-4 p-4 bg-slate-50/50">
+						{loading ? (
+							<div className="text-center text-slate-400 py-8 text-sm">데이터를 불러오는 중입니다...</div>
+						) : filtered.length === 0 ? (
+							<div className="text-center text-slate-400 py-8 text-sm">증명서 발급 신청 내역이 없습니다.</div>
+						) : (
+							filtered.map(d => (
+								<div key={d.id} className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col gap-3">
+									<div className="flex justify-between items-start border-b border-slate-100 pb-3">
+										<div className="flex flex-col">
+											<span className="text-[11px] font-mono text-slate-400">{d.documentNumber}</span>
+											<span className="font-bold text-slate-900 mt-1 flex items-center gap-2">
+												{d.certificateType}
+												<span className="text-slate-400 font-normal text-sm">|</span>
+												<span className="text-slate-600 font-medium text-sm">{d.employeeName}</span>
+											</span>
+										</div>
+										<div className="scale-90 origin-top-right">
+											{d.issueStatus === "ISSUED" ? (
+												<span className="pill blue">발급완료</span>
+											) : d.issueStatus === "REJECTED" ? (
+												<span className="pill red">반려</span>
+											) : (
+												<span className="pill amber">발급대기</span>
+											)}
+										</div>
+									</div>
+									
+									<div className="flex justify-between items-center text-sm">
+										<span className="text-slate-500 font-medium">신청일자</span>
+										<span className="font-mono text-slate-700">{d.applicationDate}</span>
+									</div>
+									<div className="flex flex-col gap-1 text-sm bg-slate-50 rounded-lg p-2.5">
+										<span className="text-slate-500 font-medium text-xs">신청 사유(용도)</span>
+										<span className="text-slate-700">{d.purpose || "-"}</span>
+									</div>
+									
+									<div className="mt-2 pt-3 border-t border-slate-50 flex justify-end gap-2">
+										{d.issueStatus === "ISSUED" ? (
+											<button className="btn-ghost py-1.5 px-4 text-xs h-auto" onClick={() => setPrintTarget(d)}>증명서 보기 / 인쇄</button>
+										) : d.issueStatus === "REJECTED" ? (
+											<span className="text-[12.5px] font-bold text-slate-400">결재 반려됨</span>
+										) : canApproveTarget(user, d.employeeId, d.departmentId, d.positionLevel) ? (
+											<>
+												<button className="btn-primary py-1.5 px-4 text-xs h-auto" onClick={() => handleIssue(d)}>발급 처리</button>
+												<button className="btn-ghost py-1.5 px-4 text-xs h-auto text-red-600 border-red-200" onClick={() => handleReject(d)}>반려</button>
+											</>
+										) : null}
+									</div>
+								</div>
+							))
+						)}
+					</div>
 				</div>
 			</div>
 

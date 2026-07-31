@@ -156,13 +156,13 @@ export default function AppointmentsPage() {
 
 	return (
 		<>
-			<div className="title-row">
+			<div className="title-row flex-col sm:flex-row gap-4 sm:gap-0">
 				<div>
 					<div className="page-title">발령 등록·승인</div>
 					<div className="page-sub">전보·승진·겸임 등 인사발령 건을 등록하고 승인합니다</div>
 				</div>
 				{isAdmin && (
-					<button className="btn-primary" onClick={() => setIsModalOpen(true)}>+ 발령 등록</button>
+					<button className="btn-primary w-full sm:w-auto" onClick={() => setIsModalOpen(true)}>+ 발령 등록</button>
 				)}
 			</div>
 
@@ -190,36 +190,79 @@ export default function AppointmentsPage() {
 					<div className="card-head">
 						<div className="card-title">발령 목록</div>
 					</div>
-					<table>
-						<thead>
-							<tr>
-								<th>발령번호</th>
-								<th>대상자 / 발령내용</th>
-								<th>구분</th>
-								<th>발령일</th>
-								<th>상태</th>
-							</tr>
-						</thead>
-						<tbody>
-							{appointments.map((appt) => (
-								<tr key={appt.id} onClick={() => setSelectedAppt(appt)} style={{cursor: 'pointer'}}>
-									<td className="mono">{appt.documentNumber}</td>
-									<td>
-										<div className="cell-person">
-											<div className="avatar-sm">{appt.employeeName.slice(0, 1)}</div>
-											<div>
-												<div className="p-name">{appt.employeeName}</div>
-												<div className="p-sub">{formatChanges(appt)}</div>
+					<div className="overflow-x-auto">
+						<table className="w-full whitespace-nowrap min-w-[600px] hidden lg:table">
+							<thead>
+								<tr>
+									<th>발령번호</th>
+									<th>대상자 / 발령내용</th>
+									<th>구분</th>
+									<th>발령일</th>
+									<th>상태</th>
+								</tr>
+							</thead>
+							<tbody>
+								{appointments.map((appt) => {
+									const isSelected = selectedAppt?.id === appt.id;
+									return (
+									<tr key={appt.id} onClick={() => setSelectedAppt(appt)}
+										className={`cursor-pointer transition-colors hover:bg-slate-50 ${isSelected ? "bg-indigo-50/70" : ""}`}
+										style={isSelected ? { boxShadow: "inset 4px 0 0 0 #1F3A8F" } : undefined}>
+										<td className="mono">{appt.documentNumber}</td>
+										<td>
+											<div className="cell-person">
+												<div className="avatar-sm">{appt.employeeName.slice(0, 1)}</div>
+												<div>
+													<div className="p-name">{appt.employeeName}</div>
+													<div className="p-sub">{formatChanges(appt)}</div>
+												</div>
+											</div>
+										</td>
+										<td>{getTypePill(appt.appointmentType)}</td>
+										<td className="mono">{appt.appointmentDate}</td>
+										<td>{getStatusPill(appt.approvalStatus)}</td>
+									</tr>
+									);
+								})}
+							</tbody>
+						</table>
+						
+						{/* Mobile Card View */}
+						<div className="lg:hidden flex flex-col gap-3 p-4 bg-slate-50/50">
+							{appointments.length === 0 ? (
+								<div className="text-center text-slate-400 py-8 text-sm">발령 목록이 없습니다.</div>
+							) : (
+								appointments.map((appt) => {
+									const isSelected = selectedAppt?.id === appt.id;
+									return (
+										<div key={appt.id} onClick={() => setSelectedAppt(appt)} className={`bg-white border rounded-xl p-4 shadow-sm flex flex-col gap-3 cursor-pointer transition-all ${isSelected ? "border-indigo-500 ring-1 ring-indigo-500 bg-indigo-50/30" : "border-slate-200"}`} style={{ borderLeft: isSelected ? "4px solid #1F3A8F" : "4px solid #E2E8F0" }}>
+											<div className="flex justify-between items-start border-b border-slate-100 pb-3">
+												<div className="flex items-center gap-3">
+													<div className="avatar-sm flex-shrink-0">{appt.employeeName.slice(0, 1)}</div>
+													<div>
+														<div className="font-bold text-slate-900">{appt.employeeName}</div>
+														<div className="text-xs text-slate-500 mt-0.5">{formatChanges(appt)}</div>
+													</div>
+												</div>
+												<div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+													<div className="scale-90 origin-top-right">{getStatusPill(appt.approvalStatus)}</div>
+													<div className="scale-90 origin-top-right">{getTypePill(appt.appointmentType)}</div>
+												</div>
+											</div>
+											<div className="flex justify-between items-center text-sm pt-1">
+												<span className="text-slate-500 font-medium">발령번호</span>
+												<span className="font-mono text-slate-700">{appt.documentNumber}</span>
+											</div>
+											<div className="flex justify-between items-center text-sm pb-1">
+												<span className="text-slate-500 font-medium">발령일</span>
+												<span className="font-mono text-slate-700">{appt.appointmentDate}</span>
 											</div>
 										</div>
-									</td>
-									<td>{getTypePill(appt.appointmentType)}</td>
-									<td className="mono">{appt.appointmentDate}</td>
-									<td>{getStatusPill(appt.approvalStatus)}</td>
-								</tr>
-							))}
-						</tbody>
-					</table>
+									);
+								})
+							)}
+						</div>
+					</div>
 					<div className="table-foot">
 						<span className="foot-info">전체 {totalElements}건 중 1–{appointments.length}건 표시</span>
 						<div className="pager">

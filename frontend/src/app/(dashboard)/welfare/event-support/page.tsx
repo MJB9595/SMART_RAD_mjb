@@ -133,23 +133,25 @@ export default function EventSupportPage() {
 				<button onClick={() => setShowForm(true)} className="btn-primary">+ 경조비 신규 신청</button>
 			</div>
 
-			<div className="filter-bar" style={{background: "#fff", borderRadius: "14px", border: "1px solid #EEF0F3", marginBottom: "20px"}}>
-				<span style={{fontSize: "13px", fontWeight: 700, color: "#374151"}}>경조 구분 검색</span>
-				<select value={type} onChange={(e) => setType(e.target.value)} className="filter-select">
-					<option value="">전체 내역</option>
-					<option value="결혼">결혼</option>
-					<option value="출산">출산</option>
-					<option value="사망">사망</option>
-					<option value="기타">기타</option>
-				</select>
-				<div style={{marginLeft: "auto", fontSize: "12.5px", color: "#8A94A6"}}>
-					총 <span style={{fontWeight: 800, color: "#1F3A8F"}}>{filtered.length}</span>건의 신청 내역
+			<div className="bg-white rounded-2xl border border-slate-100 mb-5 p-4 flex flex-col sm:flex-row sm:items-center gap-4">
+				<div className="flex items-center gap-3 w-full sm:w-auto">
+					<span className="text-[13px] font-bold text-slate-700 whitespace-nowrap">경조 구분 검색</span>
+					<select value={type} onChange={(e) => setType(e.target.value)} className="filter-select flex-1 sm:flex-none">
+						<option value="">전체 내역</option>
+						<option value="결혼">결혼</option>
+						<option value="출산">출산</option>
+						<option value="사망">사망</option>
+						<option value="기타">기타</option>
+					</select>
+				</div>
+				<div className="text-[12.5px] text-slate-400 sm:ml-auto text-right sm:text-left">
+					총 <span className="font-extrabold text-indigo-700">{filtered.length}</span>건의 신청 내역
 				</div>
 			</div>
 
 			<div className="card">
 				<div className="overflow-x-auto">
-					<table>
+					<table className="w-full whitespace-nowrap min-w-[600px] hidden lg:table">
 						<thead>
 							<tr>
 								<th>신청번호</th>
@@ -194,6 +196,53 @@ export default function EventSupportPage() {
 							)}
 						</tbody>
 					</table>
+
+					{/* Mobile Card View */}
+					<div className="lg:hidden flex flex-col gap-4 p-4 bg-slate-50/50">
+						{loading ? (
+							<div className="text-center text-slate-400 py-8 text-sm">데이터를 불러오는 중입니다...</div>
+						) : filtered.length === 0 ? (
+							<div className="text-center text-slate-400 py-8 text-sm">조회된 내역이 없습니다.</div>
+						) : (
+							filtered.map(d => (
+								<div key={d.id} className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col gap-3">
+									<div className="flex justify-between items-start border-b border-slate-100 pb-3">
+										<div className="flex flex-col">
+											<span className="text-[11px] font-mono text-slate-400">{d.documentNumber}</span>
+											<span className="font-bold text-slate-900 mt-1 flex items-center gap-2">
+												{d.eventType} 
+												<span className="text-slate-400 font-normal text-sm">|</span>
+												<span className="text-slate-600 font-medium text-sm">{d.targetName}</span>
+											</span>
+										</div>
+										<div className="scale-90 origin-top-right">{getStatusPill(d.approvalStatus)}</div>
+									</div>
+									
+									<div className="flex justify-between items-center text-sm">
+										<span className="text-slate-500 font-medium">경조일자</span>
+										<span className="font-mono text-slate-700">{d.eventDate}</span>
+									</div>
+									<div className="flex justify-between items-center text-sm">
+										<span className="text-slate-500 font-medium">신청금액</span>
+										<span className="font-bold text-indigo-700">{d.requestedAmount?.toLocaleString()}원</span>
+									</div>
+									
+									<div className="mt-2 pt-3 border-t border-slate-50 flex justify-end gap-2">
+										{d.approvalStatus === "PENDING" && canApproveTarget(user, d.employeeId, d.departmentId, d.positionLevel) ? (
+											<>
+												<button className="btn-primary py-1.5 px-4 text-xs h-auto" onClick={() => handleApprove(d)}>승인</button>
+												<button className="btn-ghost py-1.5 px-4 text-xs h-auto text-red-600 border-red-200" onClick={() => handleReject(d)}>반려</button>
+											</>
+										) : d.approvalStatus === "APPROVED" ? (
+											<span className="text-[12.5px] font-bold text-emerald-500">결재 승인됨</span>
+										) : d.approvalStatus === "REJECTED" ? (
+											<span className="text-[12.5px] font-bold text-slate-400">결재 반려됨</span>
+										) : null}
+									</div>
+								</div>
+							))
+						)}
+					</div>
 				</div>
 			</div>
 

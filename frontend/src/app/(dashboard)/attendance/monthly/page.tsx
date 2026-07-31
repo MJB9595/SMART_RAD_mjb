@@ -152,7 +152,7 @@ export default function MonthlyAttendancePage() {
 	};
 
 	return (
-		<div className="flex flex-1 w-full gap-6 pb-4 min-h-0">
+		<div className="flex flex-col lg:flex-row flex-1 w-full gap-6 pb-4 min-h-0">
 			{/* Main Grid View */}
 			<div className="flex-1 flex flex-col bg-white overflow-hidden rounded-xl border border-slate-200 shadow-sm">
 				{/* Header */}
@@ -160,14 +160,14 @@ export default function MonthlyAttendancePage() {
 					<div className="flex items-center gap-4 sm:gap-8 flex-wrap">
 						<h1 className="text-[22px] font-bold text-slate-900 tracking-tight">출퇴근기록 관리</h1>
 					</div>
-					<Button variant="outline" className="text-indigo-600 border-indigo-200 hover:bg-indigo-50 hover:border-indigo-300 font-medium h-9 px-5" onClick={handleExport} disabled={downloading}>
+					<Button variant="outline" className="text-indigo-600 border-indigo-200 hover:bg-indigo-50 hover:border-indigo-300 font-medium h-9 px-5 w-full sm:w-auto" onClick={handleExport} disabled={downloading}>
 						{downloading ? "다운로드 중" : "다운로드"}
 					</Button>
 				</div>
 
 				{/* Filters */}
 				<div className="flex flex-wrap items-center gap-3 px-5 py-4 bg-white border-b border-slate-200">
-					<div className="flex items-center border border-slate-300 rounded overflow-hidden h-[34px]">
+					<div className="flex items-center border border-slate-300 rounded overflow-hidden h-[34px] w-full sm:w-auto">
 						<input 
 							type="month" 
 							value={`${year}-${month}`} 
@@ -175,22 +175,22 @@ export default function MonthlyAttendancePage() {
 								const [y, m] = e.target.value.split('-');
 								if(y && m) { setYear(y); setMonth(m); }
 							}}
-							className="px-3 outline-none text-sm font-medium text-slate-700 bg-white w-[130px]"
+							className="px-3 outline-none text-sm font-medium text-slate-700 bg-white w-full sm:w-[130px]"
 						/>
 					</div>
 					
-					<div className="flex flex-wrap items-center gap-2 sm:ml-auto">
+					<div className="flex flex-wrap items-center gap-2 sm:ml-auto w-full sm:w-auto">
 						<select
 							value={deptFilter}
 							onChange={(e) => setDeptFilter(e.target.value)}
-							className="h-[34px] min-w-[100px] text-sm font-medium bg-slate-50 border border-slate-300 rounded px-2 outline-none text-slate-700"
+							className="h-[34px] flex-1 sm:flex-none min-w-[100px] text-sm font-medium bg-slate-50 border border-slate-300 rounded px-2 outline-none text-slate-700"
 						>
 							<option value="">전체 부서</option>
 							{departmentOptions.map((d) => (
 								<option key={d} value={d}>{d}</option>
 							))}
 						</select>
-						<label className="flex items-center gap-2 bg-slate-50 border border-slate-300 rounded h-[34px] px-3 text-sm text-slate-700 cursor-pointer">
+						<label className="flex flex-1 sm:flex-none items-center justify-center gap-2 bg-slate-50 border border-slate-300 rounded h-[34px] px-3 text-sm text-slate-700 cursor-pointer">
 							<input type="checkbox" checked={showLateOnly} onChange={(e) => setShowLateOnly(e.target.checked)} />
 							<span className="font-medium">지각자만</span>
 						</label>
@@ -198,7 +198,7 @@ export default function MonthlyAttendancePage() {
 				</div>
 
 				{/* Table Grid */}
-				<div className="flex-1 overflow-x-auto overflow-y-auto bg-white [&::-webkit-scrollbar]:h-[10px] [&::-webkit-scrollbar]:w-[10px] [&::-webkit-scrollbar-track]:bg-slate-100 [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full">
+				<div className="flex-1 overflow-x-auto overflow-y-auto bg-white [&::-webkit-scrollbar]:h-[10px] [&::-webkit-scrollbar]:w-[10px] [&::-webkit-scrollbar-track]:bg-slate-100 [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full lg:min-h-0 min-h-[400px]">
 					<table className="w-full border-collapse text-xs whitespace-nowrap min-w-max bg-white">
 						<thead className="sticky top-0 z-30">
 							<tr className="border-b border-slate-200 bg-white">

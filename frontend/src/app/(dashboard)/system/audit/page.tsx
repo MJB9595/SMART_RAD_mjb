@@ -63,22 +63,24 @@ export default function AuditPage() {
 				</div>
 			</div>
 
-			<div className="filter-bar" style={{ background: "#fff", borderRadius: "14px", border: "1px solid #EEF0F3", marginBottom: "20px" }}>
-				<span style={{ fontSize: "13px", fontWeight: 700, color: "#374151" }}>대상</span>
-				<select value={entity} onChange={(e) => setEntity(e.target.value)} className="filter-select">
-					<option value="">전체 대상</option>
-					{entities.map((e) => (
-						<option key={e} value={e}>{ENTITY_LABEL[e] ?? e}</option>
-					))}
-				</select>
-				<div style={{ marginLeft: "auto", fontSize: "12.5px", color: "#8A94A6" }}>
-					조회된 이력 <span style={{ fontWeight: 800, color: "#1F3A8F" }}>{filtered.length}</span>건
+			<div className="bg-white rounded-2xl border border-slate-100 mb-5 p-4 flex flex-col sm:flex-row sm:items-center gap-4">
+				<div className="flex items-center gap-3 w-full sm:w-auto">
+					<span className="text-[13px] font-bold text-slate-700 whitespace-nowrap">대상</span>
+					<select value={entity} onChange={(e) => setEntity(e.target.value)} className="filter-select flex-1 sm:flex-none">
+						<option value="">전체 대상</option>
+						{entities.map((e) => (
+							<option key={e} value={e}>{ENTITY_LABEL[e] ?? e}</option>
+						))}
+					</select>
+				</div>
+				<div className="text-[12.5px] text-slate-400 sm:ml-auto text-right sm:text-left">
+					조회된 이력 <span className="font-extrabold text-indigo-700">{filtered.length}</span>건
 				</div>
 			</div>
 
 			<div className="card">
 				<div className="overflow-x-auto">
-					<table>
+					<table className="w-full whitespace-nowrap min-w-[600px] hidden lg:table">
 						<thead>
 							<tr>
 								<th style={{ width: "180px" }}>일시</th>
@@ -119,6 +121,48 @@ export default function AuditPage() {
 							)}
 						</tbody>
 					</table>
+
+					{/* Mobile Card View */}
+					<div className="lg:hidden flex flex-col gap-4 p-4 bg-slate-50/50">
+						{loading ? (
+							<div className="text-center text-slate-400 py-8 text-sm">데이터를 불러오는 중입니다...</div>
+						) : error ? (
+							<div className="text-center text-red-400 py-8 text-sm">{error}</div>
+						) : filtered.length === 0 ? (
+							<div className="text-center text-slate-400 py-8 text-sm">기록된 감사로그가 없습니다.</div>
+						) : (
+							filtered.map((a) => (
+								<div key={a.id} className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col gap-3">
+									<div className="flex justify-between items-start border-b border-slate-100 pb-3">
+										<div className="flex flex-col gap-1">
+											<span className="text-[11px] font-mono text-slate-400">{a.createdAt.replace("T", " ").slice(0, 19)}</span>
+											<div className="font-bold text-slate-900 flex items-center gap-2">
+												{a.actorName ? (
+													<>
+														<span>{a.actorName}</span>
+														<span className="text-slate-400 font-normal text-[12px]">#{a.actorId}</span>
+													</>
+												) : (
+													<span className="text-slate-400">시스템</span>
+												)}
+											</div>
+										</div>
+										<div className="scale-90 origin-top-right">
+											<span className={`pill ${ACTION_PILL[a.action] ?? "gray"}`}>{ACTION_LABEL[a.action] ?? a.action}</span>
+										</div>
+									</div>
+									<div className="flex justify-between items-center text-sm pt-1">
+										<span className="text-slate-500 font-medium">대상</span>
+										<span className="text-slate-700 font-bold">{a.entityType ? ENTITY_LABEL[a.entityType] ?? a.entityType : "-"}</span>
+									</div>
+									<div className="flex justify-between items-center text-sm pb-1">
+										<span className="text-slate-500 font-medium">대상 ID</span>
+										<span className="font-mono text-slate-600">{a.entityId ?? "-"}</span>
+									</div>
+								</div>
+							))
+						)}
+					</div>
 				</div>
 			</div>
 		</>

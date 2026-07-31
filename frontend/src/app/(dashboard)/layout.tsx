@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { TopNav } from "@/components/layout/TopNav";
@@ -10,6 +10,7 @@ import { UiScale } from "@/components/UiScale";
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
 	const { user, loading, logout } = useAuth();
 	const router = useRouter();
+	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
 	useEffect(() => {
 		if (!loading && !user) {
@@ -24,7 +25,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 	return (
 		<div className="app">
 			<UiScale />
-			<Sidebar />
+			<div className={`sidebar-overlay ${isSidebarOpen ? 'block' : 'hidden'} lg:hidden`} onClick={() => setIsSidebarOpen(false)}></div>
+			<Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 			<div className="main">
 				<TopNav
 					user={user}
@@ -32,6 +34,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 						logout();
 						router.replace("/login");
 					}}
+					onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
 				/>
 				<div className="content">
 					{children}

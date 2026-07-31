@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import type { AuthUser } from "@/lib/types/auth";
 import { ChangePasswordModal } from "@/components/ChangePasswordModal";
 
-export function TopNav({ user, onLogout }: { user: AuthUser; onLogout: () => void }) {
+export function TopNav({ user, onLogout, onToggleSidebar }: { user: AuthUser; onLogout: () => void; onToggleSidebar?: () => void }) {
 	const [showPasswordModal, setShowPasswordModal] = useState(false);
 	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 	const dropdownRef = useRef<HTMLDivElement>(null);
@@ -24,9 +24,20 @@ export function TopNav({ user, onLogout }: { user: AuthUser; onLogout: () => voi
 
 	return (
 		<header className="topbar">
-			<div className="flex items-center text-lg font-bold text-[#E6007E]">
-				<img src="/kbu_logo.png" alt="경복대학교 로고" className="h-8 w-8 object-cover object-left mr-2" />
-				경복대학교
+			<div className="flex items-center text-lg font-bold text-[#E6007E] whitespace-nowrap">
+				<button 
+					onClick={onToggleSidebar}
+					className="lg:hidden mr-3 p-1 text-slate-500 hover:text-slate-800 transition-colors flex-shrink-0"
+					title="메뉴 열기"
+				>
+					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+						<line x1="3" y1="12" x2="21" y2="12"></line>
+						<line x1="3" y1="6" x2="21" y2="6"></line>
+						<line x1="3" y1="18" x2="21" y2="18"></line>
+					</svg>
+				</button>
+				<img src="/kbu_logo.png" alt="경복대학교 로고" className="h-8 w-8 object-cover object-left mr-2 flex-shrink-0" />
+				<span className="hidden sm:inline">경복대학교</span>
 			</div>
 			<div className="user-box relative" ref={dropdownRef}>
 				<span className="notif-dot"></span>
@@ -34,8 +45,8 @@ export function TopNav({ user, onLogout }: { user: AuthUser; onLogout: () => voi
 					onClick={() => setIsDropdownOpen(!isDropdownOpen)}
 					className="flex items-center gap-2 hover:bg-slate-50 p-1.5 pr-3 rounded-lg transition-colors cursor-pointer text-left border-none bg-transparent"
 				>
-					<div className="user-avatar">{user?.name ? user.name.slice(0, 1) : "U"}</div>
-					<div>
+					<div className="user-avatar flex-shrink-0">{user?.name ? user.name.slice(0, 1) : "U"}</div>
+					<div className="whitespace-nowrap">
 						<div className="user-name">{user?.name ?? "사용자"}</div>
 						<div className="user-role">{user?.role ?? "권한 없음"}</div>
 					</div>

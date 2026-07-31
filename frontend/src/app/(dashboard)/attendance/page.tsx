@@ -108,13 +108,13 @@ export default function AttendancePage() {
 
 	return (
 		<>
-			<div className="title-row">
+			<div className="title-row flex-col sm:flex-row gap-4 sm:gap-0">
 				<div>
 					<div className="page-title">일일 근태 관리</div>
 					<div className="page-sub">일자별 출퇴근 현황을 등록·조회합니다</div>
 				</div>
 				<button
-					className="btn-primary"
+					className="btn-primary w-full sm:w-auto"
 					onClick={() => setShowForm(true)}
 					disabled={isPastDate}
 					style={isPastDate ? { opacity: 0.45, cursor: "not-allowed" } : undefined}
@@ -145,13 +145,14 @@ export default function AttendancePage() {
 
 			<div className="split">
 				<div className="card">
-					<div className="card-head">
-						<div className="card-title">출퇴근 현황 ({workDate})</div>
-						<div className="head-actions">
-							<input type="date" value={workDate} onChange={(e) => setWorkDate(e.target.value)} className="border border-slate-200 rounded-lg px-3 py-1 text-sm outline-none text-slate-700 font-mono" />
+					<div className="card-head flex-col items-start sm:flex-row sm:items-center gap-3">
+						<div className="card-title w-full sm:w-auto">출퇴근 현황 ({workDate})</div>
+						<div className="head-actions w-full sm:w-auto">
+							<input type="date" value={workDate} onChange={(e) => setWorkDate(e.target.value)} className="w-full sm:w-auto border border-slate-200 rounded-lg px-3 py-1.5 text-sm outline-none text-slate-700 font-mono" />
 						</div>
 					</div>
-					<table>
+					<div className="overflow-x-auto">
+						<table className="w-full whitespace-nowrap min-w-[500px] hidden lg:table">
 						<thead>
 							<tr>
 								<th>대상자</th>
@@ -169,9 +170,11 @@ export default function AttendancePage() {
 								attendances.map((a) => {
 									// 전체를 보는 인사팀·관리자 화면에서 본인 행을 찾기 쉽도록 강조한다
 									const isMine = a.employeeId === user?.employeeId;
+									const isSelected = selectedRecord?.id === a.id;
 									return (
 									<tr key={a.id} onClick={() => setSelectedRecord(a)}
-										style={{ cursor: "pointer", background: isMine ? "#EEF2FF" : undefined }}>
+										className={`cursor-pointer transition-colors hover:bg-slate-50 ${isSelected ? "bg-indigo-50/70" : isMine ? "bg-slate-50" : ""}`}
+										style={isSelected ? { boxShadow: "inset 4px 0 0 0 #1F3A8F" } : undefined}>
 										<td>
 											<div className="cell-person">
 												<div className="avatar-sm">{a.employeeName.slice(0, 1)}</div>
@@ -192,7 +195,49 @@ export default function AttendancePage() {
 								})
 							)}
 						</tbody>
-					</table>
+						</table>
+						
+						{/* Mobile Card View */}
+						<div className="lg:hidden flex flex-col gap-3 p-4 bg-slate-50/50">
+							{loading ? (
+								<div className="text-center text-slate-400 py-8 text-sm">불러오는 중...</div>
+							) : attendances.length === 0 ? (
+								<div className="text-center text-slate-400 py-8 text-sm">{workDate} 근태 기록이 없습니다.</div>
+							) : (
+								attendances.map((a) => {
+									const isMine = a.employeeId === user?.employeeId;
+									const isSelected = selectedRecord?.id === a.id;
+									return (
+										<div key={a.id} onClick={() => setSelectedRecord(a)} className={`bg-white border rounded-xl p-4 shadow-sm flex flex-col gap-3 cursor-pointer transition-all ${isSelected ? "border-indigo-500 ring-1 ring-indigo-500 bg-indigo-50/30" : "border-slate-200"}`} style={{ borderLeft: isSelected ? "4px solid #1F3A8F" : (isMine ? "4px solid #94A3B8" : undefined) }}>
+											<div className="flex justify-between items-start border-b border-slate-100 pb-3">
+												<div className="flex items-center gap-3">
+													<div className="avatar-sm flex-shrink-0">{a.employeeName.slice(0, 1)}</div>
+													<div>
+														<div className="font-bold text-slate-900 flex items-center gap-2">
+															{a.employeeName}
+															{isMine && <span className="pill blue text-[10px] px-1.5 py-0.5">본인</span>}
+														</div>
+														<div className="text-xs text-slate-400 font-mono mt-0.5">{a.employeeNumber}</div>
+													</div>
+												</div>
+												<div className="scale-90 origin-top-right flex-shrink-0">
+													{getStatusPill(a.status)}
+												</div>
+											</div>
+											<div className="flex justify-between items-center text-sm pt-1">
+												<span className="text-slate-500 font-medium">출근시간</span>
+												<span className="font-mono text-slate-700">{a.checkInTime ?? "-"}</span>
+											</div>
+											<div className="flex justify-between items-center text-sm pb-1">
+												<span className="text-slate-500 font-medium">퇴근시간</span>
+												<span className="font-mono text-slate-700">{a.checkOutTime ?? "-"}</span>
+											</div>
+										</div>
+									);
+								})
+							)}
+						</div>
+					</div>
 					<div className="table-foot">
 						<span className="foot-info">전체 {attendances.length}건</span>
 					</div>

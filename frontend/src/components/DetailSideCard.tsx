@@ -17,6 +17,7 @@ export function DetailSideCard({
 	stats,
 	children,
 	footer,
+	className,
 }: {
 	/** 카드 최상단 라벨 (예: "근태 상세", "휴가 관리 내역") */
 	eyebrow: string;
@@ -28,12 +29,13 @@ export function DetailSideCard({
 	stats?: { label: string; value: ReactNode; tone?: "default" | "warn" | "primary" }[];
 	children?: ReactNode;
 	footer?: ReactNode;
+	className?: string;
 }) {
 	const toneClass = (tone?: string) =>
 		tone === "warn" ? "text-amber-600" : tone === "primary" ? "text-indigo-700" : "text-slate-900";
 
 	return (
-		<div className="w-[380px] shrink-0 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-200 p-8 flex flex-col relative overflow-hidden animate-in slide-in-from-right-4 duration-300 h-full">
+		<div className={`w-full lg:w-[380px] shrink-0 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-200 p-8 flex flex-col relative overflow-hidden animate-in slide-in-from-right-4 duration-300 h-full ${className ?? ""}`}>
 			<div className="text-sm font-bold text-indigo-900 mb-6 tracking-tight">{eyebrow}</div>
 
 			<div className="flex items-center gap-4 mb-6 pb-6 border-b border-slate-100 shrink-0">

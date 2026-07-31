@@ -95,12 +95,12 @@ export default function AllowancePage() {
 
 	return (
 		<>
-			<div className="title-row">
+			<div className="title-row flex-col sm:flex-row gap-4 sm:gap-0">
 				<div>
 					<div className="page-title">수당 관리</div>
 					<div className="page-sub">급여에 적용되는 고정 및 변동 수당 항목을 손쉽게 설정하세요</div>
 				</div>
-				<button onClick={openCreate} className="btn-primary">+ 신규 수당 등록</button>
+				<button onClick={openCreate} className="btn-primary w-full sm:w-auto">+ 신규 수당 등록</button>
 			</div>
 
 			<div className="card">
@@ -108,7 +108,7 @@ export default function AllowancePage() {
 					<div className="card-title">등록된 수당 목록</div>
 				</div>
 				<div className="overflow-x-auto">
-					<table>
+					<table className="w-full whitespace-nowrap min-w-[600px] hidden lg:table">
 						<thead>
 							<tr>
 								<th>수당 ID</th>
@@ -162,6 +162,48 @@ export default function AllowancePage() {
 							)}
 						</tbody>
 					</table>
+
+					{/* Mobile Card View */}
+					<div className="lg:hidden flex flex-col gap-4 p-4 bg-slate-50/50">
+						{loading ? (
+							<div className="text-center text-slate-400 py-8 text-sm">데이터를 불러오는 중입니다...</div>
+						) : allowances.length === 0 ? (
+							<div className="text-center text-slate-400 py-8 text-sm">등록된 수당 내역이 없습니다.</div>
+						) : (
+							allowances.map((a) => (
+								<div key={a.id} className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col gap-3">
+									<div className="flex justify-between items-start border-b border-slate-100 pb-3">
+										<div className="flex flex-col gap-1">
+											<span className="text-[11px] font-mono text-slate-400">A{String(a.id).padStart(3, "0")}</span>
+											<div className="font-bold text-slate-900 flex items-center gap-2">
+												{a.name}
+											</div>
+										</div>
+										<div className="scale-90 origin-top-right">
+											<span className={`pill ${a.active ? "blue" : "gray"}`}>{a.active ? "사용" : "미사용"}</span>
+										</div>
+									</div>
+									<div className="flex justify-between items-center text-sm pt-1">
+										<span className="text-slate-500 font-medium">과세 여부</span>
+										{a.taxable ? <span className="pill red">과세</span> : <span className="pill blue">비과세</span>}
+									</div>
+									<div className="flex justify-between items-center text-sm pb-1">
+										<span className="text-slate-500 font-medium">지급 형태</span>
+										{a.fixed ? <span className="pill gray">매월 고정액</span> : <span className="pill green">변동 지급</span>}
+									</div>
+									<div className="pt-3 border-t border-slate-50 flex flex-wrap gap-2 justify-end">
+										<button className="btn-ghost py-1.5 px-4 text-xs h-auto" onClick={() => openEdit(a)}>수정</button>
+										<button className="btn-ghost py-1.5 px-4 text-xs h-auto" onClick={() => toggleActive(a)}>
+											{a.active ? "미사용" : "사용"}
+										</button>
+										<button className="btn-ghost py-1.5 px-4 text-xs h-auto text-red-600 border-red-200" onClick={() => remove(a)}>
+											삭제
+										</button>
+									</div>
+								</div>
+							))
+						)}
+					</div>
 				</div>
 			</div>
 

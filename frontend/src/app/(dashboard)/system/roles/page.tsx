@@ -194,12 +194,12 @@ export default function RolesPage() {
 
 	return (
 		<>
-			<div className="title-row">
+			<div className="title-row flex-col sm:flex-row gap-4 sm:gap-0">
 				<div>
 					<div className="page-title">권한 관리 (RBAC)</div>
 					<div className="page-sub">역할을 만들고 권한을 부여합니다. 좌측에서 역할을 선택하면 상세 권한이 표시됩니다.</div>
 				</div>
-				<button className="btn-primary" onClick={openCreate}>
+				<button className="btn-primary w-full sm:w-auto" onClick={openCreate}>
 					<Plus className="w-4 h-4" /> 새 역할 추가
 				</button>
 			</div>
@@ -225,11 +225,7 @@ export default function RolesPage() {
 			)}
 
 			{!loading && !error && (
-				<div
-					className="split"
-					/* .split 기본값은 본문(1fr)+사이드(320px) 이므로, 목록-좌/상세-우 화면에 맞게 열 비율을 뒤집는다 */
-					style={{ gridTemplateColumns: "340px minmax(0, 1fr)" }}
-				>
+				<div className="split-reverse">
 					{/* 좌측: 역할 목록 */}
 					<div className="card" style={{ minWidth: 0 }}>
 						<div className="card-head">
@@ -277,13 +273,13 @@ export default function RolesPage() {
 					<div className="card" style={{ minWidth: 0 }}>
 						{selectedRole ? (
 							<>
-								<div className="card-head">
-									<div className="flex items-center gap-2 min-w-0">
+								<div className="card-head flex-col items-start sm:flex-row sm:items-center gap-3">
+									<div className="flex items-center gap-2 min-w-0 w-full">
 										<div className="card-title truncate">{selectedRole.name}</div>
-										<span className="pill gray font-mono">{selectedRole.code}</span>
-										{isProtected(selectedRole.code) && <span className="pill amber">보호됨</span>}
+										<span className="pill gray font-mono shrink-0">{selectedRole.code}</span>
+										{isProtected(selectedRole.code) && <span className="pill amber shrink-0">보호됨</span>}
 									</div>
-									<div className="head-actions" style={{ flexShrink: 0, whiteSpace: "nowrap" }}>
+									<div className="head-actions flex-wrap sm:flex-nowrap" style={{ flexShrink: 0 }}>
 										<button className="btn-ghost" onClick={() => openEdit(selectedRole)} disabled={isProtected(selectedRole.code)}
 											style={isProtected(selectedRole.code) ? { opacity: 0.4, cursor: "not-allowed" } : undefined}>
 											<Pencil className="w-3.5 h-3.5" /> 수정

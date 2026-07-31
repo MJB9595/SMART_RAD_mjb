@@ -23,7 +23,7 @@ export default function SettlementPage() {
 
 	return (
 		<>
-			<div className="title-row">
+			<div className="title-row flex-col sm:flex-row gap-4 sm:gap-0">
 				<div>
 					<div className="page-title">정산용 엑셀 다운로드</div>
 					<div className="page-sub">은행 이체 및 회계 부서 전달용 급여 정산 데이터를 엑셀로 추출합니다</div>
@@ -61,7 +61,7 @@ export default function SettlementPage() {
 
 					<div className="form-field full" style={{marginBottom: "32px"}}>
 						<label>추출 양식 유형</label>
-						<div style={{display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px", marginTop: "8px"}}>
+						<div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mt-2">
 							<label style={{position: "relative", display: "flex", flexDirection: "column", padding: "16px", border: formType === 'bank' ? "2px solid #1F3A8F" : "1px solid #EEF0F3", borderRadius: "12px", cursor: "pointer", background: formType === 'bank' ? "#EAF0FF" : "#fff", transition: "all 0.2s"}}>
 								<input type="radio" name="formType" value="bank" checked={formType === 'bank'} onChange={(e) => setFormType(e.target.value)} style={{position: "absolute", opacity: 0}} />
 								<div style={{display: "flex", justifyContent: "space-between", marginBottom: "8px"}}>
@@ -104,9 +104,9 @@ export default function SettlementPage() {
 						</div>
 					</div>
 
-					<div style={{display: "flex", justifyContent: "flex-end", paddingTop: "16px", borderTop: "1px solid #F1F3F6"}}>
-						<button className="btn-primary" style={{padding: "10px 20px"}} onClick={handleExport} disabled={downloading}>
-							<svg style={{width: "16px", height: "16px", marginRight: "4px"}} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+					<div className="flex flex-col sm:flex-row sm:justify-end pt-4 border-t border-slate-100 mt-4">
+						<button className="btn-primary w-full sm:w-auto py-2.5 px-5" onClick={handleExport} disabled={downloading}>
+							<svg className="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
 							</svg>
 							{downloading ? "엑셀 파일 생성 중" : "엑셀 파일 생성 및 다운로드"}

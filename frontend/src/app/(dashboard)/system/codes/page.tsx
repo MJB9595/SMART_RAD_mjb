@@ -110,22 +110,24 @@ export default function CodesPage() {
 				</div>
 			)}
 
-			<div className="filter-bar" style={{ background: "#fff", borderRadius: "14px", border: "1px solid #EEF0F3", marginBottom: "20px" }}>
-				<span style={{ fontSize: "13px", fontWeight: 700, color: "#374151" }}>코드그룹</span>
-				<select value={group} onChange={(e) => setGroup(e.target.value)} className="filter-select">
-					<option value="">전체 그룹</option>
-					{groups.map((g) => (
-						<option key={g} value={g}>{g}</option>
-					))}
-				</select>
-				<div style={{ marginLeft: "auto", fontSize: "12.5px", color: "#8A94A6" }}>
-					조회된 코드 <span style={{ fontWeight: 800, color: "#1F3A8F" }}>{filtered.length}</span>건
+			<div className="bg-white rounded-2xl border border-slate-100 mb-5 p-4 flex flex-col sm:flex-row sm:items-center gap-4">
+				<div className="flex items-center gap-3 w-full sm:w-auto">
+					<span className="text-[13px] font-bold text-slate-700 whitespace-nowrap">코드그룹</span>
+					<select value={group} onChange={(e) => setGroup(e.target.value)} className="filter-select flex-1 sm:flex-none">
+						<option value="">전체 그룹</option>
+						{groups.map((g) => (
+							<option key={g} value={g}>{g}</option>
+						))}
+					</select>
+				</div>
+				<div className="text-[12.5px] text-slate-400 sm:ml-auto text-right sm:text-left">
+					조회된 코드 <span className="font-extrabold text-indigo-700">{filtered.length}</span>건
 				</div>
 			</div>
 
 			<div className="card">
 				<div className="overflow-x-auto">
-					<table>
+					<table className="w-full whitespace-nowrap min-w-[600px] hidden lg:table">
 						<thead>
 							<tr>
 								<th>코드그룹</th>
@@ -170,6 +172,50 @@ export default function CodesPage() {
 							)}
 						</tbody>
 					</table>
+
+					{/* Mobile Card View */}
+					<div className="lg:hidden flex flex-col gap-4 p-4 bg-slate-50/50">
+						{loading ? (
+							<div className="text-center text-slate-400 py-8 text-sm">데이터를 불러오는 중입니다...</div>
+						) : error ? (
+							<div className="text-center text-red-400 py-8 text-sm">{error}</div>
+						) : filtered.length === 0 ? (
+							<div className="text-center text-slate-400 py-8 text-sm">등록된 공통코드가 없습니다.</div>
+						) : (
+							filtered.map((c) => (
+								<div key={c.id} className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col gap-3">
+									<div className="flex justify-between items-start border-b border-slate-100 pb-3">
+										<div className="flex flex-col gap-1">
+											<span className="text-[11px] font-mono text-slate-400">{c.groupCode}</span>
+											<div className="font-bold text-slate-900 flex items-center gap-2">
+												{c.name}
+												<span className="text-slate-400 font-normal font-mono text-[12px]">{c.code}</span>
+											</div>
+										</div>
+										<div className="scale-90 origin-top-right">
+											<span className={`pill ${c.active ? "blue" : "gray"}`}>{c.active ? "활성" : "비활성"}</span>
+										</div>
+									</div>
+									<div className="flex justify-between items-center text-sm pt-1">
+										<span className="text-slate-500 font-medium">정렬순서</span>
+										<span className="text-slate-700 font-bold">{c.sortOrder}</span>
+									</div>
+									<div className="flex justify-between items-center text-sm pb-1">
+										<span className="text-slate-500 font-medium">상위코드</span>
+										<span className="font-mono text-slate-600">{c.parentCode || "-"}</span>
+									</div>
+									<div className="pt-3 border-t border-slate-50 flex justify-end gap-2">
+										<button className="btn-ghost py-1.5 px-4 text-xs h-auto flex items-center" onClick={() => openEdit(c)}>
+											<Pencil className="w-3 h-3 mr-1" /> 수정
+										</button>
+										<button className="btn-ghost py-1.5 px-4 text-xs h-auto text-red-600 border-red-200 flex items-center" onClick={() => setPendingDelete(c)}>
+											<Trash2 className="w-3 h-3 mr-1" /> 삭제
+										</button>
+									</div>
+								</div>
+							))
+						)}
+					</div>
 				</div>
 			</div>
 

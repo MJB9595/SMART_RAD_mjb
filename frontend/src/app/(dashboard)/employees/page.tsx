@@ -155,20 +155,20 @@ export default function EmployeesPage() {
 			<div className="breadcrumb">
 				인사기록 관리 <b>›</b> 교직원 정보관리
 			</div>
-			<div className="title-row">
+			<div className="title-row flex-col sm:flex-row gap-4 sm:gap-0">
 				<div>
 					<div className="page-title">교직원 정보관리</div>
 					<div className="page-sub">교직원 인사기록카드를 조회·등록하고 학력·경력·자격 이력을 관리합니다</div>
 				</div>
-				<div className="flex gap-2">
+				<div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
 					{canWrite && (
 						<>
-							<button className="btn-outline text-blue-600 border-blue-600 hover:bg-blue-50 relative px-4" onClick={() => setShowApprovalModal(true)}>
+							<button className="btn-outline text-blue-600 border-blue-600 hover:bg-blue-50 relative px-4 w-full sm:w-auto" onClick={() => setShowApprovalModal(true)}>
 								교직원 가입 승인
 								{pendingSignupsCount > 0 && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>}
 							</button>
 							<button
-								className="btn-primary"
+								className="btn-primary w-full sm:w-auto"
 								onClick={() => router.push("/employees/new")}
 								title="사번·이메일 없이 직위·권한(자리)만 정의 — 회원가입 승인 시 이 자리와 매칭됩니다"
 							>
@@ -207,84 +207,137 @@ export default function EmployeesPage() {
 						</div>
 					</div>
 
-					<div className="filter-bar">
+					<div className="filter-bar flex-wrap sm:flex-nowrap">
 						<input
-							className="filter-input"
+							className="filter-input w-full sm:w-auto"
 							placeholder="이름 또는 사번 검색"
 							value={keyword}
 							onChange={(e) => changeFilter(setKeyword, e.target.value)}
 						/>
-						<select className="filter-select" value={staffCategory} onChange={(e) => changeFilter(setStaffCategory, e.target.value)}>
+						<select className="filter-select flex-1 sm:flex-none w-1/2 sm:w-auto" value={staffCategory} onChange={(e) => changeFilter(setStaffCategory, e.target.value)}>
 							<option value="">구분 전체</option>
 							<option value="FACULTY">교원</option>
 							<option value="STAFF">직원</option>
 						</select>
-						<select className="filter-select" value={departmentId} onChange={(e) => changeFilter(setDepartmentId, e.target.value)}>
+						<select className="filter-select flex-1 sm:flex-none w-1/2 sm:w-auto" value={departmentId} onChange={(e) => changeFilter(setDepartmentId, e.target.value)}>
 							<option value="">소속 전체</option>
 							{departments.map((d) => (
 								<option key={d.id} value={d.id}>{d.name}</option>
 							))}
 						</select>
-						<select className="filter-select" value={employmentStatus} onChange={(e) => changeFilter(setEmploymentStatus, e.target.value)}>
+						<select className="filter-select w-full sm:w-auto" value={employmentStatus} onChange={(e) => changeFilter(setEmploymentStatus, e.target.value)}>
 							<option value="">재직상태 전체</option>
 							<option value="EMPLOYED">재직</option>
 							<option value="ON_LEAVE">휴직</option>
 							<option value="RESIGNED">퇴직</option>
 						</select>
-						{hasFilter && <button className="filter-reset" onClick={resetFilters}>초기화</button>}
+						{hasFilter && <button className="filter-reset w-full sm:w-auto mt-2 sm:mt-0" onClick={resetFilters}>초기화</button>}
 					</div>
 
-					<table>
-						<thead>
-							<tr>
-								<th>이름</th>
-								<th>사번</th>
-								<th>구분</th>
-								<th>소속</th>
-								<th>직급</th>
-								<th>재직상태</th>
-								<th>임용일</th>
-							</tr>
-						</thead>
-						<tbody>
+					<div className="overflow-x-auto">
+						<table className="w-full whitespace-nowrap min-w-[700px] hidden lg:table">
+							<thead>
+								<tr>
+									<th>이름</th>
+									<th>사번</th>
+									<th>구분</th>
+									<th>소속</th>
+									<th>직급</th>
+									<th>재직상태</th>
+									<th>임용일</th>
+								</tr>
+							</thead>
+							<tbody>
+								{loading ? (
+									<tr className="empty-row"><td colSpan={7}>불러오는 중...</td></tr>
+								) : employees.length === 0 ? (
+									<tr className="empty-row"><td colSpan={7}>조건에 맞는 교직원이 없습니다.</td></tr>
+								) : (
+									employees.map((emp) => {
+										const st = STATUS_PILL[emp.employmentStatus] ?? { cls: "gray", label: emp.employmentStatus };
+										const isSelected = selected?.id === emp.id;
+										return (
+											<tr
+												key={emp.id}
+												onClick={() => setSelected(emp)}
+												className={`cursor-pointer transition-colors hover:bg-slate-50 ${isSelected ? "bg-indigo-50/70" : ""}`}
+												style={isSelected ? { boxShadow: "inset 4px 0 0 0 #1F3A8F" } : undefined}
+											>
+												<td>
+													<div className="cell-person">
+														<div className="avatar-sm">{emp.name.slice(0, 1)}</div>
+														<div>
+															<div className="p-name">{emp.name}</div>
+															<div className="p-sub">{emp.email}</div>
+														</div>
+													</div>
+												</td>
+												<td className="mono">{emp.employeeNumber}</td>
+												<td>
+													<span className={`pill ${emp.staffCategory === "FACULTY" ? "blue" : "gray"}`}>
+														{emp.staffCategory === "FACULTY" ? "교원" : "직원"}
+													</span>
+												</td>
+												<td>{emp.departmentName}</td>
+												<td>{emp.positionName}</td>
+												<td><span className={`pill ${st.cls}`}>{st.label}</span></td>
+												<td className="mono">{emp.hireDate}</td>
+											</tr>
+										);
+									})
+								)}
+							</tbody>
+						</table>
+						
+						{/* Mobile Card View */}
+						<div className="lg:hidden flex flex-col gap-3 p-4 bg-slate-50/50">
 							{loading ? (
-								<tr className="empty-row"><td colSpan={7}>불러오는 중...</td></tr>
+								<div className="text-center text-slate-400 py-8 text-sm">불러오는 중...</div>
 							) : employees.length === 0 ? (
-								<tr className="empty-row"><td colSpan={7}>조건에 맞는 교직원이 없습니다.</td></tr>
+								<div className="text-center text-slate-400 py-8 text-sm">조건에 맞는 교직원이 없습니다.</div>
 							) : (
 								employees.map((emp) => {
 									const st = STATUS_PILL[emp.employmentStatus] ?? { cls: "gray", label: emp.employmentStatus };
+									const isSelected = selected?.id === emp.id;
 									return (
-										<tr
-											key={emp.id}
-											onClick={() => setSelected(emp)}
-											style={{ cursor: "pointer", background: selected?.id === emp.id ? "#F7F9FF" : undefined }}
-										>
-											<td>
-												<div className="cell-person">
-													<div className="avatar-sm">{emp.name.slice(0, 1)}</div>
+										<div key={emp.id} onClick={() => setSelected(emp)} className={`bg-white border rounded-xl p-4 shadow-sm flex flex-col gap-3 cursor-pointer transition-all ${isSelected ? "border-indigo-500 ring-1 ring-indigo-500 bg-indigo-50/30" : "border-slate-200"}`} style={{ borderLeft: isSelected ? "4px solid #1F3A8F" : "4px solid #E2E8F0" }}>
+											<div className="flex justify-between items-start border-b border-slate-100 pb-3">
+												<div className="flex items-center gap-3">
+													<div className="avatar-sm flex-shrink-0">{emp.name.slice(0, 1)}</div>
 													<div>
-														<div className="p-name">{emp.name}</div>
-														<div className="p-sub">{emp.email}</div>
+														<div className="font-bold text-slate-900">{emp.name}</div>
+														<div className="text-xs text-slate-500 mt-0.5">{emp.email}</div>
 													</div>
 												</div>
-											</td>
-											<td className="mono">{emp.employeeNumber}</td>
-											<td>
-												<span className={`pill ${emp.staffCategory === "FACULTY" ? "blue" : "gray"}`}>
-													{emp.staffCategory === "FACULTY" ? "교원" : "직원"}
-												</span>
-											</td>
-											<td>{emp.departmentName}</td>
-											<td>{emp.positionName}</td>
-											<td><span className={`pill ${st.cls}`}>{st.label}</span></td>
-											<td className="mono">{emp.hireDate}</td>
-										</tr>
+												<div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+													<div className="scale-90 origin-top-right">
+														<span className={`pill ${st.cls}`}>{st.label}</span>
+													</div>
+													<div className="scale-90 origin-top-right">
+														<span className={`pill ${emp.staffCategory === "FACULTY" ? "blue" : "gray"}`}>
+															{emp.staffCategory === "FACULTY" ? "교원" : "직원"}
+														</span>
+													</div>
+												</div>
+											</div>
+											<div className="flex justify-between items-center text-sm pt-1">
+												<span className="text-slate-500 font-medium">소속 / 직급</span>
+												<span className="font-medium text-slate-700">{emp.departmentName} / {emp.positionName}</span>
+											</div>
+											<div className="flex justify-between items-center text-sm">
+												<span className="text-slate-500 font-medium">사번</span>
+												<span className="font-mono text-slate-700">{emp.employeeNumber}</span>
+											</div>
+											<div className="flex justify-between items-center text-sm pb-1">
+												<span className="text-slate-500 font-medium">임용일</span>
+												<span className="font-mono text-slate-700">{emp.hireDate}</span>
+											</div>
+										</div>
 									);
 								})
 							)}
-						</tbody>
-					</table>
+						</div>
+					</div>
 
 					<div className="table-foot">
 						<span className="foot-info">

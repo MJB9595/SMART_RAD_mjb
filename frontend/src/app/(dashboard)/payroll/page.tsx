@@ -106,39 +106,43 @@ export default function PayrollPage() {
 						<div className="card-title">급여 대장 목록</div>
 						<span className="foot-info">{totalElements}건</span>
 					</div>
-					<div className="filter-bar">
-						<select value={yearMonth} onChange={(e) => setYearMonth(e.target.value)} className="filter-select">
-							<option value="">전체 급여월</option>
-							{options.yearMonths.map((ym) => (
-								<option key={ym} value={ym}>{ym}</option>
-							))}
-						</select>
-						<select value={status} onChange={(e) => setStatus(e.target.value)} className="filter-select">
-							<option value="">전체 상태</option>
-							{options.statuses.map((st) => (
-								<option key={st} value={st}>{statusLabel(st)}</option>
-							))}
-						</select>
-						<input
-							value={keyword}
-							onChange={(e) => setKeyword(e.target.value)}
-							onKeyDown={(e) => { if (e.key === "Enter") load(); }}
-							placeholder="이름 또는 사번"
-							className="filter-input"
-						/>
-						<button type="button" className="btn-ghost" onClick={() => load()}>검색</button>
-						{(yearMonth || status || keyword) && (
-							<button
-								type="button"
-								className="filter-reset"
-								onClick={() => { setYearMonth(""); setStatus(""); setKeyword(""); }}
-							>
-								초기화
-							</button>
-						)}
+					<div className="flex flex-col sm:flex-row flex-wrap gap-2 p-4 border-b border-slate-100">
+						<div className="flex gap-2 w-full sm:w-auto">
+							<select value={yearMonth} onChange={(e) => setYearMonth(e.target.value)} className="filter-select flex-1 sm:flex-none min-w-0">
+								<option value="">전체 급여월</option>
+								{options.yearMonths.map((ym) => (
+									<option key={ym} value={ym}>{ym}</option>
+								))}
+							</select>
+							<select value={status} onChange={(e) => setStatus(e.target.value)} className="filter-select flex-1 sm:flex-none min-w-0">
+								<option value="">전체 상태</option>
+								{options.statuses.map((st) => (
+									<option key={st} value={st}>{statusLabel(st)}</option>
+								))}
+							</select>
+						</div>
+						<div className="flex gap-2 w-full sm:w-auto flex-1">
+							<input
+								value={keyword}
+								onChange={(e) => setKeyword(e.target.value)}
+								onKeyDown={(e) => { if (e.key === "Enter") load(); }}
+								placeholder="이름 또는 사번"
+								className="filter-input flex-1 min-w-0"
+							/>
+							<button type="button" className="btn-ghost bg-slate-50 hover:bg-slate-100 shrink-0" onClick={() => load()}>검색</button>
+							{(yearMonth || status || keyword) && (
+								<button
+									type="button"
+									className="filter-reset shrink-0"
+									onClick={() => { setYearMonth(""); setStatus(""); setKeyword(""); }}
+								>
+									초기화
+								</button>
+							)}
+						</div>
 					</div>
 					<div className="flex-1 overflow-auto">
-						<table>
+						<table className="w-full whitespace-nowrap min-w-[600px] hidden lg:table">
 							<thead>
 								<tr>
 									<th>대상자</th>
@@ -178,6 +182,51 @@ export default function PayrollPage() {
 								)}
 							</tbody>
 						</table>
+
+						{/* Mobile Card View */}
+						<div className="lg:hidden flex flex-col gap-4 p-4 bg-slate-50/50">
+							{loading ? (
+								<div className="text-center text-slate-400 py-8 text-sm">데이터를 불러오는 중입니다...</div>
+							) : payrolls.length === 0 ? (
+								<div className="text-center text-slate-400 py-8 text-sm">내역이 없습니다.</div>
+							) : (
+								payrolls.map((p) => (
+									<div 
+										key={p.id} 
+										onClick={() => setSelectedPayroll(p)} 
+										className={`bg-white border rounded-xl p-4 shadow-sm flex flex-col gap-3 cursor-pointer transition-colors ${selectedPayroll?.id === p.id ? 'border-indigo-500 bg-indigo-50/30 ring-1 ring-indigo-500' : 'border-slate-200'}`}
+									>
+										<div className="flex justify-between items-start border-b border-slate-100 pb-3">
+											<div className="flex items-center gap-2">
+												<div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-600 text-sm flex-shrink-0">
+													{p.employeeName?.slice(0, 1) || "-"}
+												</div>
+												<div className="flex flex-col">
+													<span className="font-bold text-slate-900">{p.employeeName}</span>
+													<span className="text-slate-500 text-xs">{p.departmentName}</span>
+												</div>
+											</div>
+											<div className="scale-90 origin-top-right">
+												{getStatusPill(p.payrollStatusCode)}
+											</div>
+										</div>
+										
+										<div className="flex justify-between items-center text-sm pt-1">
+											<span className="text-slate-500 font-medium">총지급액</span>
+											<span className="font-mono text-slate-700">{formatCurrency(p.totalPayAmount)}원</span>
+										</div>
+										<div className="flex justify-between items-center text-sm">
+											<span className="text-slate-500 font-medium">총공제액</span>
+											<span className="font-mono text-red-600">-{formatCurrency(p.totalDeductionAmount)}원</span>
+										</div>
+										<div className="flex justify-between items-center text-sm bg-indigo-50/50 p-2 rounded-lg mt-1 border border-indigo-100/50">
+											<span className="text-indigo-900 font-bold">실지급액</span>
+											<span className="font-mono font-bold text-indigo-700 text-base">{formatCurrency(p.realPayAmount)}원</span>
+										</div>
+									</div>
+								))
+							)}
+						</div>
 					</div>
 					<div className="table-foot">
 						<span className="foot-info">전체 {totalElements}건 중 1–{payrolls.length}건 표시</span>
