@@ -35,7 +35,9 @@ export function DetailSideCard({
 		tone === "warn" ? "text-amber-600" : tone === "primary" ? "text-indigo-700" : "text-slate-900";
 
 	return (
-		<div className={`w-full lg:w-[380px] shrink-0 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-200 p-8 flex flex-col relative overflow-hidden animate-in slide-in-from-right-4 duration-300 h-full ${className ?? ""}`}>
+		// h-full 은 가로 배치일 때만 준다. 모바일에서 세로로 쌓이면 이 카드가 부모 높이를
+		// 100% 차지해 옆(위)의 표 카드가 0 으로 눌린다.
+		<div className={`w-full lg:w-[380px] shrink-0 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-200 p-6 sm:p-8 flex flex-col relative overflow-hidden animate-in slide-in-from-right-4 duration-300 lg:h-full ${className ?? ""}`}>
 			<div className="text-sm font-bold text-indigo-900 mb-6 tracking-tight">{eyebrow}</div>
 
 			<div className="flex items-center gap-4 mb-6 pb-6 border-b border-slate-100 shrink-0">

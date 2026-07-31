@@ -75,7 +75,7 @@ export default function LeavePolicyPage() {
 				휴가 관리 <span className="mx-1">›</span>{" "}
 				<span className="font-medium text-slate-900">휴가유형·정책 관리</span>
 			</nav>
-			<div className="mb-6 flex items-start justify-between">
+			<div className="mb-6 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-start sm:gap-0">
 				<div>
 					<h1 className="text-2xl font-bold text-slate-900">휴가 정책 관리</h1>
 					<p className="mt-1 text-sm text-slate-500">직급별 연차 부여 기준 및 이월 한도를 관리합니다.</p>
@@ -83,8 +83,8 @@ export default function LeavePolicyPage() {
 				<Button onClick={() => setShowForm(true)}>새 정책 등록</Button>
 			</div>
 
-			<div className="rounded-lg border border-slate-200 bg-white">
-				<table className="w-full border-collapse text-sm">
+			<div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
+				<table className="w-full min-w-[38rem] border-collapse text-sm">
 					<thead>
 						<tr className="border-b border-slate-200 bg-slate-50 text-left text-slate-500">
 							<th className="p-3 font-medium">적용 직급</th>
@@ -122,7 +122,7 @@ export default function LeavePolicyPage() {
 
 			{showForm && (
 				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-					<form onSubmit={submit} className="w-[420px] max-w-[95vw] rounded-lg bg-white p-6 shadow-xl">
+					<form onSubmit={submit} className="max-h-[90vh] w-full max-w-[420px] overflow-y-auto rounded-lg bg-white p-5 shadow-xl sm:p-6">
 						<div className="mb-4 flex items-center justify-between">
 							<h2 className="text-lg font-bold text-slate-900">휴가 정책 등록</h2>
 							<button type="button" onClick={() => setShowForm(false)} className="text-2xl leading-none text-slate-400 hover:text-slate-600">&times;</button>
@@ -137,7 +137,7 @@ export default function LeavePolicyPage() {
 									))}
 								</select>
 							</div>
-							<div className="flex gap-3">
+							<div className="flex flex-col gap-3 sm:flex-row">
 								<div className="flex-1">
 									<label className="mb-1 block text-sm font-medium text-slate-700">기본 연차일수</label>
 									<input type="number" step="0.5" min="0" value={annual} onChange={(e) => setAnnual(e.target.value)} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none" required />

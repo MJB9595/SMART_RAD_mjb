@@ -171,3 +171,6 @@ run_ssh*
 TestBcrypt.java
 .idea/
 *.iml
+
+# 일회성 변환 스크립트
+frontend/convert.py

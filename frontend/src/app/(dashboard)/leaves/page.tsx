@@ -214,7 +214,9 @@ export default function LeavesPage() {
 	return (
 		<div className="flex flex-col lg:flex-row flex-1 w-full gap-6 pb-4 min-h-0">
 			{/* Main Grid View */}
-			<div className="flex-1 flex flex-col bg-white overflow-hidden rounded-xl border border-slate-200 shadow-sm">
+			{/* 모바일(세로 배치)에서 flex-1 은 basis 0 이라 overflow-hidden 과 만나면
+			    카드 높이가 0 으로 붕괴해 표가 통째로 사라진다. 가로 배치일 때만 flex-1 을 준다. */}
+			<div className="flex flex-col bg-white overflow-hidden rounded-xl border border-slate-200 shadow-sm lg:flex-1 lg:min-h-0">
 				{/* Header */}
 				<div className="flex flex-wrap justify-between items-center p-5 border-b border-slate-200 bg-white gap-4">
 					<div className="flex items-center gap-4 sm:gap-8 flex-wrap">
@@ -396,7 +398,7 @@ export default function LeavesPage() {
 					)}
 				</DetailSideCard>
 			) : (
-				<div className="w-full lg:w-[380px] shrink-0 bg-slate-50/50 rounded-2xl border border-slate-200 p-8 flex flex-col items-center justify-center text-center h-full min-h-[300px]">
+				<div className="w-full lg:w-[380px] shrink-0 bg-slate-50/50 rounded-2xl border border-slate-200 p-8 flex flex-col items-center justify-center text-center lg:h-full min-h-[300px]">
 					<div className="w-16 h-16 rounded-full bg-white shadow-sm flex items-center justify-center mb-5 border border-slate-100">
 						<svg className="w-8 h-8 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
 					</div>

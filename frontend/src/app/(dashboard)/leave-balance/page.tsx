@@ -39,9 +39,9 @@ export default function LeaveBalancePage() {
 
 			<div className="mb-6 rounded-lg border border-slate-200 p-6">
 				<p className="mb-4 text-sm font-semibold text-slate-700">검색조건</p>
-				<div className="flex items-end gap-4">
+				<div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-4">
 					<Field label="기준연도">
-						<Input type="number" value={year} onChange={(e) => setYear(Number(e.target.value))} className="w-28" />
+						<Input type="number" value={year} onChange={(e) => setYear(Number(e.target.value))} className="w-full sm:w-28" />
 					</Field>
 					<Button variant="primary" onClick={() => load(year)}>조회</Button>
 				</div>
@@ -52,7 +52,8 @@ export default function LeaveBalancePage() {
 
 			{!loading && !error && (
 				<>
-					<table className="w-full border-collapse text-sm">
+					<div className="overflow-x-auto">
+					<table className="hidden w-full border-collapse text-sm lg:table">
 						<thead>
 							<tr className="border-b border-slate-200 bg-slate-50 text-left text-slate-500">
 								<th className="p-3 font-medium">사번</th>
@@ -81,6 +82,45 @@ export default function LeaveBalancePage() {
 							})}
 						</tbody>
 					</table>
+					</div>
+
+					{/* 모바일: 표 대신 카드 — 7개 열이 좁은 화면에 들어가지 않는다 */}
+					<div className="flex flex-col gap-3 lg:hidden">
+						{items.map((b) => {
+							const rate = b.totalGranted > 0 ? Math.round((b.usedDays / b.totalGranted) * 100) : 0;
+							return (
+								<div key={b.id} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+									<div className="flex items-start justify-between gap-3 border-b border-slate-100 pb-3">
+										<div>
+											<div className="text-sm font-bold text-slate-900">{b.employeeName}</div>
+											<div className="text-xs text-slate-400">{b.employeeNumber} · {b.departmentName}</div>
+										</div>
+										<span className="shrink-0 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700">
+											잔여 {b.remaining}일
+										</span>
+									</div>
+									<div className="mt-3 grid grid-cols-3 gap-2 text-center">
+										<div>
+											<div className="text-[11px] text-slate-400">부여</div>
+											<div className="text-sm font-bold text-slate-900">{b.totalGranted}일</div>
+										</div>
+										<div>
+											<div className="text-[11px] text-slate-400">사용</div>
+											<div className="text-sm font-bold text-slate-900">{b.usedDays}일</div>
+										</div>
+										<div>
+											<div className="text-[11px] text-slate-400">사용률</div>
+											<div className="text-sm font-bold text-slate-900">{rate}%</div>
+										</div>
+									</div>
+								</div>
+							);
+						})}
+						{items.length === 0 && (
+							<p className="py-8 text-center text-sm text-slate-400">조회된 휴가 잔여 내역이 없습니다.</p>
+						)}
+					</div>
+
 					<div className="mt-4 text-sm text-slate-500">총 {items.length}건</div>
 				</>
 			)}

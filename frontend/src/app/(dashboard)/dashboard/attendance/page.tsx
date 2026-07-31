@@ -29,16 +29,16 @@ export default function AttendanceDashboardPage() {
 
 			{error && <p className="mb-4 text-sm text-red-600">{error}</p>}
 
-			<div className="mb-8 grid grid-cols-4 gap-4">
+			<div className="mb-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
 				{[
 					{ label: "출근", value: summary?.present ?? 0 },
 					{ label: "지각", value: summary?.late ?? 0 },
 					{ label: "결근", value: summary?.absent ?? 0 },
 					{ label: "연차", value: summary?.annualLeave ?? 0 },
 				].map((s) => (
-					<div key={s.label} className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+					<div key={s.label} className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
 						<p className="text-sm font-semibold text-slate-500">{s.label}</p>
-						<p className="mt-2 text-3xl font-bold text-slate-900">{s.value}<span className="text-base font-normal text-slate-500 ml-1">명</span></p>
+						<p className="mt-2 text-2xl font-bold text-slate-900 sm:text-3xl">{s.value}<span className="text-base font-normal text-slate-500 ml-1">명</span></p>
 					</div>
 				))}
 			</div>

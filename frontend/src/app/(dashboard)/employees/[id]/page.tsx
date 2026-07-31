@@ -284,7 +284,7 @@ export default function EmployeeDetailPage() {
 					</div>
 					<div className="page-sub">{employee.departmentName} · {employee.positionName} · {employee.employmentTypeName}</div>
 				</div>
-				<div style={{ display: "flex", gap: 8 }}>
+				<div className="head-actions flex-wrap">
 					<button className="btn-ghost" onClick={openStatusChange}>재직상태 변경</button>
 					<button className="btn-ghost" onClick={openEmployeeEdit}>기본정보 수정</button>
 					<button className="btn-ghost" onClick={() => router.push("/employees")}>목록으로</button>
@@ -429,12 +429,15 @@ export default function EmployeeDetailPage() {
 
 function RecTable({ headers, children }: { headers: string[]; children: React.ReactNode }) {
 	return (
-		<table>
-			<thead>
-				<tr>{headers.map((h) => <th key={h}>{h}</th>)}<th style={{ textAlign: "right" }}>관리</th></tr>
-			</thead>
-			<tbody>{children}</tbody>
-		</table>
+		// 학력·경력·자격증 표는 열이 많아 좁은 화면에서 넘친다. 가로 스크롤로 감싼다.
+		<div className="overflow-x-auto">
+			<table>
+				<thead>
+					<tr>{headers.map((h) => <th key={h}>{h}</th>)}<th style={{ textAlign: "right" }}>관리</th></tr>
+				</thead>
+				<tbody>{children}</tbody>
+			</table>
+		</div>
 	);
 }
 

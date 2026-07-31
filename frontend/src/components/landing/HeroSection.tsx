@@ -15,12 +15,14 @@ export function HeroSection() {
 							<span className="flex h-2 w-2 rounded-full bg-blue-600"></span>
 							국내 최고 수준의 학교 특화 HR 솔루션
 						</div>
-						<h1 className="text-5xl font-extrabold tracking-tight text-slate-900 sm:text-6xl lg:text-7xl mb-8 leading-[1.15]">
+						{/* 모바일에서 text-5xl 이면 "데이터로 완벽하게" 의 마지막 글자만 세 번째 줄로 떨어진다 */}
+						<h1 className="text-[2rem] font-extrabold tracking-tight text-slate-900 sm:text-5xl md:text-6xl lg:text-7xl mb-6 sm:mb-8 leading-[1.2] sm:leading-[1.15]">
 							학교 인사관리, <br />
 							<span className="text-blue-600">데이터로 완벽하게</span>
 						</h1>
-						<p className="text-lg lg:text-xl text-slate-500 mb-10 leading-relaxed font-medium">
-							근태, 급여, 인사발령 등 파편화된 교무 업무를 하나로 통합합니다.<br className="hidden lg:block" />
+						<p className="text-base sm:text-lg lg:text-xl text-slate-500 mb-8 sm:mb-10 leading-relaxed font-medium">
+							근태, 급여, 인사발령 등 파편화된 교무 업무를 하나로 통합합니다.{" "}
+							<br className="hidden lg:block" />
 							번거로운 행정 업무는 시스템에 맡기고 교육에 집중하세요.
 						</p>
 						

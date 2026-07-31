@@ -154,7 +154,9 @@ export default function MonthlyAttendancePage() {
 	return (
 		<div className="flex flex-col lg:flex-row flex-1 w-full gap-6 pb-4 min-h-0">
 			{/* Main Grid View */}
-			<div className="flex-1 flex flex-col bg-white overflow-hidden rounded-xl border border-slate-200 shadow-sm">
+			{/* 모바일(세로 배치)에서 flex-1 은 basis 0 이라 overflow-hidden 과 만나면
+			    카드 높이가 0 으로 붕괴해 표가 통째로 사라진다. 가로 배치일 때만 flex-1 을 준다. */}
+			<div className="flex flex-col bg-white overflow-hidden rounded-xl border border-slate-200 shadow-sm lg:flex-1 lg:min-h-0">
 				{/* Header */}
 				<div className="flex flex-wrap justify-between items-center p-5 border-b border-slate-200 bg-white gap-4">
 					<div className="flex items-center gap-4 sm:gap-8 flex-wrap">
@@ -346,7 +348,7 @@ export default function MonthlyAttendancePage() {
 								<svg className="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
 							</button>
 						</div>
-						<div className="p-0 overflow-y-auto bg-white">
+						<div className="p-0 overflow-auto bg-white">
 							<table className="w-full text-sm text-left">
 								<thead className="bg-slate-50/80 text-slate-500 font-bold border-b border-slate-200 sticky top-0 z-10">
 									<tr>

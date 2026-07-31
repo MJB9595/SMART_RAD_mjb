@@ -411,9 +411,14 @@ tr:last-child td { border-bottom:none; }
 
 /* ==============================================================
    Responsive Dashboard Styles
+
+   경계값 주의: Tailwind 의 lg: 는 min-width:1024px 이므로 여기서
+   max-width:1024px 을 쓰면 1024px 에서 둘 다 걸린다. 실제로 사이드바는
+   드로어로 접히는데 여는 햄버거는 lg:hidden 으로 사라져 메뉴에 접근할 수
+   없었다(iPad Pro 가로 폭이 정확히 1024px). 1023.98px 로 겹침을 없앤다.
    ============================================================== */
 
-@media (max-width: 1024px) {
+@media (max-width: 1023.98px) {
   /* Sidebar becomes a mobile drawer */
   .sidebar {
     position: fixed;
@@ -499,8 +504,90 @@ tr:last-child td { border-bottom:none; }
   gap: 1.5rem;
   align-items: start;
 }
-@media (max-width: 1024px) {
+@media (max-width: 1023.98px) {
   .split-reverse {
     grid-template-columns: 1fr;
   }
+}
+
+/* ── 좁은 화면 공통 보정 ───────────────────────────────────────
+   표 외에도 탭·폼·상세카드처럼 가로로 넓게 짜인 요소들이 모바일에서
+   넘치거나 세로로 쪼개진다. 화면별로 흩뿌리지 않고 여기서 한 번에 잡는다. */
+
+@media (max-width: 1023.98px) {
+  /* 인사기록카드 2열 정보 그리드 → 1열 */
+  .info-card {
+    grid-template-columns: 1fr;
+    gap: 0 1rem;
+    padding: 1.25rem 1.25rem;
+  }
+  /* 우측 상세 카드가 아래로 내려오면 높이를 내용에 맞춘다 */
+  .panel {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 767.98px) {
+  /* 탭이 여러 줄로 접히면 본문이 밀린다. 가로 스크롤로 한 줄 유지 */
+  .tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    white-space: nowrap;
+    padding: 0.6875rem 0.75rem;
+  }
+
+  /* 카드 머리말의 제목과 버튼이 한 줄에 안 들어간다 */
+  .card-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem 1.125rem;
+  }
+  .head-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  /* 모달: 화면에 꽉 채우고 버튼은 가로로 넓게 */
+  .modal-overlay { padding: 0.75rem; }
+  .modal-head, .modal-body, .modal-foot { padding-left: 1.125rem; padding-right: 1.125rem; }
+  .modal-foot { flex-direction: column-reverse; }
+  .modal-foot > * { width: 100%; }
+
+  /* 상세 페이지 툴바 */
+  .rec-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.625rem;
+  }
+
+  /* 페이지 하단 건수/페이저 */
+  .table-foot {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem 1.125rem;
+  }
+
+  /* 필터 입력이 min-width 때문에 넘치는 것 방지 */
+  .filter-bar { padding: 0.875rem 1.125rem; }
+  .filter-input { min-width: 0; width: 100%; }
+  .filter-select { min-width: 0; }
+
+  /* 증명서 용지 */
+  .cert-sheet { padding: 1.75rem 1.25rem 1.5rem; }
+  .cert-title { font-size: 1.375rem; letter-spacing: 0.375rem; margin-bottom: 1.5rem; }
+  .cert-table th { width: 5rem; }
+}
+
+@media (max-width: 480px) {
+  /* 통계 카드는 2열 유지 — 1열로 내리면 목록까지 스크롤이 네 배로 늘어난다.
+     라벨이 긴 카드는 .stat-label 의 word-break:keep-all 로 두 줄 처리된다. */
+  .mini-stats { gap: 0.375rem; }
+  .page-title { font-size: 1.375rem; }
 }
