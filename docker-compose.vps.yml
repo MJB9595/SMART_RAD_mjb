@@ -68,6 +68,11 @@ services:
       - .env
 
   frontend:
+    # 이미지를 만들 때 도메인이 코드에 박힌다. 링크 미리보기(og:image)가 o-r.kr 로 나오려면
+    # 빌드 시점에 반드시 아래 인자를 넣어야 한다.
+    #   docker build --build-arg NEXT_PUBLIC_SITE_URL=https://tsms.o-r.kr \
+    #                --build-arg NEXT_PUBLIC_API_BASE_URL=https://tsms.o-r.kr/api \
+    #                -t tp-hr-frontend:vps ./frontend
     image: tp-hr-frontend:vps
     container_name: tp-hr-frontend-vps
     depends_on:
