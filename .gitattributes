@@ -1,0 +1,9 @@
+# gradlew 는 리눅스 컨테이너 안에서 실행되는 셸 스크립트다.
+# 윈도우에서 core.autocrlf=true 로 체크아웃하면 셔뱅이 "#!/bin/sh\r" 이 되어
+# 도커 빌드가 "./gradlew: not found" (exit 127) 로 실패한다. LF 로 고정한다.
+gradlew text eol=lf
+*.sh text eol=lf
+
+# 윈도우 배치 파일은 반대로 CRLF 여야 한다.
+gradlew.bat text eol=crlf
+*.bat text eol=crlf
