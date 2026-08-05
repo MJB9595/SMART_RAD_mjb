@@ -66,9 +66,11 @@ docker buildx build --platform linux/amd64 -t tp-hr-backend:vps ./backend
 # 2. 프론트엔드 빌드 (실서버 도메인 환경 변수 주입)
 docker buildx build --platform linux/amd64 -t tp-hr-frontend:vps \
   --build-arg NEXT_PUBLIC_API_BASE_URL=https://tsms.o-r.kr/api \
+  --build-arg NEXT_PUBLIC_SITE_URL=https://tsms.o-r.kr \
   ./frontend
 
-# NEXT_PUBLIC_API_BASE_URL 은 반드시 build-arg 로 넣어야 한다.
+# NEXT_PUBLIC_API_BASE_URL 과 NEXT_PUBLIC_SITE_URL 은 반드시 build-arg 로 넣어야 한다.
+# SITE_URL 을 빠뜨리면 링크 미리보기(og:image)와 canonical 이 localhost:3000 으로 나간다.
 # Next.js 는 NEXT_PUBLIC_ 변수를 빌드 시점에 번들로 굽기 때문에, 이미지를 만든 뒤
 # 서버 .env 에 값을 채워도 브라우저 쪽 값은 바뀌지 않는다.
 #

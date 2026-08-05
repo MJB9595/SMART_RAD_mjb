@@ -1,3 +1,11 @@
 node_modules
 .next
 .git
+
+# 로컬 개발용 환경파일은 빌드 컨텍스트에 넣지 않는다.
+# COPY . . 로 들어가면 Next.js 가 빌드 중 이 파일을 읽어, 배포용 이미지에
+# 로컬 값(localhost API 주소·개발용 카카오 키)이 섞일 수 있다.
+# 배포 값은 전부 --build-arg 로만 준다.
+.env
+.env.*
+!.env.example
