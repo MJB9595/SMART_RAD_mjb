@@ -66,8 +66,17 @@ docker buildx build --platform linux/amd64 -t tp-hr-backend:vps ./backend
 # 2. 프론트엔드 빌드 (실서버 도메인 환경 변수 주입)
 docker buildx build --platform linux/amd64 -t tp-hr-frontend:vps \
   --build-arg NEXT_PUBLIC_API_BASE_URL=https://tsms.o-r.kr/api \
-  --build-arg NEXT_PUBLIC_KAKAO_REDIRECT_URI=https://tsms.o-r.kr/oauth/kakao/callback \
   ./frontend
+
+# NEXT_PUBLIC_API_BASE_URL 은 반드시 build-arg 로 넣어야 한다.
+# Next.js 는 NEXT_PUBLIC_ 변수를 빌드 시점에 번들로 굽기 때문에, 이미지를 만든 뒤
+# 서버 .env 에 값을 채워도 브라우저 쪽 값은 바뀌지 않는다.
+#
+# 반대로 카카오 설정(REST 키·redirect URI)은 더 이상 build-arg 로 넣지 않는다.
+# 프론트가 부팅 후 GET /api/auth/kakao/config 로 서버에서 받아 쓰므로,
+# 서버의 .env 에 KAKAO_REST_API_KEY / KAKAO_REDIRECT_URI 만 있으면 동작한다.
+# (예전에는 build-arg 로 넣어야 했고, 이걸 빠뜨려서 대여서버에서
+#  "카카오 로그인 설정이 없습니다" 로 막혀 있었다.)
 
 # 3. 이미지 압축 (약 3~5분 소요)
 docker save tp-hr-backend:vps tp-hr-frontend:vps | gzip > hris-images-vps-update.tar.gz

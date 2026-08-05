@@ -144,11 +144,11 @@ export default function LoginPage() {
     }
   };
 
-  const handleKakaoLogin = (): void => {
+  const handleKakaoLogin = async (): Promise<void> => {
     try {
       setError(null);
       setKakaoLoading(true);
-      startKakaoLogin();
+      await startKakaoLogin();
     } catch (err) {
       setError(err instanceof Error ? err.message : "카카오 로그인 중 오류가 발생했습니다.");
       setKakaoLoading(false);

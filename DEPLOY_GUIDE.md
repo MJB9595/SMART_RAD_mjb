@@ -76,8 +76,9 @@ docker build --platform linux/amd64 -t hris-kbu-backend:latest ./backend
 docker build --platform linux/amd64 --build-arg NEXT_PUBLIC_API_BASE_URL=http://49.247.139.51:8080/api -t hris-kbu-frontend:latest ./frontend
 ```
 
-> 카카오 로그인도 서버에서 쓰려면 위 프론트 빌드에 다음 인자를 추가하세요:
-> `--build-arg NEXT_PUBLIC_KAKAO_CLIENT_ID=<카카오 REST 키> --build-arg NEXT_PUBLIC_KAKAO_REDIRECT_URI=http://49.247.139.51:3000/oauth/kakao/callback`
+> 카카오 로그인은 **프론트 빌드 인자로 넣지 않습니다.** 프론트가 실행 중에
+> `GET /api/auth/kakao/config` 로 서버에서 받아 쓰므로, 서버의 `.env` 에
+> `KAKAO_REST_API_KEY` 와 `KAKAO_REDIRECT_URI` 만 넣으면 됩니다.
 > (카카오 개발자 콘솔에도 이 Redirect URI를 등록해야 합니다.)
 
 **빌드 결과 확인 (amd64로 나왔는지)**
